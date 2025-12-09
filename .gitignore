@@ -1,0 +1,75 @@
+# IDEs
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+.*.sw?
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node.js
+node_modules/
+package-lock.json
+yarn.lock
+.npm
+.yarn
+.pnp.*
+
+# Build outputs
+dist/
+build/
+out/
+*.jar
+*.class
+target/
+
+# Claude-specific
+.claude/sessions/
+.claude/transcripts/
+.claude/.local/
+.claude/cache/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+credentials.json
+secrets.json
+
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Misc
+*.pid
+*.seed
+*.pid.lock
+.cache
