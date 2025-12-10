@@ -573,6 +573,57 @@ The Qingyi plugin currently includes these production-ready agents:
    - Model: sonnet
    - Skills: agent-creation-guide, pattern-recognition
 
+7. **minecraft-code-validator** ([agents/minecraft-code-validator.md](../agents/minecraft-code-validator.md))
+   - Code quality assurance specialist using IntelliJ MCP
+   - Runs IntelliJ inspections on generated code
+   - Auto-fixes common issues (imports, annotations, formatting)
+   - Ensures consistent code style across all files
+   - Invoked PROACTIVELY after specialist agents complete work
+   - Tools: mcp__intellij__get_file_problems, mcp__intellij__reformat_file, Read, Edit
+   - Model: sonnet
+   - Skills: forge-event-system, forge-registry-api, neoforge-registry-api, nbt-serialization-patterns, intellij-inspection-guide
+
+8. **intellij-code-navigator** ([agents/intellij-code-navigator.md](../agents/intellij-code-navigator.md))
+   - Code navigation and discovery specialist using IntelliJ MCP
+   - Finds registry entries, event handlers, class hierarchies
+   - Maps code-to-resource relationships (models, textures, lang files)
+   - Provides symbol documentation and usage tracking
+   - Invoked PROACTIVELY when user asks "where", "find", "locate", "show"
+   - Tools: IntelliJ MCP navigation tools (find, search, symbol info) + Read
+   - Model: sonnet
+   - Skills: intellij-navigation-patterns
+
+9. **intellij-refactoring-master** ([agents/intellij-refactoring-master.md](../agents/intellij-refactoring-master.md))
+   - Safe, scope-aware refactoring specialist using IntelliJ MCP
+   - Renames items, blocks, entities, methods, variables (98% accuracy)
+   - Synchronizes resource files (models, textures, lang, recipes, loot tables)
+   - Detects breaking changes and provides migration strategies
+   - Invoked PROACTIVELY when user requests rename operations
+   - Tools: mcp__intellij__rename_refactoring, mcp__intellij__replace_text_in_file, mcp__intellij__get_symbol_info, Read, Write, Edit
+   - Model: sonnet
+   - Permission mode: acceptEdits
+   - Skills: intellij-refactoring-safety, forge-registry-api, neoforge-registry-api
+
+10. **intellij-project-analyzer** ([agents/intellij-project-analyzer.md](../agents/intellij-project-analyzer.md))
+    - Project structure and dependency analysis specialist using IntelliJ MCP
+    - Detects multi-loader projects (Common/Forge/Fabric/Quilt patterns)
+    - Analyzes dependencies, modules, source sets, and conventions
+    - Provides comprehensive project context (4-10x faster than manual exploration)
+    - Invoked PROACTIVELY at start of complex tasks to understand architecture
+    - Tools: mcp__intellij__get_project_modules, mcp__intellij__get_project_dependencies, mcp__intellij__list_directory_tree, mcp__intellij__get_repositories, Read
+    - Model: haiku (cost-efficient for analysis tasks)
+    - Skills: multi-loader-project-patterns, pattern-recognition
+
+11. **intellij-build-and-test-runner** ([agents/intellij-build-and-test-runner.md](../agents/intellij-build-and-test-runner.md))
+    - Build, test, and execution automation specialist using IntelliJ MCP
+    - Executes runClient, runServer, runData configurations
+    - Monitors console output for mod loading, errors, warnings
+    - Verifies in-game functionality (5x faster than manual testing)
+    - Invoked PROACTIVELY after implementing features to verify functionality
+    - Tools: mcp__intellij__get_run_configurations, mcp__intellij__execute_run_configuration, mcp__intellij__execute_terminal_command, Bash
+    - Model: sonnet
+    - Skills: minecraft-run-configuration-guide
+
 ### Suggested Future Agents
 
 Additional agents that could be added:

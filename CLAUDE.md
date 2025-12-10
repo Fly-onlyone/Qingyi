@@ -215,6 +215,11 @@ When working with Minecraft mods, use these agents:
 | Events, tick handlers | `events-and-lifecycle-expert` | Read, Write, Edit, Bash, Grep, Glob | forge-event-system |
 | NBT, capabilities, persistence | `data-and-persistence-expert` | Read, Write, Edit, Bash, Grep, Glob | nbt-serialization-patterns |
 | GUI, rendering, audio | `rendering-and-client-expert` | Read, Write, Edit, Bash, Grep, Glob | rendering-patterns |
+| Code navigation & discovery | `intellij-code-navigator` | MCP IntelliJ (search, symbol info), Read | intellij-navigation-patterns |
+| Code validation & quality | `minecraft-code-validator` | MCP IntelliJ, Read, Edit | intellij-inspection-guide, forge-event-system, forge-registry-api, neoforge-registry-api, nbt-serialization-patterns |
+| Safe refactoring & renaming | `intellij-refactoring-master` | MCP IntelliJ (rename_refactoring), Read, Write, Edit | intellij-refactoring-safety, forge-registry-api, neoforge-registry-api |
+| Project structure analysis | `intellij-project-analyzer` | MCP IntelliJ (get_project_modules, dependencies, tree), Read | multi-loader-project-patterns, pattern-recognition |
+| Build, test, and execution | `intellij-build-and-test-runner` | MCP IntelliJ (run_configurations, execute), Bash | minecraft-run-configuration-guide |
 
 ### For Qingyi Plugin Development
 

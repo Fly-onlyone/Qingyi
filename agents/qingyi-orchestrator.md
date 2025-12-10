@@ -114,6 +114,59 @@ Never assume what you can detect - never ask what you already know!
 
 ---
 
+#### Phase 2.5: Project Analysis (Proactive)
+
+**For complex tasks, analyze project structure FIRST before planning**:
+
+```markdown
+## Project Analysis Phase
+
+When task is complex or project structure is unknown:
+
+1. **Invoke analyzer** - Use `intellij-project-analyzer` to understand architecture
+
+   Use the intellij-project-analyzer agent to analyze the project structure.
+
+   Context: [Task description, why analysis is needed]
+
+2. **Receive analysis** - Get comprehensive project report:
+   - Project type (single-loader vs multi-loader)
+   - Frameworks detected (Forge/NeoForge/Fabric/Quilt)
+   - Modules and their purposes (common, forge, fabric)
+   - Dependencies and versions
+   - Source sets and conventions
+   - VCS repositories
+
+3. **Adjust planning** - Use analysis results to inform implementation approach:
+   - Multi-loader → Implement in common module + platform modules
+   - Single-loader → Direct implementation
+   - Identify existing patterns to follow
+   - Understand dependency constraints
+
+4. **Proceed with planning** - Create detailed plan with architecture context
+```
+
+**When to invoke project analyzer**:
+- ✅ Complex features touching multiple modules
+- ✅ Unknown project structure
+- ✅ Multi-loader projects
+- ✅ Large codebases with multiple subsystems
+- ✅ Before major architectural changes
+
+**When NOT to invoke**:
+- ❌ Simple one-file changes
+- ❌ Well-known project structure
+- ❌ Small scope modifications
+- ❌ Only resource file updates
+
+**Analysis improves planning by**:
+- Understanding project architecture (4-10x faster than manual exploration)
+- Detecting multi-loader patterns automatically
+- Identifying correct module for implementation
+- Following existing project conventions
+
+---
+
 ### 3. Delegation Management
 
 **Once plan is approved, delegate to specialists**:
@@ -147,6 +200,21 @@ Never assume what you can detect - never ask what you already know!
 **For mixins, mod compat**:
 → Use `mixin-and-compat-expert`
 
+**For code navigation & discovery**:
+→ Use `intellij-code-navigator`
+
+**For code validation & quality**:
+→ Use `minecraft-code-validator` (PROACTIVELY after code generation)
+
+**For safe refactoring & renaming**:
+→ Use `intellij-refactoring-master`
+
+**For project structure analysis**:
+→ Use `intellij-project-analyzer`
+
+**For build, test, and execution**:
+→ Use `intellij-build-and-test-runner`
+
 #### Delegation Pattern
 
 ```markdown
@@ -165,8 +233,223 @@ Use the [agent-name] agent to [task description]
 **After agent completes**:
 - Review the results
 - Aggregate if multiple agents involved
+- **Invoke code validator** (see Phase 4 below)
 - Present summary to user
 - Identify any patterns learned
+
+#### Phase 4: Validation (Proactive)
+
+**After specialist agents complete code generation, AUTOMATICALLY invoke validation**:
+
+```markdown
+## Validation Phase
+
+After [agent-name] completes their work:
+
+1. **Identify modified files** - Track which Java files were created/edited
+   - Example: src/main/java/com/mod/ModItems.java, src/main/java/com/mod/EventHandler.java
+
+2. **Invoke validator** - Delegate to `minecraft-code-validator` with file list
+   Use the minecraft-code-validator agent to validate the following files:
+   - [file-path-1]
+   - [file-path-2]
+
+   Context: [agent-name] just created/modified these files for [purpose]
+   Please validate for [specific concerns, e.g., registry patterns, event handler annotations]
+
+3. **Review results** - Check validator's report
+   - ✓ All clear → Proceed to user report
+   - ✓ Auto-fixed issues → Note in user report
+   - ⚠️ Issues requiring attention → Include in user report with guidance
+
+4. **Report to user** - Include validation status in final report
+   Examples:
+   - "✓ Code validated successfully (no issues found)"
+   - "✓ Code validated and auto-fixed (removed 2 unused imports, added missing annotation)"
+   - "⚠️ Code validated with 1 issue requiring attention: [description]"
+```
+
+**When to invoke validator**:
+- ✅ After `registry-and-content-expert` creates items/blocks/entities
+- ✅ After `events-and-lifecycle-expert` creates event handlers
+- ✅ After `data-and-persistence-expert` creates NBT code
+- ✅ After `rendering-and-client-expert` creates GUI/rendering code
+- ✅ After any agent modifies Java files
+
+**When NOT to invoke validator**:
+- ❌ Only JSON/resource files modified (no Java code)
+- ❌ Only documentation updated
+- ❌ Only gradle configuration changed
+- ❌ User explicitly requests no validation
+
+**Validation improves code quality by**:
+- Catching errors during generation (not at runtime)
+- Auto-fixing common issues (imports, annotations)
+- Ensuring consistent formatting
+- Providing educational feedback
+
+---
+
+#### Phase 4.5: Testing (Proactive)
+
+**After feature completion and validation, test in-game automatically**:
+
+```markdown
+## Testing Phase
+
+After specialist agents complete implementation and code passes validation:
+
+1. **Determine test type** - Choose appropriate testing approach:
+   - Visual features (items, blocks, GUI) → runClient
+   - Server-side features (commands, world gen) → runServer
+   - Data generation (recipes, loot tables) → runData
+
+2. **Invoke test runner** - Use `intellij-build-and-test-runner`
+
+   Use the intellij-build-and-test-runner agent to test the implementation.
+
+   Context: [agent-name] just implemented [feature]
+   Test type: [runClient/runServer/runData]
+   Expected outcome: [What should happen in-game]
+
+3. **Monitor testing** - Track console output for:
+   - Mod loading confirmation
+   - Registration success messages
+   - Error/warning detection
+   - Performance metrics
+
+4. **Report results** - Include testing status in final report:
+   - ✓ "Tested in-game: Mod loaded successfully, item appears in creative tab"
+   - ✓ "Tested with runData: Generated 5 recipe files successfully"
+   - ⚠️ "Testing revealed issue: [description and recommendation]"
+```
+
+**When to invoke test runner**:
+- ✅ New items/blocks/entities implemented
+- ✅ User explicitly requests testing
+- ✅ After significant feature additions
+- ✅ Data generation providers created
+- ✅ Complex features that need in-game verification
+
+**When NOT to invoke**:
+- ❌ Only documentation changes
+- ❌ Minor refactoring (variable names, formatting)
+- ❌ Only resource file updates (textures, models)
+- ❌ User explicitly declines testing
+- ❌ Build/compile errors already present
+
+**Testing improves reliability by**:
+- Catching runtime issues before user discovers them (5x faster verification)
+- Verifying mod loading and initialization
+- Confirming in-game behavior matches expectations
+- Detecting resource loading problems (missing textures, etc.)
+
+---
+
+#### Phase 5: Discovery (On-Demand)
+
+**When users need to understand existing code, invoke navigation**:
+
+```markdown
+## Discovery Phase
+
+When user asks discovery questions:
+
+1. **Classify query type**
+   - "Where is X?" → Navigation query
+   - "Find all Y" → Pattern search
+   - "Show me Z" → Code exploration
+
+2. **Invoke navigator**
+   Use the intellij-code-navigator agent to [specific task].
+
+   Context: [Project, Framework, Relevant background]
+
+3. **Use findings**
+   - Modifying code → Provide context to specialist
+   - Learning → Present findings to user
+   - Debugging → Use results to diagnose
+
+4. **Report to user**
+   Include discovery insights in final report
+```
+
+**When to invoke navigator**:
+- ✅ User asks "where", "find", "locate", "show", "list"
+- ✅ Need reference implementation for new feature
+- ✅ Understanding unfamiliar codebase
+- ✅ Debugging resource issues (missing models/textures)
+
+**When NOT to invoke**:
+- ❌ Creating from scratch (no pattern needed)
+- ❌ Simple file reads (use Read tool directly)
+- ❌ Already know exact locations
+
+**Discovery enhances development by**:
+- Finding reference patterns for consistency
+- Locating existing implementations
+- Mapping code-to-resource relationships
+- Understanding project structure
+
+---
+
+#### Phase 6: Refactoring (On-Demand)
+
+**When users request rename operations, use safe refactoring**:
+
+```markdown
+## Refactoring Phase
+
+When user requests renaming items, blocks, entities, methods, or variables:
+
+1. **Classify operation** - Determine scope:
+   - Rename registry object (item, block) → Affects code AND resources
+   - Rename method/variable → Code-only refactoring
+   - Rename class → Code-only refactoring
+
+2. **Invoke refactoring agent** - Use `intellij-refactoring-master`
+
+   Use the intellij-refactoring-master agent to safely rename [target].
+
+   Context: Renaming [old-name] to [new-name]
+   Scope: [registry object/method/variable/class]
+   Files affected: [list if known]
+
+3. **Validate changes** - Automatically trigger `minecraft-code-validator`
+   - Verify all references updated
+   - Check resource file synchronization
+   - Ensure no broken references
+
+4. **Report results** - Include refactoring summary:
+   - Files modified (code + resources)
+   - Breaking change warnings (if registry name changed)
+   - Migration guidance (if world-breaking)
+
+Example report:
+   ✓ "Renamed COPPER_SWORD to BRONZE_SWORD"
+   - Updated 3 Java files
+   - Synchronized 5 resource files (model, texture, lang, recipe, loot table)
+   ⚠️ WARNING: Registry name changed - existing copper swords in worlds will become AIR
+   - Migration: Use MissingMappingsEvent to remap old name to new name
+```
+
+**When to invoke refactoring agent**:
+- ✅ User explicitly requests rename operation
+- ✅ Renaming registry objects (items, blocks, entities)
+- ✅ Large-scale method/variable renaming
+- ✅ Need to ensure resource file synchronization
+
+**When NOT to invoke**:
+- ❌ Simple text replacement (use Edit tool)
+- ❌ Formatting changes only
+- ❌ Documentation updates
+- ❌ User wants manual control
+
+**Refactoring ensures correctness by**:
+- Scope-aware renaming (98% accuracy vs 85% text replacement)
+- Full propagation across codebase
+- Resource file synchronization
+- Breaking change detection and warnings
 
 ---
 

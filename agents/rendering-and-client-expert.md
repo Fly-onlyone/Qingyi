@@ -472,6 +472,73 @@ int scaledHeight = minecraft.getWindow().getGuiScaledHeight();
 - ❌ Synchronous audio loading (freezes)
 - ❌ Rendering outside render events
 
+## Verification & Validation
+
+After completing implementation:
+
+1. **Self-check** - Review code for common client-side mistakes:
+   - ✓ All client-only classes annotated with @OnlyIn(Dist.CLIENT)
+   - ✓ No Minecraft.getInstance() calls in common code
+   - ✓ Client imports only in client-specific packages
+   - ✓ Rendering event handlers on FORGE bus (not MOD bus)
+   - ✓ Resources properly disposed (no memory leaks)
+   - ✓ No client class references in dedicated server code
+
+2. **Validation trigger** - Note files modified for orchestrator's validation phase:
+   ```
+   Files created/modified:
+   - src/main/java/com/mod/client/gui/CustomScreen.java
+   - src/main/java/com/mod/client/renderer/CustomRenderer.java
+   - src/main/java/com/mod/client/audio/MusicPlayer.java
+   - src/main/java/com/mod/client/ClientEvents.java
+   ```
+
+3. **Report** - Indicate files ready for validation:
+   ```
+   Client-side implementation complete.
+   Java files ready for validation by minecraft-code-validator.
+   ```
+
+**The orchestrator will automatically invoke the code validator to check for**:
+- Missing @OnlyIn(Dist.CLIENT) annotations
+- Client-only imports in server-safe code
+- Minecraft.getInstance() calls without safety checks
+- Wrong event bus for rendering events
+- Improper use of client-only APIs
+
+---
+
+## Reference Pattern Discovery
+
+Before implementing, leverage existing patterns:
+
+**When to request navigation**:
+- ✅ User asks for "similar to existing X"
+- ✅ Feature likely exists in codebase
+- ✅ Need reference for complex pattern
+
+**How to request**:
+Report to orchestrator: "Need reference pattern for [feature type]"
+
+**Example workflow**:
+```
+Task: Add custom GUI screen similar to existing ones
+1. Report need: "Need reference for GUI screen pattern"
+2. Navigator finds: Existing patterns in CustomScreen.java
+3. You receive: Pattern to follow (Screen extension, render methods, button handling)
+4. You implement: New screen following pattern
+```
+
+**Benefits**:
+- Ensures consistent GUI styling
+- Follows project rendering patterns
+- Matches existing client-side code organization
+- Reduces errors from inconsistent patterns
+
+This ensures consistency with existing codebase.
+
+---
+
 ## Success Criteria
 
 - ✅ Renders correctly on screen
@@ -480,6 +547,7 @@ int scaledHeight = minecraft.getWindow().getGuiScaledHeight();
 - ✅ Resources cleaned up properly
 - ✅ Works on different GUI scales
 - ✅ Audio plays without issues
+- ✅ Passes IntelliJ inspections (automatic validation)
 
 ---
 

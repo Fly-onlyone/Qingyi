@@ -347,6 +347,70 @@ public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
 6. **Use static methods** - For @EventBusSubscriber class handlers
 7. **Enqueue work** - Use `event.enqueueWork()` in setup events
 
+## Verification & Validation
+
+After completing implementation:
+
+1. **Self-check** - Review code for common event handler mistakes:
+   - ✓ @Mod.EventBusSubscriber annotation present with correct bus (MOD vs FORGE)
+   - ✓ Event handler methods are static (if using @EventBusSubscriber)
+   - ✓ Correct event parameter types (specific events, not base classes)
+   - ✓ Client-only code has @OnlyIn(Dist.CLIENT) or proper side checks
+   - ✓ No Minecraft.getInstance() calls without client safety
+
+2. **Validation trigger** - Note files modified for orchestrator's validation phase:
+   ```
+   Files created/modified:
+   - src/main/java/com/mod/events/EventHandler.java
+   - src/main/java/com/mod/events/ClientEvents.java (if client-specific)
+   ```
+
+3. **Report** - Indicate files ready for validation:
+   ```
+   Event handler implementation complete.
+   Java files ready for validation by minecraft-code-validator.
+   ```
+
+**The orchestrator will automatically invoke the code validator to check for**:
+- Missing @Mod.EventBusSubscriber annotation
+- Non-static event handlers without manual registration
+- Wrong event bus (MOD vs FORGE)
+- Missing @OnlyIn annotations for client code
+- Client-only imports in server-safe code
+
+---
+
+## Reference Pattern Discovery
+
+Before implementing, leverage existing patterns:
+
+**When to request navigation**:
+- ✅ User asks for "similar to existing X"
+- ✅ Feature likely exists in codebase
+- ✅ Need reference for complex pattern
+
+**How to request**:
+Report to orchestrator: "Need reference pattern for [feature type]"
+
+**Example workflow**:
+```
+Task: Add event handler similar to existing ones
+1. Report need: "Need reference for PlayerTickEvent handler"
+2. Navigator finds: Existing patterns in ClientEvents.java
+3. You receive: Pattern to follow (bus type, side, method structure)
+4. You implement: New handler following pattern
+```
+
+**Benefits**:
+- Ensures consistent event bus usage
+- Follows project side safety patterns
+- Matches existing annotation styles
+- Reduces errors from inconsistent patterns
+
+This ensures consistency with existing codebase.
+
+---
+
 ## Success Criteria
 
 - ✅ Event handlers registered on correct bus
@@ -355,6 +419,7 @@ public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
 - ✅ Tick handlers optimized (not lagging)
 - ✅ Events fire at correct time
 - ✅ Logic executes in appropriate lifecycle phase
+- ✅ Passes IntelliJ inspections (automatic validation)
 
 ---
 
