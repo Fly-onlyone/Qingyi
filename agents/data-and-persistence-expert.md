@@ -481,6 +481,71 @@ packet.putHealthPercentage();
 3. **Sync**: On server, check client receives updates
 4. **Upgrade**: Simulate version upgrade, handle old data
 
+## Verification & Validation
+
+After completing implementation:
+
+1. **Self-check** - Review code for common NBT/persistence mistakes:
+   - ✓ Implements correct serialization interface (INBTSerializable or extends SavedData)
+   - ✓ serializeNBT() and deserializeNBT() methods present
+   - ✓ setDirty() called after all modifications
+   - ✓ Correct NBT tag types (putInt for int, putString for String, etc.)
+   - ✓ Handles missing NBT keys gracefully
+   - ✓ No non-serializable objects stored
+
+2. **Validation trigger** - Note files modified for orchestrator's validation phase:
+   ```
+   Files created/modified:
+   - src/main/java/com/mod/capability/CustomCapability.java
+   - src/main/java/com/mod/data/ModSavedData.java
+   - src/main/java/com/mod/network/SyncPacket.java (if networking)
+   ```
+
+3. **Report** - Indicate files ready for validation:
+   ```
+   Data persistence implementation complete.
+   Java files ready for validation by minecraft-code-validator.
+   ```
+
+**The orchestrator will automatically invoke the code validator to check for**:
+- Missing serialization interfaces
+- Wrong NBT tag types (type mismatches)
+- Missing serializeNBT/deserializeNBT methods
+- Incorrect CompoundTag usage
+
+---
+
+## Reference Pattern Discovery
+
+Before implementing, leverage existing patterns:
+
+**When to request navigation**:
+- ✅ User asks for "similar to existing X"
+- ✅ Feature likely exists in codebase
+- ✅ Need reference for complex pattern
+
+**How to request**:
+Report to orchestrator: "Need reference pattern for [feature type]"
+
+**Example workflow**:
+```
+Task: Add NBT serialization similar to existing data
+1. Report need: "Need reference for NBT serialization pattern"
+2. Navigator finds: Existing patterns in PlayerData.java
+3. You receive: Pattern to follow (tag structure, methods, setDirty usage)
+4. You implement: New serialization following pattern
+```
+
+**Benefits**:
+- Ensures consistent NBT tag structure
+- Follows project serialization patterns
+- Matches existing data organization
+- Reduces errors from inconsistent patterns
+
+This ensures consistency with existing codebase.
+
+---
+
 ## Success Criteria
 
 - ✅ Data saves correctly to NBT
@@ -489,6 +554,7 @@ packet.putHealthPercentage();
 - ✅ Client-server sync works (if needed)
 - ✅ No crashes on missing data
 - ✅ `setDirty()` called after modifications
+- ✅ Passes IntelliJ inspections (automatic validation)
 
 ---
 

@@ -205,6 +205,71 @@ After implementation:
 4. **Model**: Texture renders correctly
 5. **Behavior**: Properties work as expected
 
+## Verification & Validation
+
+After completing implementation:
+
+1. **Self-check** - Review code for common registry mistakes:
+   - ✓ MODID constant defined and used correctly
+   - ✓ DeferredRegister generic type matches ForgeRegistries type
+   - ✓ Registry names are lowercase and unique
+   - ✓ .register() called in mod constructor
+   - ✓ No duplicate registry names
+
+2. **Validation trigger** - Note files modified for orchestrator's validation phase:
+   ```
+   Files created/modified:
+   - src/main/java/com/mod/init/ModItems.java
+   - src/main/java/com/mod/init/ModBlocks.java
+   - src/main/resources/assets/modid/models/item/item_name.json
+   - src/main/resources/assets/modid/lang/en_us.json
+   ```
+
+3. **Report** - Indicate files ready for validation:
+   ```
+   Registry implementation complete.
+   Java files ready for validation by minecraft-code-validator.
+   ```
+
+**The orchestrator will automatically invoke the code validator to check for**:
+- Missing or incorrect imports
+- DeferredRegister type mismatches
+- Undefined MODID constants
+- Code formatting issues
+
+---
+
+## Reference Pattern Discovery
+
+Before implementing, leverage existing patterns:
+
+**When to request navigation**:
+- ✅ User asks for "similar to existing X"
+- ✅ Feature likely exists in codebase
+- ✅ Need reference for complex pattern
+
+**How to request**:
+Report to orchestrator: "Need reference pattern for [feature type]"
+
+**Example workflow**:
+```
+Task: Add new item similar to existing ones
+1. Report need: "Need reference for existing item registration pattern"
+2. Navigator finds: Existing patterns in ModItems.java
+3. You receive: Pattern to follow (DeferredRegister structure, properties)
+4. You implement: New item following established pattern
+```
+
+**Benefits**:
+- Ensures consistency with existing codebase
+- Follows project conventions
+- Reduces errors from inconsistent patterns
+- Faster implementation with reference
+
+This ensures consistency with existing codebase.
+
+---
+
 ## Success Criteria
 
 - ✅ Object registered with correct framework pattern
@@ -213,6 +278,7 @@ After implementation:
 - ✅ Model/texture loads correctly
 - ✅ Properties configured appropriately
 - ✅ Code follows framework conventions
+- ✅ Passes IntelliJ inspections (automatic validation)
 
 ---
 
