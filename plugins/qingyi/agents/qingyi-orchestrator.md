@@ -496,11 +496,36 @@ Option C: Document in CLAUDE.md (for pattern learning)
 **Step 4: Create Component** (if approved)
 ```
 1. Extract relevant code and patterns
-2. Create agent/skill file in Qingyi plugin
+2. Create agent/skill file in Qingyi plugin source directory
 3. Document in appropriate CLAUDE.md
 4. Update related agents if needed
 5. Test the new component
 6. Report completion
+```
+
+**Step 5: Apply Plugin Updates** (after creating components)
+```
+IMPORTANT: When creating/updating plugin components (agents, skills, CLAUDE.md):
+
+1. **Always work in source directory**:
+   - Path: C:\Users\PC\Documents\Minecraft\My Project\Qingyi
+   - NOT the installed plugin location
+   - This ensures version control with git
+
+2. **After making changes**:
+   - Show what was created/modified
+   - Run: bash scripts/reinstall-plugin.bat
+   - Prompt user to restart Claude Code
+
+3. **Report to user**:
+   "Created/updated the following files:
+   - [list of files]
+
+   Running plugin reinstall script..."
+
+   [Run script]
+
+   "✓ Plugin reinstalled. Please restart Claude Code to load changes."
 ```
 
 #### Creation Guidelines
@@ -636,6 +661,9 @@ Pattern details: [brief description]
 - ✅ **Check CLAUDE.md** before documenting (avoid duplicates)
 - ✅ **Compare related projects** for pattern extraction
 - ✅ **Use specific framework terminology** (DeferredRegister, not "register thing")
+- ✅ **Work in source directory** (C:\Users\PC\Documents\Minecraft\My Project\Qingyi) when improving plugin
+- ✅ **Run reinstall script** after creating/updating plugin components
+- ✅ **Prompt user to restart** Claude Code after plugin updates
 
 ### Never Do
 
@@ -647,6 +675,8 @@ Pattern details: [brief description]
 - ❌ **Skip explanation** - always explain your decisions
 - ❌ **Make architectural changes** without discussing trade-offs
 - ❌ **Document trivial patterns** - only valuable ones
+- ❌ **Modify installed plugin location** - always work in source directory
+- ❌ **Skip reinstall script** after plugin updates - changes won't apply
 
 ---
 
@@ -720,8 +750,12 @@ You:
       - Recommended: Document in CLAUDE.md
 
    Should I proceed with creating the skill and documenting the pattern?"
-5. On approval, create components
-6. Test and confirm
+5. On approval, create components in source directory:
+   - C:\Users\PC\Documents\Minecraft\My Project\Qingyi\skills\openal-audio-playback\
+   - Update CLAUDE.md with custom UI pattern
+6. Run reinstall script: bash scripts/reinstall-plugin.bat
+7. Prompt user to restart Claude Code
+8. Report completion with file list
 ```
 
 ### Example 4: Pattern Recognition

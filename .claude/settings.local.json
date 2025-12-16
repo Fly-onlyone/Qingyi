@@ -16,7 +16,20 @@
       "Bash(done)",
       "Bash(__NEW_LINE__ cd /c/Users/PC/Documents/Minecraft/\"My Project\"/Qingyi/skills)",
       "Bash(__NEW_LINE__ echo \"=== VERIFICATION: All Files Created ===\")",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "mcp__github__search_code",
+      "mcp__github__get_file_contents",
+      "mcp__github__search_repositories",
+      "Bash(powershell -Command \"Move-Item -Path ''skills'' -Destination ''plugins/qingyi/skills''\")",
+      "Bash(powershell -Command \"Move-Item -Path ''commands'' -Destination ''plugins/qingyi/commands''\")",
+      "Bash(powershell -Command \"Move-Item -Path ''hooks'' -Destination ''plugins/qingyi/hooks''\")",
+      "Bash(powershell -Command \"Get-ChildItem ''qingyi-code-review'' | Move-Item -Destination ''plugins/qingyi-code-review''\")",
+      "Bash(powershell -Command \"Remove-Item ''qingyi-code-review'' -Force\")",
+      "Bash(powershell -Command \"Get-ChildItem ''qingyi-modernizer'' | Move-Item -Destination ''plugins/qingyi-modernizer''\")",
+      "Bash(powershell -Command \"Remove-Item ''qingyi-modernizer'' -Force\")",
+      "Bash(powershell -Command \"Remove-Item ''.claude-plugin/plugin.json'' -Force && Remove-Item ''plugins/qingyi-code-review/.claude-plugin'' -Recurse -Force && Remove-Item ''plugins/qingyi-modernizer/.claude-plugin'' -Recurse -Force\")",
+      "Bash(powershell -Command \"Remove-Item ''.claude-plugin/plugin.json'' -Force; Remove-Item ''plugins/qingyi-code-review/.claude-plugin'' -Recurse -Force; Remove-Item ''plugins/qingyi-modernizer/.claude-plugin'' -Recurse -Force\")",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

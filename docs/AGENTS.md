@@ -624,6 +624,26 @@ The Qingyi plugin currently includes these production-ready agents:
     - Model: sonnet
     - Skills: minecraft-run-configuration-guide
 
+12. **brave-search-agent** ([plugins/qingyi/agents/brave-search-agent.md](../plugins/qingyi/agents/brave-search-agent.md))
+    - Advanced web research specialist using Brave Search API
+    - Provides documentation lookup, framework comparison, tutorial discovery
+    - 6 specialized search tools: web, local, news, video, image, AI summarizer
+    - Token-optimized with advanced filtering (freshness, domain, language, result types)
+    - Invoked PROACTIVELY for technical research requiring recent information
+    - Tools: mcp__brave__brave_web_search, mcp__brave__brave_local_search, mcp__brave__brave_news_search, mcp__brave__brave_video_search, mcp__brave__brave_image_search, mcp__brave__brave_summarizer, Read, Write
+    - Model: haiku (cost-efficient for research tasks)
+    - Skills: pattern-recognition
+
+13. **github-code-search-agent** ([plugins/qingyi/agents/github-code-search-agent.md](../plugins/qingyi/agents/github-code-search-agent.md))
+    - Community code discovery and framework source analysis specialist
+    - Searches across GitHub for modding examples, migration patterns, and implementations
+    - Provides 5-10 real code examples per query with repository attribution
+    - Accesses official Forge/NeoForge/Fabric source code directly
+    - Invoked PROACTIVELY for finding external examples and community solutions
+    - Tools: mcp__github__search_code, mcp__github__get_file_contents, mcp__github__search_repositories, mcp__github__list_commits, mcp__github__get_commit, Read, Write
+    - Model: haiku (cost-efficient for code search tasks)
+    - Skills: pattern-recognition
+
 ### Suggested Future Agents
 
 Additional agents that could be added:
