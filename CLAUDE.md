@@ -8,13 +8,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **This is NOT a traditional software project** - there are no build/test commands. This is a plugin configuration project with markdown-based agents and skills that Claude Code loads to assist with Minecraft modding.
 
-**Plugin Manifest**: [.claude-plugin/plugin.json](.claude-plugin/plugin.json)
+**Plugin Marketplace**: [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
 
 ## Plugin Architecture
 
 The plugin uses a **Master Orchestrator + Specialist Agents + Progressive Skills** architecture:
 
-- **Agents** (6 implemented): Specialized AI assistants with isolated contexts for specific domains
+- **Agents** (13 implemented): Specialized AI assistants with isolated contexts for specific domains
 - **Skills** (8 implemented): Reusable knowledge modules that auto-load based on relevance
 - **Commands**: Slash command templates for quick workflows
 - **Hooks**: Event automation for validation and assistance
@@ -23,7 +23,7 @@ The plugin uses a **Master Orchestrator + Specialist Agents + Progressive Skills
 
 ### Creating New Agents
 
-Create a new markdown file in `agents/` with this structure:
+Create a new markdown file in `plugins/qingyi/agents/` with this structure:
 
 ```markdown
 ---
@@ -58,10 +58,10 @@ You are [role description]
 
 ### Creating New Skills
 
-Create a directory in `skills/skill-name/` with this structure:
+Create a directory in `plugins/qingyi/skills/skill-name/` with this structure:
 
 ```
-skills/
+plugins/qingyi/skills/
 └── skill-name/
     ├── SKILL.md          # Main entry point (required)
     ├── supporting-1.md   # Optional supporting files
@@ -96,7 +96,7 @@ When adding agents/skills:
 
 ### Pattern 1: Master Orchestrator with Auto-Detection
 
-**Agent**: [agents/qingyi-orchestrator.md](agents/qingyi-orchestrator.md)
+**Agent**: [plugins/qingyi/agents/qingyi-orchestrator.md](plugins/qingyi/agents/qingyi-orchestrator.md)
 
 The orchestrator is the entry point for all tasks. It:
 
@@ -163,7 +163,7 @@ The same agent handles both - it detects from context which to use.
    - Advanced patterns
    - Anti-patterns and troubleshooting
 
-**Example**: [skills/forge-event-system/SKILL.md](skills/forge-event-system/SKILL.md)
+**Example**: [plugins/qingyi/skills/forge-event-system/SKILL.md](plugins/qingyi/skills/forge-event-system/SKILL.md)
 - Main file: Event bus overview, basic handler registration
 - Supporting: Event priorities, tick handlers, common events
 
@@ -171,7 +171,7 @@ This prevents token waste - only load what's needed for the current task.
 
 ### Pattern 4: Self-Evolution System
 
-The orchestrator has a **learning mechanism** (lines 173-221 in [agents/qingyi-orchestrator.md](agents/qingyi-orchestrator.md)):
+The orchestrator has a **learning mechanism** (lines 173-221 in [plugins/qingyi/agents/qingyi-orchestrator.md](plugins/qingyi/agents/qingyi-orchestrator.md)):
 
 **Workflow**:
 1. **Analyze Current Project** → Scan structure, identify patterns
@@ -215,6 +215,8 @@ When working with Minecraft mods, use these agents:
 | Events, tick handlers | `events-and-lifecycle-expert` | Read, Write, Edit, Bash, Grep, Glob | forge-event-system |
 | NBT, capabilities, persistence | `data-and-persistence-expert` | Read, Write, Edit, Bash, Grep, Glob | nbt-serialization-patterns |
 | GUI, rendering, audio | `rendering-and-client-expert` | Read, Write, Edit, Bash, Grep, Glob | rendering-patterns |
+| Web research, documentation lookup | `brave-search-agent` | Brave MCP (all search tools), Read, Write | pattern-recognition |
+| GitHub code examples, framework source | `github-code-search-agent` | GitHub MCP (search, get files, commits), Read, Write | pattern-recognition |
 | Code navigation & discovery | `intellij-code-navigator` | MCP IntelliJ (search, symbol info), Read | intellij-navigation-patterns |
 | Code validation & quality | `minecraft-code-validator` | MCP IntelliJ, Read, Edit | intellij-inspection-guide, forge-event-system, forge-registry-api, neoforge-registry-api, nbt-serialization-patterns |
 | Safe refactoring & renaming | `intellij-refactoring-master` | MCP IntelliJ (rename_refactoring), Read, Write, Edit | intellij-refactoring-safety, forge-registry-api, neoforge-registry-api |
@@ -330,4 +332,4 @@ For deeper understanding, read:
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Component design and data flow
 - [docs/AGENTS.md](docs/AGENTS.md) - Comprehensive agent creation guide
 - [docs/SKILLS.md](docs/SKILLS.md) - Skill creation and best practices
-- [agents/qingyi-orchestrator.md](agents/qingyi-orchestrator.md) - Master orchestrator implementation
+- [plugins/qingyi/agents/qingyi-orchestrator.md](plugins/qingyi/agents/qingyi-orchestrator.md) - Master orchestrator implementation
