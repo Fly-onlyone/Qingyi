@@ -1,452 +1,302 @@
 ---
 name: agent-creation-guide
-description: Guide for creating new Claude Code agents and skills for the Qingyi plugin. Use when the orchestrator needs to create new agents or skills based on discovered patterns, gaps in coverage, or user needs. Covers file format, frontmatter configuration, system prompt structure, and best practices.
+description: Guide for creating new Claude Code agents and skills for Qingyi plugin. Covers file format, frontmatter configuration, system prompt structure, and best practices. Use when creating new plugin components.
 ---
 
 # Agent and Skill Creation Guide
 
-This skill provides templates and guidelines for creating new agents and skills in the Qingyi plugin.
+## What This Covers
 
-## When to Create New Components
+- When to create agents vs skills
+- Agent file format and frontmatter
+- Skill file format and structure
+- System prompt templates
+- Best practices and validation
 
-### Create a New Agent When:
+## When to Use
 
-- Task requires **multi-step execution** with decision-making
-- Concept is **complex enough** to warrant dedicated expertise
-- **Frequent enough** to justify specialization
-- **Distinct domain** not covered by existing agents
+- Creating new agents for Qingyi plugin
+- Creating new skills for knowledge modules
+- Understanding plugin architecture
+- Validating agent/skill configurations
+
+---
+
+## Component Decision Tree
+
+### Create Agent When:
+- ✅ Task requires multi-step execution with decision-making
+- ✅ Complex enough to warrant dedicated expertise
+- ✅ Frequent enough to justify specialization
+- ✅ Distinct domain not covered by existing agents
 
 **Examples**:
-- ✅ Create `audio-expert` if you handle audio in 3+ mods
-- ✅ Create `world-gen-expert` for complex world generation
-- ❌ Don't create `item-color-expert` (too narrow, use registry-expert)
+- ✅ `audio-expert` for audio systems across multiple mods
+- ✅ `world-gen-expert` for complex world generation
+- ❌ `item-color-expert` (too narrow, use existing agent)
 
-### Create a New Skill When:
-
-- Need **reference knowledge** that agents can load
-- Pattern is **reusable** across multiple tasks
-- Information is **static** (API docs, patterns, examples)
-- **Token efficiency**: Load only when needed
+### Create Skill When:
+- ✅ Need reference knowledge that agents can load
+- ✅ Pattern is reusable across multiple tasks
+- ✅ Information is static (API docs, patterns, examples)
+- ✅ Token efficiency: Load only when needed
 
 **Examples**:
-- ✅ Create `openal-audio-playback` skill (reference for audio API)
-- ✅ Create `mixin-injection-points` skill (Fabric reference)
-- ❌ Don't create `how-to-register-item` skill (too specific, put in registry-api skill)
+- ✅ `audio-api-patterns` for OpenAL integration
+- ✅ `world-gen-examples` for biome generation
+- ❌ Single-use documentation (doesn't justify skill)
+
+---
 
 ## Agent File Format
 
 ### File Location
 ```
-Qingyi/agents/agent-name.md
+agents/agent-name.md
 ```
 
-### Template
+### YAML Frontmatter Template
 
-```markdown
+```yaml
 ---
 name: agent-name
-description: [When to use this agent]. Use PROACTIVELY for [scenarios]. Expert in [domain, framework, version].
+description: Expert in [domain]. Use PROACTIVELY for [tasks].
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
 permissionMode: default
-skills: skill-1, skill-2, skill-3
+skills: skill1, skill2, skill3
 ---
+```
 
-# Agent Display Name
+**Required Fields**:
+- `name`: kebab-case identifier
+- `description`: Clear description. Include "Use PROACTIVELY" for auto-invocation
+- `tools`: Comma-separated list of allowed tools
+- `model`: sonnet, opus, haiku, or inherit
+- `permissionMode`: default, acceptEdits, bypassPermissions, or plan
+- `skills`: Pre-loaded skills (optional)
 
-You are a [role] specializing in [domain] for Minecraft modding.
+### Agent Body Template
 
-## Core Expertise
+```markdown
+# Agent Name - Role Title
 
-### [Area 1]
-- Capability 1
-- Capability 2
+You are an expert in [domain] for Minecraft mod development. Your role is to [primary responsibility].
 
-### [Area 2]
-- Capability 1
-- Capability 2
+## Core Responsibilities
 
-## Responsibilities
+1. **[Responsibility 1]**: [Description]
+2. **[Responsibility 2]**: [Description]
+3. **[Responsibility 3]**: [Description]
 
-When invoked, you will:
+## Behavioral Guidelines
 
-1. **[Primary Task]** - Description
-2. **[Secondary Task]** - Description
-3. **[Quality Check]** - Description
+### DO:
+- ✅ [Guideline 1]
+- ✅ [Guideline 2]
 
-## Specific Instructions
-
-### Before Starting
-- Prerequisite 1
-- Prerequisite 2
-
-### During Execution
-- Guideline 1
-- Guideline 2
-
-### After Completion
-- Verification 1
-- Verification 2
-
-## Framework-Specific Knowledge
-
-### Forge
-- [Forge-specific details]
-
-### NeoForge
-- [NeoForge-specific details]
-
-### Fabric
-- [Fabric-specific details]
-
-## Example Scenarios
-
-### Scenario 1: [Title]
-**Request**: [User request]
-**Response**: [How you handle it]
-
-### Scenario 2: [Title]
-**Request**: [User request]
-**Response**: [How you handle it]
-
-## What NOT to Do
-
+### DON'T:
 - ❌ [Anti-pattern 1]
 - ❌ [Anti-pattern 2]
 
-## Success Criteria
+## Workflow
 
-- ✅ [Criterion 1]
-- ✅ [Criterion 2]
+### Step 1: [Phase Name]
+[What to do in this phase]
+
+### Step 2: [Phase Name]
+[What to do in this phase]
+
+## Code Examples
+
+**Pattern 1: [Pattern Name]**
+```java
+// Example code from real mod
 ```
 
-### Frontmatter Fields
+## Common Patterns
 
-#### name (Required)
-- **Format**: Lowercase with hyphens
-- **Max length**: 64 characters
-- **Example**: `registry-and-content-expert`
+[Reusable patterns relevant to this agent's domain]
 
-#### description (Required)
-- **Purpose**: When/why to invoke
-- **Include**: "Use PROACTIVELY" for automatic invocation
-- **Include**: Trigger keywords (framework names, concepts)
-- **Example**: `Expert in Forge event systems. Use PROACTIVELY for event handling, tick handlers, and mod lifecycle. Covers @SubscribeEvent, event buses, and event priority.`
+## Troubleshooting
 
-#### tools (Optional)
-- **Default**: Inherits all tools
-- **Common sets**:
-  - Read-only: `Read, Grep, Glob`
-  - Implementation: `Read, Write, Edit, Bash`
-  - Research: `Read, Grep, Glob, WebFetch`
-
-#### model (Optional)
-- **Options**: `sonnet` (default), `opus`, `haiku`, `inherit`
-- **Guidelines**:
-  - `haiku`: Fast, simple tasks
-  - `sonnet`: Balanced (recommended)
-  - `opus`: Complex reasoning
-
-#### permissionMode (Optional)
-- **Options**:
-  - `default`: Normal permissions
-  - `acceptEdits`: Auto-accept file edits
-  - `bypassPermissions`: Skip all permission requests
-  - `plan`: Read-only planning mode
-
-#### skills (Optional)
-- **Format**: Comma-separated skill names
-- **Example**: `forge-registry-api, neoforge-registry-api`
-- **Purpose**: Auto-load these skills when agent is invoked
+[Common issues this agent should handle]
+```
 
 ---
 
 ## Skill File Format
 
-### Directory Structure
+### File Location
 ```
-skills/skill-name/
-├── SKILL.md              # Required
-├── supporting-file.md    # Optional
-├── examples/             # Optional
-│   └── example.java
-└── templates/            # Optional
-    └── template.java
+skills/skill-name/SKILL.md
+skills/skill-name/supporting-file-1.md  (optional)
 ```
 
-### SKILL.md Template
+### YAML Frontmatter Template
 
-```markdown
+```yaml
 ---
 name: skill-name
-description: [What this covers]. Use when [scenarios]. Keywords: [keyword1, keyword2, keyword3]. Covers [frameworks/versions].
-allowed-tools: Read, Grep, Glob  # Optional
+description: [What this skill provides. Include keywords for auto-matching.]
+allowed-tools: Read, Grep, Glob
 ---
+```
 
-# Skill Display Name
+**Required Fields**:
+- `name`: kebab-case identifier
+- `description`: Clear description with keywords for matching
+- `allowed-tools`: Optional, defaults to all tools
+
+### Skill Body Template
+
+```markdown
+# Skill Name
 
 ## What This Covers
 
-- Topic 1
-- Topic 2
-- Topic 3
+- [Topic 1]
+- [Topic 2]
+- [Topic 3]
 
 ## When to Use
 
-- Scenario 1
-- Scenario 2
-- Scenario 3
+- [Use case 1]
+- [Use case 2]
+- [Use case 3]
 
-## Core Knowledge
+---
 
-### [Concept 1]
+## Core Concepts
 
-Explanation...
+### Concept 1
+[Explanation with code examples]
 
-**Example**:
-```java
-// Code example
-```
-
-### [Concept 2]
-
-Explanation...
+### Concept 2
+[Explanation with code examples]
 
 ## Common Patterns
 
 ### Pattern 1: [Name]
-
-**Use when**: [Scenario]
-
-**Implementation**:
 ```java
-// Implementation
+// Real code example
 ```
-
-**Pitfalls**:
-- ❌ [What to avoid]
 
 ### Pattern 2: [Name]
+```java
+// Real code example
+```
 
-...
+## Supporting Documentation
 
-## Version Differences
+### Detailed Guides
+- [Guide Name](./guide-name.md) - [Description]
 
-### Forge 1.20.x
-- [Specifics]
+---
 
-### NeoForge 1.21.x
-- [Changes from Forge]
-
-### Fabric 1.20.x
-- [Different approach]
-
-## Best Practices
-
-1. [Practice 1]
-2. [Practice 2]
-
-## Anti-Patterns
-
-1. ❌ [Anti-pattern 1] - [Why to avoid]
-2. ❌ [Anti-pattern 2] - [Why to avoid]
-
-## See Also
-
-- [Related skill](../related-skill/SKILL.md)
-- [Supporting file](supporting-file.md)
+Use this skill when [conditions for using this skill].
 ```
 
 ---
 
-## Creation Workflow
+## Validation Checklist
 
-### For Agents
+### Agent Validation
+- [ ] YAML frontmatter is valid
+- [ ] Name is kebab-case
+- [ ] Description includes "Use PROACTIVELY" if auto-invoke desired
+- [ ] Tools list is comma-separated
+- [ ] Model is valid: sonnet, opus, haiku, or inherit
+- [ ] PermissionMode is valid: default, acceptEdits, bypassPermissions, or plan
+- [ ] Skills are comma-separated and exist
+- [ ] Body provides clear responsibilities
+- [ ] Examples use real code patterns
 
-1. **Analyze need**
-   - What task does this handle?
-   - Is it distinct from existing agents?
-   - How often will it be used?
-
-2. **Define scope**
-   - Core responsibilities (3-5 items)
-   - Required expertise
-   - Tools needed
-
-3. **Write system prompt**
-   - Clear role definition
-   - Specific instructions
-   - Example scenarios
-   - Success criteria
-
-4. **Specify skills**
-   - Which skills should auto-load?
-   - What knowledge does it need?
-
-5. **Test agent**
-   - Invoke with sample task
-   - Verify it handles correctly
-   - Refine if needed
-
-### For Skills
-
-1. **Gather knowledge**
-   - Official docs
-   - User's code examples
-   - API source code
-   - Community best practices
-
-2. **Organize content**
-   - Main SKILL.md (overview)
-   - Supporting files (details)
-   - Examples (real code)
-   - Templates (boilerplate)
-
-3. **Write description**
-   - Include trigger keywords
-   - Specify use cases
-   - Mention frameworks/versions
-
-4. **Create examples**
-   - Real code from user's projects
-   - Official API usage
-   - Common patterns
-
-5. **Test skill**
-   - Check if agents load it
-   - Verify it helps solve problems
-   - Ensure examples are accurate
+### Skill Validation
+- [ ] YAML frontmatter is valid
+- [ ] Name is kebab-case
+- [ ] Description includes relevant keywords
+- [ ] Main file is ≤350 lines (ideally ≤200)
+- [ ] Supporting files referenced with markdown links
+- [ ] Examples are concrete and tested
+- [ ] Uses progressive loading pattern
 
 ---
 
 ## Best Practices
 
-### Agent System Prompts
+### Agent Best Practices
 
-**DO**:
-- ✅ Be specific about role and responsibilities
-- ✅ Provide concrete examples
-- ✅ Include "what NOT to do" section
-- ✅ Define success criteria
-- ✅ Use framework-specific terminology
+1. **Clear Scope**: Agent should have well-defined domain
+2. **Real Examples**: Use code from actual mods, not pseudocode
+3. **Behavioral Guidelines**: Specify what agent should/shouldn't do
+4. **Workflow Structure**: Provide step-by-step process
+5. **Auto-Invocation**: Use "Use PROACTIVELY" for automatic usage
 
-**DON'T**:
-- ❌ Be vague ("helps with stuff")
-- ❌ Overlap with existing agents
-- ❌ Mix multiple unrelated domains
-- ❌ Assume knowledge (list it in skills)
+### Skill Best Practices
 
-### Skill Descriptions
-
-**DO**:
-- ✅ Include many relevant keywords
-- ✅ Specify frameworks and versions
-- ✅ Describe use cases clearly
-- ✅ Use action verbs
-
-**DON'T**:
-- ❌ Be too generic ("Minecraft knowledge")
-- ❌ Forget to mention frameworks
-- ❌ Miss important keywords
-- ❌ Duplicate existing skills
+1. **Token Efficiency**: Keep main file ≤200 lines ideal, ≤350 max
+2. **Progressive Loading**: Link to supporting files for details
+3. **Concrete Examples**: Real code, not generic templates
+4. **Clear Keywords**: Include search terms in description
+5. **Reference Format**: Quick reference tables and patterns
 
 ---
 
-## File Creation Steps
+## Quick Templates
 
-### Create Agent File
-
-```bash
-# 1. Create file
-cd /path/to/Qingyi/agents
-touch new-agent.md
-
-# 2. Add frontmatter and content
-# [Use template above]
-
-# 3. Test
-# Invoke agent with sample task
-```
-
-### Create Skill Directory
-
-```bash
-# 1. Create directory
-cd /path/to/Qingyi/skills
-mkdir new-skill
-
-# 2. Create SKILL.md
-cd new-skill
-touch SKILL.md
-
-# 3. Add frontmatter and content
-# [Use template above]
-
-# 4. Add supporting files (optional)
-touch examples.md
-mkdir examples
-```
-
----
-
-## Quality Checklist
-
-### For Agents
-
-- [ ] Name is descriptive and unique
-- [ ] Description includes "Use PROACTIVELY"
-- [ ] Description has trigger keywords
-- [ ] Tools list is appropriate
-- [ ] Skills list includes needed knowledge
-- [ ] System prompt is clear and specific
-- [ ] Responsibilities are well-defined
-- [ ] Example scenarios are provided
-- [ ] Success criteria are defined
-- [ ] Tested with sample task
-
-### For Skills
-
-- [ ] Name clearly indicates content
-- [ ] Description is keyword-rich
-- [ ] Use cases are specified
-- [ ] Content is well-organized
-- [ ] Examples are real and accurate
-- [ ] Version differences noted
-- [ ] Best practices included
-- [ ] Anti-patterns documented
-- [ ] Supporting files linked correctly
-- [ ] Tested by loading in agent
-
----
-
-## Examples from Qingyi Plugin
-
-### Example Agent: registry-and-content-expert
-
-**Good description**:
+### Minimal Agent
 ```yaml
-description: Expert in Minecraft registry systems for items, blocks, and entities. Use PROACTIVELY when creating game content, registering objects, or working with DeferredRegister (Forge/NeoForge) or Registry.register (Fabric). Handles creative tabs, properties, and registration lifecycle.
+---
+name: example-agent
+description: Expert in examples. Use PROACTIVELY for example tasks.
+tools: Read, Write, Edit
+model: sonnet
+permissionMode: default
+---
+
+# Example Agent
+
+You are an expert in [domain].
+
+## Responsibilities
+1. [Task 1]
+2. [Task 2]
+
+## Workflow
+[Step-by-step process]
 ```
 
-**Why it's good**:
-- ✅ "Use PROACTIVELY" included
-- ✅ Keywords: registry, items, blocks, entities, DeferredRegister, Fabric
-- ✅ Specific frameworks mentioned
-- ✅ Clear use cases
-
-### Example Skill: forge-registry-api
-
-**Good description**:
+### Minimal Skill
 ```yaml
-description: Forge and NeoForge registry API reference for items, blocks, and entities. Use when implementing game content registration, working with DeferredRegister, RegistryObject, or creative tabs. Covers Forge 1.19-1.20 and NeoForge 1.20-1.21 differences.
-```
+---
+name: example-skill
+description: Example patterns for demonstration purposes.
+---
 
-**Why it's good**:
-- ✅ Keywords: Forge, NeoForge, registry, DeferredRegister, RegistryObject
-- ✅ Use cases specified
-- ✅ Version coverage mentioned
-- ✅ Action-oriented
+# Example Skill
+
+## What This Covers
+- [Topic]
+
+## When to Use
+- [Condition]
+
+## Pattern Example
+```java
+// Code
+```
+```
 
 ---
 
-**Use this guide to create high-quality agents and skills that expand the Qingyi plugin's capabilities!**
+## Supporting Documentation
+
+### Detailed Guides
+- [Agent Architecture](./agent-architecture.md) - Deep dive into agent design patterns
+- [Skill Progressive Loading](./skill-progressive-loading.md) - Token optimization strategies
+- [YAML Configuration Reference](./yaml-configuration-reference.md) - Complete frontmatter options
+
+---
+
+Use this skill when creating new agents or skills for the Qingyi plugin to ensure proper structure and functionality.

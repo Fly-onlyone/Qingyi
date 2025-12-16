@@ -1,0 +1,19 @@
+{
+  "name": "qingyi-code-review",
+  "version": "1.0.0",
+  "description": "AI-powered code review for Java and Minecraft mods with security, performance, and quality analysis. Compatible with Qingyi but usable independently.",
+  "author": {
+    "name": "Fly",
+    "email": "",
+    "url": ""
+  },
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "minecraft",
+    "java",
+    "security",
+    "quality-assurance",
+    "performance"
+  ]
+}

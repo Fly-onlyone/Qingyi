@@ -4,7 +4,19 @@
       "Bash(find:*)",
       "Bash(cd:*)",
       "mcp__intellij__list_directory_tree",
-      "mcp__intellij__get_file_text_by_path"
+      "mcp__intellij__get_file_text_by_path",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(wc:*)",
+      "Bash(sort:*)",
+      "Bash(mkdir:*)",
+      "Bash(test:*)",
+      "Bash(powershell -Command \"Get-Content ''C:\\Users\\PC\\Documents\\Minecraft\\My Project\\Qingyi\\agents\\supporting\\intellij-refactoring-master\\refactoring-workflow.md'' | Measure-Object -Line\")",
+      "Bash(done)",
+      "Bash(__NEW_LINE__ cd /c/Users/PC/Documents/Minecraft/\"My Project\"/Qingyi/skills)",
+      "Bash(__NEW_LINE__ echo \"=== VERIFICATION: All Files Created ===\")",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

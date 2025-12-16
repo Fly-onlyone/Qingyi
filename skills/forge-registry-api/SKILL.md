@@ -1,6 +1,6 @@
 ---
 name: forge-registry-api
-description: Forge and NeoForge registry API reference for items, blocks, and entities. Use when implementing game content registration, working with DeferredRegister, RegistryObject, or creative tabs. Covers Forge 1.19-1.20 and NeoForge 1.20-1.21 differences.
+description: Forge registry API reference for items, blocks, and entities. Use when implementing game content registration, working with DeferredRegister, RegistryObject, or creative tabs. Covers Forge 1.19-1.20 patterns.
 allowed-tools: Read, Grep, Glob
 ---
 
@@ -9,451 +9,279 @@ allowed-tools: Read, Grep, Glob
 ## What This Covers
 
 - DeferredRegister registration system
-- RegistryObject pattern for type-safe references
+- RegistryObject for type-safe references
 - Creative tab organization
-- Item/Block/Entity registration lifecycle
+- Item/Block/Entity registration patterns
 - Registry timing and MOD bus usage
-- Version differences between Forge 1.19, 1.20, and NeoForge 1.21
 
 ## When to Use
 
-- Creating new items, blocks, or entities
+- Creating new items, blocks, or entities in Forge
 - Setting up mod registration infrastructure
-- Migrating between Forge versions
-- Understanding registry object initialization timing
+- Understanding registry initialization timing
 - Troubleshooting "registry not found" errors
+- Working with creative tabs
 
-## Core Knowledge
+---
 
-### DeferredRegister Pattern
+## Core Registration Pattern
 
-The DeferredRegister system defers object registration until the appropriate registry event fires, preventing timing issues.
+### Basic Item Registration (Forge 1.20)
 
-**Basic Setup (Forge 1.20.1 - from MusicMod)**:
 ```java
-public class ModSounds {
-    public static final DeferredRegister<SoundEvent> SOUNDS =
-        DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MODID);
+public class ModItems {
+    public static final DeferredRegister<Item> ITEMS =
+        DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 
-    public static final RegistryObject<SoundEvent> CUSTOM_SOUND =
-        SOUNDS.register("custom_sound", () ->
-            SoundEvent.createVariableRangeEvent(new ResourceLocation(MODID, "custom_sound"))
-        );
-}
-```
+    // RegistryObject provides type-safe reference
+    public static final RegistryObject<Item> RUBY =
+        ITEMS.register("ruby", () -> new Item(new Item.Properties()));
 
-**Registration in Main Class**:
-```java
-@Mod(MODID)
-public class MyMod {
-    public MyMod(IEventBus modEventBus) {
-        ModSounds.SOUNDS.register(modEventBus);
-        ModItems.ITEMS.register(modEventBus);
-        ModBlocks.BLOCKS.register(modEventBus);
+    public static final RegistryObject<SwordItem> RUBY_SWORD =
+        ITEMS.register("ruby_sword", () ->
+            new SwordItem(Tiers.IRON, 3, -2.4f, new Item.Properties()));
+
+    public static void register(IEventBus modEventBus) {
+        ITEMS.register(modEventBus);
     }
 }
 ```
 
 **Key Points**:
-- Must register DeferredRegister to MOD event bus (not FORGE bus)
-- Registration happens in mod constructor
-- Use lambda supplier `() -> new Item(...)` for deferred creation
-- RegistryObject provides type-safe access after registration
-
-### RegistryObject Type Safety
-
-**Access Pattern**:
-```java
-public static final RegistryObject<Item> THEFATRAT =
-    ITEMS.register("thefatrat", () -> new Item(new Item.Properties()
-        .stacksTo(1)
-        .rarity(Rarity.RARE)));
-
-// Later access (safe)
-Item item = ModItems.THEFATRAT.get();
-```
-
-**When Objects Are Available**:
-- ❌ NOT available during mod constructor
-- ❌ NOT available during `@SubscribeEvent` registry events
-- ✅ Available after `FMLCommonSetupEvent`
-- ✅ Safe to use in gameplay code
-
-### Item Registration Patterns
-
-**Simple Item (MusicMod Pattern)**:
-```java
-public static final RegistryObject<Item> SIMPLE_ITEM =
-    ITEMS.register("simple_item", () -> new Item(new Item.Properties()));
-```
-
-**Item with Properties**:
-```java
-public static final RegistryObject<Item> SPECIAL_ITEM =
-    ITEMS.register("special_item", () -> new Item(new Item.Properties()
-        .stacksTo(1)               // Stack size (1-64)
-        .rarity(Rarity.EPIC)       // Color in tooltip
-        .fireResistant()           // Survives fire/lava
-        .tab(CreativeModeTab.TAB_MISC))); // Creative tab
-```
-
-**Custom Item Class**:
-```java
-public static final RegistryObject<MusicDiscItem> MUSIC_DISC =
-    ITEMS.register("music_disc", () -> new MusicDiscItem(
-        15,  // Comparator signal
-        ModSounds.CUSTOM_SOUND,
-        new Item.Properties().stacksTo(1).rarity(Rarity.RARE),
-        180  // Duration in seconds
-    ));
-```
-
-### Sound Event Registration (from MusicMod)
-
-**Sound Event**:
-```java
-public static final RegistryObject<SoundEvent> THEFATRAT =
-    SOUNDS.register("thefatrat", () ->
-        SoundEvent.createVariableRangeEvent(new ResourceLocation(MODID, "thefatrat"))
-    );
-```
-
-**Corresponding sounds.json**:
-```json
-{
-  "thefatrat": {
-    "subtitle": "sounds.musicmod.thefatrat",
-    "sounds": [
-      {
-        "name": "musicmod:thefatrat",
-        "stream": true
-      }
-    ]
-  }
-}
-```
-
-**Resource Location**:
-- Registry name: `"thefatrat"`
-- Sound file: `assets/musicmod/sounds/thefatrat.ogg`
-- Full ID: `musicmod:thefatrat`
-
-### Entity Registration (NeoForge 1.21.3 - from Apocalypse_TNT)
-
-**Entity Type Registration**:
-```java
-public class ModEntities {
-    public static final DeferredRegister<EntityType<?>> ENTITIES =
-        DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, MODID);
-
-    public static final Supplier<EntityType<GroundActivatedTnt>> GROUND_TNT =
-        ENTITIES.register("ground_tnt", () -> EntityType.Builder
-            .<GroundActivatedTnt>of(GroundActivatedTnt::new, MobCategory.MISC)
-            .sized(0.98F, 0.98F)           // Hitbox size
-            .clientTrackingRange(10)       // Render distance in chunks
-            .updateInterval(10)            // Sync frequency in ticks
-            .build("ground_tnt"));
-}
-```
-
-**Entity Class**:
-```java
-public class GroundActivatedTnt extends Entity {
-    public GroundActivatedTnt(EntityType<? extends GroundActivatedTnt> type, Level level) {
-        super(type, level);
-    }
-
-    // Implementation...
-}
-```
+- `DeferredRegister.create(ForgeRegistries.ITEMS, MODID)`
+- Return type: `RegistryObject<Item>`
+- Access via `.get()`: `ModItems.RUBY.get()`
+- Register on MOD bus in mod constructor
 
 ### Block Registration
 
-**Simple Block**:
 ```java
-public static final RegistryObject<Block> CUSTOM_BLOCK =
-    BLOCKS.register("custom_block", () -> new Block(
-        BlockBehaviour.Properties.of()
-            .strength(3.0F)        // Hardness
-            .requiresCorrectToolForDrops()
-            .sound(SoundType.STONE)
-    ));
-```
+public class ModBlocks {
+    public static final DeferredRegister<Block> BLOCKS =
+        DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
 
-**Block + BlockItem**:
-```java
-// 1. Register block
-public static final RegistryObject<Block> CUSTOM_BLOCK =
-    BLOCKS.register("custom_block", () -> new Block(...));
+    public static final RegistryObject<Block> RUBY_BLOCK =
+        BLOCKS.register("ruby_block", () ->
+            new Block(BlockBehaviour.Properties.of()
+                .strength(5.0f, 6.0f)
+                .requiresCorrectToolForDrops()));
 
-// 2. Register corresponding item
-public static final RegistryObject<BlockItem> CUSTOM_BLOCK_ITEM =
-    ITEMS.register("custom_block", () -> new BlockItem(
-        CUSTOM_BLOCK.get(),
-        new Item.Properties()
-    ));
-```
-
-## Version Differences
-
-### Forge 1.19.x
-
-**ForgeRegistries**:
-```java
-DeferredRegister<Item> ITEMS =
-    DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
-```
-
-**Creative Tabs**:
-```java
-new Item.Properties().tab(CreativeModeTab.TAB_MISC)
-```
-
-### Forge 1.20.x (MusicMod)
-
-**ForgeRegistries (same as 1.19)**:
-```java
-DeferredRegister<SoundEvent> SOUNDS =
-    DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MODID);
-```
-
-**Creative Tabs (changed)**:
-- Now uses `CreativeModeTabRegistry` or custom tab creation
-- Item properties no longer have `.tab()` method in some 1.20+ versions
-
-### NeoForge 1.20.x → 1.21.3 (Apocalypse_TNT)
-
-**BuiltInRegistries (NEW)**:
-```java
-DeferredRegister<EntityType<?>> ENTITIES =
-    DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, MODID);
-```
-
-**Key Changes**:
-- `ForgeRegistries` → `BuiltInRegistries` for vanilla registries
-- `RegistryObject` → `Supplier` (more flexible return type)
-- Some API methods renamed or moved
-
-**Migration Example**:
-```java
-// Forge 1.20
-DeferredRegister<Item> ITEMS =
-    DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
-public static final RegistryObject<Item> MY_ITEM = ...;
-
-// NeoForge 1.21.3
-DeferredRegister<Item> ITEMS =
-    DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
-public static final Supplier<Item> MY_ITEM = ...;
-```
-
-## Common Patterns
-
-### Pattern 1: Centralized Registry Classes
-
-**Use when**: Organizing multiple related objects
-
-**Implementation**:
-```
-src/main/java/[package]/
-├── item/
-│   └── ModItems.java         // All item registrations
-├── block/
-│   └── ModBlocks.java        // All block registrations
-├── entity/
-│   └── ModEntities.java      // All entity registrations
-└── sound/
-    └── ModSounds.java        // All sound registrations
-```
-
-**Benefits**:
-- Clear organization
-- Easy to find registrations
-- Single point of registration in main class
-
-### Pattern 2: Grouped Registration (from MusicMod)
-
-**Use when**: Many similar items (e.g., music discs, tools set)
-
-**Example**:
-```java
-public class ModSounds {
-    // Group 1: TheFatRat music
-    public static final RegistryObject<SoundEvent> THEFATRAT =
-        SOUNDS.register("thefatrat", () -> ...);
-    public static final RegistryObject<SoundEvent> MONODY =
-        SOUNDS.register("monody", () -> ...);
-
-    // Group 2: NCS music
-    public static final RegistryObject<SoundEvent> INVINCIBLE =
-        SOUNDS.register("invincible", () -> ...);
+    public static void register(IEventBus modEventBus) {
+        BLOCKS.register(modEventBus);
+    }
 }
 ```
 
-### Pattern 3: Helper Method Pattern
-
-**Use when**: Repeated registration logic
-
-**Implementation**:
+**Block Items** (separate registration):
 ```java
-private static RegistryObject<Item> registerSimpleItem(String name) {
-    return ITEMS.register(name, () -> new Item(new Item.Properties()));
-}
-
-public static final RegistryObject<Item> ITEM1 = registerSimpleItem("item1");
-public static final RegistryObject<Item> ITEM2 = registerSimpleItem("item2");
+public static final RegistryObject<BlockItem> RUBY_BLOCK_ITEM =
+    ModItems.ITEMS.register("ruby_block", () ->
+        new BlockItem(ModBlocks.RUBY_BLOCK.get(), new Item.Properties()));
 ```
 
-## Best Practices
+### Entity Registration
 
-1. **Always register to MOD bus** (not FORGE bus):
-   ```java
-   // ✅ Correct
-   ModItems.ITEMS.register(modEventBus);
-
-   // ❌ Wrong
-   ModItems.ITEMS.register(MinecraftForge.EVENT_BUS);
-   ```
-
-2. **Use constants for registry names**:
-   ```java
-   // ✅ Good
-   public static final String CUSTOM_ITEM_NAME = "custom_item";
-   ITEMS.register(CUSTOM_ITEM_NAME, () -> ...);
-
-   // ❌ Bad (typo-prone)
-   ITEMS.register("custm_item", () -> ...);
-   ```
-
-3. **Match registry name with field name**:
-   ```java
-   // ✅ Good (easy to find)
-   public static final RegistryObject<Item> RUBY_SWORD =
-       ITEMS.register("ruby_sword", () -> ...);
-
-   // ❌ Confusing
-   public static final RegistryObject<Item> SWORD1 =
-       ITEMS.register("ruby_sword", () -> ...);
-   ```
-
-4. **Group related registrations**:
-   ```java
-   // Tools
-   public static final RegistryObject<Item> RUBY_PICKAXE = ...;
-   public static final RegistryObject<Item> RUBY_AXE = ...;
-
-   // Combat
-   public static final RegistryObject<Item> RUBY_SWORD = ...;
-   public static final RegistryObject<Item> RUBY_BOW = ...;
-   ```
-
-## Anti-Patterns
-
-1. ❌ **Registering too late**:
-   ```java
-   // ❌ Wrong - registration must happen in mod constructor
-   @SubscribeEvent
-   public void onCommonSetup(FMLCommonSetupEvent event) {
-       ModItems.ITEMS.register(modEventBus); // TOO LATE!
-   }
-   ```
-
-2. ❌ **Accessing RegistryObject.get() too early**:
-   ```java
-   // ❌ Crash - object not registered yet
-   public MyMod() {
-       Item item = ModItems.CUSTOM_ITEM.get(); // NULL or crash
-   }
-
-   // ✅ Safe
-   public void onCommonSetup(FMLCommonSetupEvent event) {
-       Item item = ModItems.CUSTOM_ITEM.get(); // OK
-   }
-   ```
-
-3. ❌ **Duplicate registry names**:
-   ```java
-   // ❌ Second registration overwrites first
-   ITEMS.register("custom_item", () -> new Item(...));
-   ITEMS.register("custom_item", () -> new Item(...)); // ERROR
-   ```
-
-4. ❌ **Wrong registry type**:
-   ```java
-   // ❌ Type mismatch
-   DeferredRegister<Item> ITEMS = ...;
-   ITEMS.register("block", () -> new Block(...)); // Wrong type!
-   ```
-
-5. ❌ **Not creating BlockItem for blocks**:
-   ```java
-   // ❌ Block exists but not obtainable
-   BLOCKS.register("custom_block", () -> new Block(...));
-   // Missing: BlockItem registration
-   ```
-
-## Pitfalls to Avoid
-
-### Pitfall 1: Null Pointer in Static Initialization
 ```java
-// ❌ Crashes during class loading
-public class ModItems {
-    private static final Item DEPENDENCY = ModItems.OTHER_ITEM.get(); // NULL
+public class ModEntities {
+    public static final DeferredRegister<EntityType<?>> ENTITIES =
+        DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, MODID);
 
-    public static final RegistryObject<Item> CUSTOM_ITEM =
-        ITEMS.register("custom_item", () -> new Item(
-            new Item.Properties().food(new FoodProperties.Builder()
-                .effect(() -> new MobEffectInstance(MobEffects.REGENERATION, 200), 1.0F)
-                .build())
-        ));
-}
+    public static final RegistryObject<EntityType<CustomEntity>> CUSTOM_ENTITY =
+        ENTITIES.register("custom_entity", () -> EntityType.Builder
+            .of(CustomEntity::new, MobCategory.CREATURE)
+            .sized(0.6F, 1.8F)
+            .clientTrackingRange(8)
+            .build("custom_entity"));
 
-// ✅ Use supplier to defer access
-() -> new Item(new Item.Properties()
-    .food(createFoodProperties())) // Method call, evaluated later
-```
-
-### Pitfall 2: Forgetting to Register DeferredRegister
-```java
-// ❌ Objects never registered
-public static final DeferredRegister<Item> ITEMS = ...;
-// Missing: ITEMS.register(modEventBus);
-
-// ✅ Always register in mod constructor
-public MyMod(IEventBus modEventBus) {
-    ModItems.ITEMS.register(modEventBus);
+    public static void register(IEventBus modEventBus) {
+        ENTITIES.register(modEventBus);
+    }
 }
 ```
 
-### Pitfall 3: Client-Only Registry Access on Server
-```java
-// ❌ Crashes dedicated server
-@OnlyIn(Dist.CLIENT)
-public class ClientItems {
-    public static final DeferredRegister<Item> ITEMS = ...; // Server can't see this
-}
+---
 
-// ✅ Register in common code, use client-only properties if needed
-public class ModItems {
-    public static final DeferredRegister<Item> ITEMS = ...; // Accessible everywhere
+## Creative Tab Registration (Forge 1.20)
+
+### Creating Custom Tab
+
+```java
+public class ModCreativeTabs {
+    public static final DeferredRegister<CreativeModeTab> TABS =
+        DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+
+    public static final RegistryObject<CreativeModeTab> MOD_TAB =
+        TABS.register("mod_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup." + MODID))
+            .icon(() -> new ItemStack(ModItems.RUBY.get()))
+            .displayItems((params, output) -> {
+                // Add items to tab
+                output.accept(ModItems.RUBY.get());
+                output.accept(ModItems.RUBY_SWORD.get());
+                output.accept(ModBlocks.RUBY_BLOCK.get());
+            })
+            .build());
+
+    public static void register(IEventBus modEventBus) {
+        TABS.register(modEventBus);
+    }
 }
 ```
 
-## Verification Checklist
+---
 
-- [ ] DeferredRegister created with correct registry type
-- [ ] Registered to MOD event bus in mod constructor
-- [ ] Registry names follow snake_case convention
-- [ ] Field names follow UPPER_SNAKE_CASE convention
-- [ ] No duplicate registry names
-- [ ] RegistryObject.get() not called during static initialization
-- [ ] Blocks have corresponding BlockItems (if obtainable)
-- [ ] Items appear in creative tab (if desired)
-- [ ] Translation keys exist in lang file
-- [ ] Models/textures created for items/blocks
+## Mod Initialization Pattern
 
-## See Also
+### Main Mod Class (Forge 1.20)
 
-- [neoforge-registry-api](../neoforge-registry-api/SKILL.md) - NeoForge migration guide
-- [fabric-registry-api](../fabric-registry-api/SKILL.md) - Fabric equivalent
-- Official Forge Docs: https://docs.minecraftforge.net/en/latest/concepts/registries/
+```java
+@Mod(MODID)
+public class MyMod {
+    public static final String MODID = "mymod";
+
+    public MyMod(IEventBus modEventBus) {
+        // Register all deferred registers
+        ModItems.register(modEventBus);
+        ModBlocks.register(modEventBus);
+        ModEntities.register(modEventBus);
+        ModCreativeTabs.register(modEventBus);
+
+        // Common setup
+        modEventBus.addListener(this::commonSetup);
+
+        // Client setup (conditional)
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+            () -> () -> modEventBus.addListener(this::clientSetup));
+    }
+
+    private void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            // Thread-safe initialization
+        });
+    }
+
+    private void clientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> {
+            // Client-only initialization
+        });
+    }
+}
+```
+
+---
+
+## Common Registration Patterns
+
+### Pattern 1: Item with Custom Properties
+
+```java
+public static final RegistryObject<Item> MAGICAL_DUST =
+    ITEMS.register("magical_dust", () -> new Item(new Item.Properties()
+        .stacksTo(16)
+        .rarity(Rarity.RARE)
+        .fireResistant()));
+```
+
+### Pattern 2: Tool Item
+
+```java
+public static final RegistryObject<PickaxeItem> RUBY_PICKAXE =
+    ITEMS.register("ruby_pickaxe", () ->
+        new PickaxeItem(ModTiers.RUBY, 1, -2.8f, new Item.Properties()));
+```
+
+### Pattern 3: Food Item
+
+```java
+public static final RegistryObject<Item> ENCHANTED_APPLE =
+    ITEMS.register("enchanted_apple", () -> new Item(new Item.Properties()
+        .food(Foods.GOLDEN_APPLE)
+        .rarity(Rarity.EPIC)));
+```
+
+### Pattern 4: Block with Custom Behavior
+
+```java
+public static final RegistryObject<Block> SPECIAL_BLOCK =
+    BLOCKS.register("special_block", () ->
+        new SpecialBlock(BlockBehaviour.Properties.of()
+            .strength(3.0f)
+            .sound(SoundType.METAL)
+            .lightLevel(state -> 15)));
+```
+
+---
+
+## ForgeRegistries Reference (Quick Lookup)
+
+### Common Registries
+
+```java
+ForgeRegistries.ITEMS               // Items
+ForgeRegistries.BLOCKS              // Blocks
+ForgeRegistries.ENTITY_TYPES        // Entity types
+ForgeRegistries.BLOCK_ENTITY_TYPES  // Block entities
+ForgeRegistries.SOUND_EVENTS        // Sounds
+ForgeRegistries.MOB_EFFECTS         // Potion effects
+ForgeRegistries.POTIONS             // Potions
+ForgeRegistries.ENCHANTMENTS        // Enchantments
+ForgeRegistries.MENU_TYPES          // Container menus
+ForgeRegistries.RECIPE_TYPES        // Recipe types
+ForgeRegistries.RECIPE_SERIALIZERS  // Recipe serializers
+```
+
+---
+
+## Common Issues and Solutions
+
+### Issue 1: Registry Not Found
+**Error**: `Registry not found during initialization`
+
+**Cause**: DeferredRegister not registered on MOD bus
+
+**Solution**:
+```java
+// In mod constructor
+ModItems.register(modEventBus);
+```
+
+### Issue 2: NullPointerException When Accessing Item
+**Error**: NPE when calling `.get()` on RegistryObject
+
+**Cause**: Accessing registry object before registration complete
+
+**Solution**: Only access `.get()` after FMLCommonSetupEvent or in-game
+
+### Issue 3: Item Not in Creative Tab
+**Symptom**: Item registered but not visible in creative menu
+
+**Solution**: Add to creative tab via displayItems:
+```java
+.displayItems((params, output) -> {
+    output.accept(ModItems.RUBY.get());
+})
+```
+
+---
+
+## Supporting Documentation
+
+### Detailed Guides
+- [DeferredRegister Deep Dive](./deferred-register-deep-dive.md) - Complete registration lifecycle
+- [Creative Tab Customization](./creative-tab-customization.md) - Advanced tab configuration
+- [Registry Troubleshooting](./registry-troubleshooting.md) - Common errors and fixes
+
+---
+
+## Quick Checklist
+
+- [ ] Create DeferredRegister for registry type
+- [ ] Register items/blocks/entities with `.register()`
+- [ ] Call `.register(modEventBus)` in mod constructor
+- [ ] Register block items separately if needed
+- [ ] Add items to creative tab
+- [ ] Use `.get()` only after registration completes
+
+---
+
+Use this skill when working with Forge 1.19-1.20 to ensure correct registration patterns and avoid common pitfalls.
