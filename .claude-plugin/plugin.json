@@ -1,6 +1,6 @@
 {
   "name": "qingyi",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Minecraft mod development plugin with specialized agents and skills for improved code accuracy and token efficiency. Supports Forge, NeoForge, Fabric, and Quilt frameworks.",
   "author": {
     "name": "Fly",

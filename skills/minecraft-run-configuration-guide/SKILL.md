@@ -4,538 +4,371 @@ description: IntelliJ run configurations for Minecraft modding. Covers runClient
 allowed-tools: mcp__intellij__get_run_configurations, mcp__intellij__execute_run_configuration
 ---
 
-# Minecraft Run Configuration Guide - IntelliJ Run Configurations for Modding
+# Minecraft Run Configuration Guide
 
-This skill provides comprehensive guidance on using IntelliJ IDEA run configurations for Minecraft mod development, including testing, debugging, and data generation.
+## What This Covers
 
-## Overview
+- IntelliJ run configurations for Minecraft modding
+- runClient, runServer, runData configuration types
+- Testing and debugging workflows
+- Data generation with datagen providers
+- JVM options and program arguments
 
-### What Are Run Configurations?
+## When to Use
 
-**Run configurations** are IntelliJ project templates that define how to launch Minecraft with your mod loaded.
-
-**Created by**:
-- **ForgeGradle** (Forge/NeoForge mods)
-- **Fabric Loom** (Fabric/Quilt mods)
-
-**Common configurations**:
-- `runClient` - Launch Minecraft client
-- `runServer` - Launch dedicated server
-- `runData` - Generate data files
-- `runGameTest` - Run automated tests (if configured)
-
-### Why Use Run Configurations?
-
-**Benefits**:
-- ✅ Test mod in real Minecraft environment
-- ✅ Debug code with breakpoints
-- ✅ Verify features work in-game
-- ✅ Generate data files (recipes, loot, models)
-- ✅ Catch runtime issues before release
-
-**Without run configurations**: Manual JAR installation, slow testing cycle
-
-**With run configurations**: One-click testing, instant feedback
+- Testing mod features in Minecraft
+- Debugging code with breakpoints
+- Generating data files (recipes, loot, models)
+- Running automated tests
+- Verifying features work in-game
 
 ---
 
-## Run Configuration Types
+## Run Configuration Types (Quick Reference)
 
 ### runClient
-
 **Purpose**: Launch Minecraft client with mod loaded (graphical game)
 
 **Use for**:
-- ✅ Visual features (items, blocks, models, textures)
-- ✅ GUI testing (custom screens, HUDs)
-- ✅ Client-side rendering
-- ✅ Sounds and music
-- ✅ Keybindings
-- ✅ Creative tab organization
+- Visual features (items, blocks, textures)
+- GUI testing (custom screens, HUDs)
+- Client-side rendering, sounds, music
+- Keybindings and creative tabs
 
-**Startup process**:
-1. Launches Java with Minecraft client
-2. Loads resource packs and assets
-3. Initializes rendering engine (LWJGL)
-4. Loads mods (including yours)
-5. Registers items/blocks/entities
-6. Opens main menu
+**Startup time**: 30-90 seconds
 
-**Typical time**: 30-90 seconds
-
-**Access mod**:
-1. Create new world (Creative mode)
-2. Open inventory
-3. Check creative tab for mod items
+**Test workflow**:
+1. Run configuration
+2. Create new world (Creative mode)
+3. Open inventory → Check creative tab
 4. Test functionality
 
-**Example usage**:
-```
-Feature: New ruby sword item
-Test: runClient
-Verify: Item appears in creative tab, correct texture, works correctly
-```
-
 ### runServer
-
-**Purpose**: Launch dedicated Minecraft server (no graphics)
+**Purpose**: Launch dedicated server (no graphics)
 
 **Use for**:
-- ✅ Server-side features (commands, world generation)
-- ✅ Multi-player mechanics
-- ✅ Server-only logic
-- ✅ Performance testing (no rendering overhead)
+- Server-side logic (commands, events)
+- Multiplayer features
+- World generation
+- Performance testing (no rendering overhead)
 
-**Startup process**:
-1. Launches Java with Minecraft server
-2. Loads server configuration (server.properties)
-3. Loads mods (server-side only)
-4. Generates or loads world
-5. Starts listening on port 25565
+**Startup time**: 15-45 seconds
 
-**Typical time**: 20-60 seconds
-
-**Connect to server**:
-1. Launch Minecraft client separately
-2. Multiplayer → Add Server
-3. Address: `localhost` or `127.0.0.1`
-4. Join and test
-
-**Example usage**:
-```
-Feature: Custom /givebronze command
-Test: runServer
-Verify: Command works, gives items to player
-```
+**Test workflow**:
+1. Run configuration
+2. Wait for "Done!" message
+3. Connect from Minecraft client (localhost)
+4. Test server-side features
 
 ### runData
-
-**Purpose**: Generate data files from code (recipes, loot tables, tags, models)
+**Purpose**: Generate data files (recipes, loot tables, models, etc.)
 
 **Use for**:
-- ✅ Recipe generation (crafting, smelting)
-- ✅ Loot table generation
-- ✅ Model/blockstate generation
-- ✅ Tag generation (item tags, block tags)
-- ✅ Language file generation
+- Creating recipe JSON files
+- Generating loot tables
+- Creating block/item models
+- Tag generation
 
-**Startup process**:
-1. Launches minimal Minecraft
-2. Loads DataProvider classes
-3. Executes generation
-4. Writes files to `src/generated/resources/`
-5. Exits
+**Output location**: `src/generated/resources/`
 
-**Typical time**: 10-30 seconds
+**Test workflow**:
+1. Run configuration
+2. Wait for completion
+3. Check `generated/resources/` for output
+4. Copy to `src/main/resources/` if needed
 
-**Output location**: `src/generated/resources/data/modid/`
+### runGameTest (Optional)
+**Purpose**: Run automated game tests
 
-**Example usage**:
-```
-Feature: RecipeProvider for all tools
-Test: runData
-Verify: 5 recipe JSON files created in src/generated/resources/
-```
+**Use for**:
+- Automated feature testing
+- Integration tests
+- CI/CD pipelines
+
+**Requires**: GameTest framework setup
 
 ---
 
-## Detecting Run Configurations
+## Using IntelliJ MCP Tools
 
-### Using IntelliJ MCP
+### Get Available Run Configurations
 
-**Check available configurations**:
 ```
 mcp__intellij__get_run_configurations()
 
 Returns:
 [
-  {name: "runClient", type: "Application"},
-  {name: "runServer", type: "Application"},
-  {name: "runData", type: "Application"}
+  {name: "runClient", type: "Gradle", command: "runClient"},
+  {name: "runServer", type: "Gradle", command: "runServer"},
+  {name: "runData", type: "Gradle", command: "runData"}
 ]
-
-→ All standard configurations available
 ```
 
-**If empty**:
-```
-Returns: []
+### Execute Run Configuration
 
-Possible causes:
-1. Gradle not synced: Run ./gradlew --refresh-dependencies
-2. ForgeGradle/Loom not applied: Check build.gradle
-3. IntelliJ not loaded project: Open project in IntelliJ
-```
-
-### Manually in IntelliJ
-
-**Location**: Run menu → Edit Configurations
-
-**Should see**:
-- runClient (Gradle task or Application)
-- runServer (Gradle task or Application)
-- runData (Gradle task or Application)
-
-**If missing**: Re-sync Gradle project
-
----
-
-## Executing Run Configurations
-
-### Using IntelliJ MCP
-
-**Basic execution**:
-```
-mcp__intellij__execute_run_configuration("runClient", timeout=120000)
-
-Parameters:
-- name: "runClient" (required)
-- timeout: 120000ms = 2 minutes (optional, default varies)
-- maxLinesCount: 200 (optional, default varies)
-
-Returns:
-- console output (last N lines)
-- exit code
-- execution status
-```
-
-**With custom timeout**:
 ```
 mcp__intellij__execute_run_configuration(
-    "runClient",
-    timeout=180000,  // 3 minutes for slow startup
-    maxLinesCount=500  // Capture more output
+  configurationName: "runClient",
+  timeout: 120000  // 2 minutes
 )
 ```
 
-### Manually in IntelliJ
-
-**Run**: Click green play button next to configuration
-
-**Debug**: Click green bug button (enables breakpoints)
-
-**Stop**: Click red stop button
+**Monitoring Output**:
+- Watch for "Mod loading complete" → Successful startup
+- Check for errors in console
+- Verify resources loaded correctly
 
 ---
 
-## Program Arguments
+## Common Configuration Patterns
 
-### What Are Program Arguments?
+### Pattern 1: Test New Item
 
-**Program arguments** customize Minecraft launch behavior.
-
-**Common arguments**:
-
-**Username** (change player name):
-```
---username PlayerName
-```
-
-**UUID** (set player UUID):
-```
---uuid 12345678-1234-1234-1234-123456789abc
-```
-
-**Access token** (simulate authentication):
-```
---accessToken dummy_token
-```
-
-**Game directory** (custom saves location):
-```
---gameDir run/
-```
-
-**Example configuration**:
-```
-Program arguments: --username TestPlayer --uuid 00000000-0000-0000-0000-000000000000
-```
-
-### Setting Arguments in build.gradle
-
-**ForgeGradle**:
-```groovy
-minecraft {
-    runs {
-        client {
-            args '--username', 'DevPlayer'
-        }
-    }
-}
-```
-
-**Fabric Loom**:
-```groovy
-loom {
-    runs {
-        client {
-            programArgs '--username=DevPlayer'
-        }
-    }
-}
-```
-
----
-
-## JVM Options
-
-### What Are JVM Options?
-
-**JVM options** configure Java Virtual Machine behavior.
-
-**Common options**:
-
-**Memory allocation**:
-```
--Xms2G   // Initial heap size: 2 GB
--Xmx4G   // Maximum heap size: 4 GB
-```
-
-**Debugging**:
-```
--Xdebug  // Enable debugging
--agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005  // Debug port
-```
-
-**Performance**:
-```
--XX:+UseG1GC  // Use G1 garbage collector (recommended)
-```
-
-**Development**:
-```
--Dmixin.debug.verbose=true  // Mixin debugging (Fabric)
--Dmixin.debug.export=true   // Export transformed classes
-```
-
-### Setting JVM Options in build.gradle
-
-**ForgeGradle**:
-```groovy
-minecraft {
-    runs {
-        client {
-            jvmArgs '-Xmx4G', '-Xms2G'
-        }
-    }
-}
-```
-
-**Fabric Loom**:
-```groovy
-loom {
-    runs {
-        client {
-            vmArgs '-Xmx4G', '-Xms2G'
-        }
-    }
-}
-```
-
----
-
-## Testing Workflows
-
-### Workflow 1: Quick Feature Test
-
-**Goal**: Verify feature works
-
-**Steps**:
-1. Implement feature (e.g., new item)
+1. Add item to mod code
 2. Run `runClient`
-3. Create new world (Creative)
-4. Check creative tab for item
-5. Verify texture, name, functionality
-6. Exit Minecraft
+3. Create world → Open inventory
+4. Verify item appears with correct texture
+5. Test item functionality
 
-**Time**: 2-3 minutes total
+### Pattern 2: Generate Recipes
 
-### Workflow 2: Debug with Breakpoints
-
-**Goal**: Find and fix bug
-
-**Steps**:
-1. Set breakpoint in code (click line number in IntelliJ)
-2. Debug `runClient` (bug icon)
-3. Trigger code path in-game
-4. Execution pauses at breakpoint
-5. Inspect variables, step through code
-6. Identify issue, fix code
-7. Restart and retest
-
-**Time**: 5-15 minutes
-
-### Workflow 3: Server Testing
-
-**Goal**: Test server-side feature
-
-**Steps**:
-1. Run `runServer`
-2. Wait for "Server listening on port 25565"
-3. Launch Minecraft client separately
-4. Connect to localhost
-5. Test feature (commands, world gen, etc.)
-6. Check server console for logs
-7. Stop server
-
-**Time**: 3-5 minutes
-
-### Workflow 4: Data Generation
-
-**Goal**: Generate recipe/loot files
-
-**Steps**:
-1. Create DataProvider classes
+1. Create DataGenerator class with recipe provider
 2. Run `runData`
-3. Wait for "Data generation complete"
-4. Check `src/generated/resources/data/modid/`
-5. Verify files created
-6. Review generated JSON
-7. Copy to `src/main/resources/` if satisfied
+3. Check `generated/resources/data/modid/recipes/`
+4. Copy to `src/main/resources/` if satisfied
 
-**Time**: 1-2 minutes
+### Pattern 3: Test Server Commands
 
----
-
-## Progressive Skill Loading
-
-This skill uses **progressive loading** to optimize token usage. For detailed guides on specific configurations and patterns, see:
-
-### Supporting Files
-
-1. **[Run Client & Server](./run-client-server.md)** (~200 lines)
-   - Detailed runClient configuration
-   - Detailed runServer configuration
-   - Program arguments reference
-   - JVM options reference
-   - Debugging workflows
-   - Performance tuning
-   - Multi-player testing
-
-2. **[Data Generation](./data-generation.md)** (~250 lines)
-   - DataProvider architecture
-   - Recipe generation (crafting, smelting, blasting, smoking)
-   - Loot table generation
-   - Model and blockstate generation
-   - Tag generation
-   - Language file generation
-   - Real code examples
-   - Troubleshooting common issues
-
-3. **[Custom Configurations](./custom-configurations.md)** (~150 lines)
-   - Creating custom run configs
-   - Testing specific scenarios
-   - Performance profiling configurations
-   - Debugging configurations
-   - Multi-loader testing (Forge vs Fabric)
-   - CI/CD integration
-
-### When to Load Supporting Files
-
-**Load [Run Client & Server](./run-client-server.md)** when:
-- Need detailed runClient/runServer setup
-- Configuring program arguments or JVM options
-- Setting up debugging
-- Performance issues
-
-**Load [Data Generation](./data-generation.md)** when:
-- Implementing data providers
-- Generating recipes or loot tables
-- Need data generation examples
-- Troubleshooting datagen failures
-
-**Load [Custom Configurations](./custom-configurations.md)** when:
-- Creating specialized run configs
-- Need performance profiling
-- Setting up CI/CD
-- Testing edge cases
+1. Add command to mod
+2. Run `runServer`
+3. Wait for "Done!" message
+4. Type command in server console
+5. Verify command works correctly
 
 ---
 
-## Quick Reference
+## Data Generation Setup
 
-### Configuration Selection Guide
+### Forge/NeoForge Data Generation
 
-| Task | Configuration | Notes |
-|------|---------------|-------|
-| Test new item/block | runClient | Visual verification needed |
-| Test GUI/rendering | runClient | Client-only feature |
-| Test commands | runServer | Server-side feature |
-| Test world generation | runServer | Server-side feature |
-| Generate recipes | runData | DataProvider required |
-| Generate loot tables | runData | DataProvider required |
-| Debug crash | runClient (Debug) | Use breakpoints |
-| Performance test | runServer | No rendering overhead |
+**Main class setup**:
+```java
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+public class DataGenerators {
 
-### Common Issues
+    @SubscribeEvent
+    public static void gatherData(GatherDataEvent event) {
+        DataGenerator generator = event.getGenerator();
+        PackOutput output = generator.getPackOutput();
+        ExistingFileHelper fileHelper = event.getExistingFileHelper();
 
-**Issue**: No run configurations found
+        // Recipes
+        generator.addProvider(event.includeServer(),
+            new ModRecipeProvider(output));
 
-**Fix**: Run `./gradlew --refresh-dependencies` and reload Gradle project
+        // Loot tables
+        generator.addProvider(event.includeServer(),
+            new ModLootTableProvider(output));
 
-**Issue**: Minecraft won't start (timeout)
+        // Block states and models
+        generator.addProvider(event.includeClient(),
+            new ModBlockStateProvider(output, MODID, fileHelper));
 
-**Fix**: Increase timeout, check for infinite loops in code
+        // Item models
+        generator.addProvider(event.includeClient(),
+            new ModItemModelProvider(output, MODID, fileHelper));
+    }
+}
+```
 
-**Issue**: Missing textures in-game
+**Run**: Execute `runData` configuration
 
-**Fix**: Verify resource files in `src/main/resources/assets/modid/`
+**Output**: `src/generated/resources/`
 
-**Issue**: Data generation fails
+### Fabric Data Generation
 
-**Fix**: Check DataProvider classes for errors, verify registration
+**Main class setup**:
+```java
+public class ModDataGenerator implements DataGeneratorEntrypoint {
 
-**Issue**: Server port already in use
+    @Override
+    public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
+        FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
 
-**Fix**: Stop other Minecraft servers, run `./gradlew --stop`
+        // Recipes
+        pack.addProvider(ModRecipeProvider::new);
+
+        // Loot tables
+        pack.addProvider(ModLootTableProvider::new);
+
+        // Models
+        pack.addProvider(ModModelProvider::new);
+    }
+}
+```
+
+**Register in fabric.mod.json**:
+```json
+"entrypoints": {
+  "datagen": [
+    "com.mod.datagen.ModDataGenerator"
+  ]
+}
+```
+
+**Run**: Execute `runData` configuration
 
 ---
 
-## Best Practices
+## JVM Options and Program Arguments
 
-### DO
+### Common JVM Options
 
-- ✅ Use runClient for visual feature testing
-- ✅ Use runServer for server-side logic
-- ✅ Use runData to generate JSON files
-- ✅ Set breakpoints for debugging
-- ✅ Allocate sufficient memory (Xmx)
-- ✅ Check console output for errors
-- ✅ Test before releasing to users
+**Increase memory allocation**:
+```
+-Xmx4G  // Max heap size: 4GB
+-Xms2G  // Initial heap size: 2GB
+```
 
-### DON'T
+**Enable debugging**:
+```
+-Xdebug
+-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+```
 
-- ❌ Skip in-game testing (code may compile but crash)
-- ❌ Ignore console errors/warnings
-- ❌ Test only on client (server may have different behavior)
-- ❌ Commit generated files from src/generated/ (review first)
-- ❌ Use production credentials in dev environment
-- ❌ Run multiple instances simultaneously (port conflicts)
+**Performance profiling**:
+```
+-XX:+UnlockDiagnosticVMOptions
+-XX:+LogCompilation
+```
+
+### Common Program Arguments
+
+**Skip splash screen** (faster startup):
+```
+--nogui  // For runServer
+```
+
+**Specify data generation**:
+```
+--mod modid --all --output src/generated/resources/
+```
+
+**Enable mixins debug**:
+```
+-Dmixin.debug=true
+```
+
+**For detailed configuration**: See [JVM Options and Arguments](./jvm-options-and-arguments.md)
 
 ---
 
-## Summary
+## Testing Workflow Best Practices
 
-**Run configurations** enable rapid testing and debugging of Minecraft mods.
+### 1. Quick Feature Test (runClient)
+```
+1. Make code changes
+2. Run runClient
+3. Create test world
+4. Verify feature works
+5. Iterate as needed
+```
 
-**Types**:
-- **runClient**: Graphical game testing
-- **runServer**: Server-side testing
-- **runData**: Data file generation
+### 2. Server-Only Feature Test (runServer)
+```
+1. Make code changes
+2. Run runServer
+3. Wait for startup
+4. Test via server console or by connecting
+5. Check server logs for errors
+```
 
-**Detection**: Use `get_run_configurations()` to discover available configs
+### 3. Data Generation Workflow (runData)
+```
+1. Create/modify data providers
+2. Run runData
+3. Check generated/ folder
+4. Review generated files
+5. Copy to main resources if correct
+```
 
-**Execution**: Use `execute_run_configuration()` to run with timeout
+### 4. Full Integration Test
+```
+1. Run runClient → Test client features
+2. Run runServer → Test server features
+3. Run runData → Generate resources
+4. Build JAR → Test in clean environment
+```
 
-**Customization**:
-- Program arguments: Player name, UUID, game directory
-- JVM options: Memory, debugging, performance
+---
 
-**Testing Workflow**:
-1. Implement feature
-2. Run appropriate configuration
-3. Verify in-game
-4. Check console for errors
-5. Fix issues, repeat
+## Common Issues and Solutions
 
-For detailed configuration guides, see the supporting files linked above.
+### Issue 1: Configuration Not Found
+**Symptom**: IntelliJ doesn't show run configurations
+
+**Solution**:
+1. Refresh Gradle project (Gradle tool window → Reload)
+2. Run `./gradlew genIntellijRuns` (Forge) or `./gradlew idea` (Fabric)
+3. Restart IntelliJ
+
+### Issue 2: Mod Not Loading
+**Symptom**: Mod doesn't appear in game
+
+**Check**:
+- Console output for mod loading messages
+- `mods.toml` or `fabric.mod.json` syntax
+- Correct modid in all files
+- Main mod class has proper annotations
+
+### Issue 3: Long Startup Time
+**Solutions**:
+- Increase JVM memory (`-Xmx4G`)
+- Disable unnecessary mods in development
+- Use SSD for project files
+- Skip splash screen with `--nogui` (server)
+
+### Issue 4: Data Generation Fails
+**Check**:
+- DataGenerator class registered correctly
+- Providers added to event
+- Output directory permissions
+- No syntax errors in provider classes
+
+**For comprehensive troubleshooting**: See [Troubleshooting Guide](./troubleshooting-guide.md)
+
+---
+
+## Supporting Documentation
+
+### Detailed Guides
+- [Detailed Run Config Reference](./detailed-run-config-reference.md) - Complete docs for each configuration type with startup sequences
+- [JVM Options and Arguments](./jvm-options-and-arguments.md) - JVM tuning, program arguments, debugging setup
+- [Data Generation Guide](./data-generation-guide.md) - Complete data generation setup for recipes, loot, models, tags
+- [Troubleshooting Guide](./troubleshooting-guide.md) - Common issues, error messages, fixes
+
+---
+
+## Quick Decision Tree
+
+**Need to test visual features?**
+→ Use `runClient`
+
+**Need to test server logic?**
+→ Use `runServer`
+
+**Need to generate data files?**
+→ Use `runData`
+
+**Need automated testing?**
+→ Use `runGameTest` (requires setup)
+
+**Mod not loading?**
+→ Check console output, verify mod metadata
+
+**Slow startup?**
+→ Increase JVM memory, use SSD
+
+---
+
+Use this skill when working with IntelliJ run configurations to test, debug, and generate data for Minecraft mods efficiently.

@@ -1,0 +1,21 @@
+{
+  "name": "qingyi-modernizer",
+  "version": "1.0.0",
+  "description": "Safe, incremental modernization for legacy codebases including Minecraft mod version migrations (1.19→1.20, Forge→NeoForge, monolithic→multi-loader). Uses strangler fig pattern for zero-downtime upgrades.",
+  "author": {
+    "name": "Fly",
+    "email": "",
+    "url": ""
+  },
+  "license": "MIT",
+  "keywords": [
+    "refactoring",
+    "migration",
+    "modernization",
+    "minecraft",
+    "version-upgrade",
+    "forge",
+    "neoforge",
+    "fabric"
+  ]
+}

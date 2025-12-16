@@ -10,10 +10,9 @@ allowed-tools: Read, Grep, Glob
 
 - Event bus architecture (@SubscribeEvent)
 - MOD bus vs FORGE bus distinction
-- Event priority and ordering
-- Event cancellation
-- Tick handlers (Client, Server, Player, Level)
+- Event handler registration
 - Common event patterns from real mods
+- Tick handlers (Client, Server, Player, Level)
 - Side-specific event handling
 
 ## When to Use
@@ -25,11 +24,11 @@ allowed-tools: Read, Grep, Glob
 - Synchronizing client-server state
 - Troubleshooting "event not firing" issues
 
-## Core Knowledge
+---
 
-### Event Bus System
+## Core Concepts (Quick Reference)
 
-Forge uses two separate event buses:
+### Two Event Buses
 
 **MOD Bus** (`IEventBus` from mod constructor):
 - Mod lifecycle events (setup, config load)
@@ -40,21 +39,43 @@ Forge uses two separate event buses:
 - Game events (player tick, block break, entity spawn)
 - Fires during gameplay
 
-### Event Handler Registration
+### Bus Selection Table
 
-**Automatic Registration (Recommended)**:
+| Event Category | Bus |
+|---------------|-----|
+| Registry (items, blocks) | MOD |
+| Mod setup (common, client) | MOD |
+| Capability registration | MOD |
+| Player actions (break, interact) | FORGE |
+| Entity events (spawn, death) | FORGE |
+| Tick handlers | FORGE |
+| World events (load, save) | FORGE |
+
+---
+
+## Event Handler Registration
+
+### Automatic Registration (Recommended)
+
 ```java
 @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeEvents {
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        // Handler logic
+        // Handler logic (MUST be static)
     }
 }
 ```
 
-**Manual Registration**:
+**Key Points**:
+- Use `@Mod.EventBusSubscriber` annotation on class
+- Specify `bus` parameter (MOD or FORGE)
+- Event handler methods MUST be `static`
+- Automatically registered at startup
+
+### Manual Registration
+
 ```java
 @Mod(MODID)
 public class MyMod {
@@ -68,11 +89,40 @@ public class MyMod {
 }
 ```
 
+---
+
 ## Common Event Patterns
 
-### Player Tick Handler (from MusicMod)
+### Pattern 1: Server Tick Handler
 
-**Client-Side Tick**:
+**From Apocalypse_TNT** (NeoForge):
+
+```java
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+public class ForgeEvents {
+
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+            if (server != null) {
+                // Delegate to orchestrator
+                ApocalypseOrchestrator.getInstance().tick(server);
+            }
+        }
+    }
+}
+```
+
+**Key Techniques**:
+- `event.phase == TickEvent.Phase.END` - Runs after game logic updates
+- Runs every server tick (20 times per second)
+- Delegate heavy work to manager/orchestrator classes
+
+### Pattern 2: Client Tick Handler
+
+**From MusicMod** (Forge 1.20.1):
+
 ```java
 @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ClientForgeEvents {
@@ -92,40 +142,15 @@ public class ClientForgeEvents {
 }
 ```
 
-**Key Points**:
-- `event.side.isClient()` - Ensures client-only execution
-- `event.phase == TickEvent.Phase.END` - Runs after game logic updates
+**Key Techniques**:
+- `value = Dist.CLIENT` - Class only loads on client
+- `event.side.isClient()` - Runtime client check
 - Use for UI updates, client state management, audio control
 
-### Server Tick Handler (from Apocalypse_TNT)
+### Pattern 3: Player Join/Leave Events
 
-**Server-Side Tick**:
-```java
-@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class ForgeEvents {
+**From Apocalypse_TNT**:
 
-    @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-            if (server != null) {
-                // Delegate to orchestrator
-                ApocalypseOrchestrator.getInstance().tick(server);
-            }
-        }
-    }
-}
-```
-
-**Key Points**:
-- Runs every server tick (20 times per second)
-- Use for world state updates, game logic
-- Delegate heavy work to manager/orchestrator classes
-- Check phase to avoid duplicate execution
-
-### Player Join Event (from Apocalypse_TNT)
-
-**Player Login Handler**:
 ```java
 @SubscribeEvent
 public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -135,41 +160,32 @@ public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
             serverPlayer,
             serverPlayer.server
         );
-
-        // Send welcome packet
-        PacketHandler.sendToPlayer(new WelcomePacket(), serverPlayer);
     }
 }
-```
 
-**Key Points**:
-- `instanceof ServerPlayer` - Type-safe server player check
-- Only fires on logical server side
-- Use for initializing player state, syncing data, adding to boss bars
-
-### Player Leave Event
-
-**Player Logout Handler**:
-```java
 @SubscribeEvent
 public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
     if (event.getEntity() instanceof ServerPlayer serverPlayer) {
-        // Save player data
         // Remove from tracking lists
         BossBarHelper.removePlayer(serverPlayer);
     }
 }
 ```
 
-### Block Break Event (from MusicMod)
+**Key Techniques**:
+- `instanceof ServerPlayer` - Type-safe server player check
+- Only fires on logical server side
+- Use for initializing/cleaning up player state
 
-**Block Interaction Handler**:
+### Pattern 4: Block Break Event
+
+**From MusicMod**:
+
 ```java
 @SubscribeEvent
 public static void onBreakLog(BlockEvent.BreakEvent event) {
     Player player = event.getPlayer();
     BlockState state = event.getState();
-    BlockPos pos = event.getPos();
 
     if (!player.level().isClientSide) {
         // Server-side validation
@@ -181,7 +197,7 @@ public static void onBreakLog(BlockEvent.BreakEvent event) {
 }
 ```
 
-**Cancellation**:
+**Cancellation Example**:
 ```java
 @SubscribeEvent
 public static void onBreakBlock(BlockEvent.BreakEvent event) {
@@ -191,201 +207,42 @@ public static void onBreakBlock(BlockEvent.BreakEvent event) {
 }
 ```
 
-## Tick Event Types
+---
 
-### 1. Server Tick
-**When**: Every server game tick (20 TPS)
-**Use**: World state updates, game logic
+## Tick Event Types (Quick Reference)
 
-```java
-@SubscribeEvent
-public static void onServerTick(TickEvent.ServerTickEvent event) {
-    if (event.phase == TickEvent.Phase.END) {
-        // After server logic updates
-    }
-}
-```
+### Server Tick
+- **When**: Every server game tick (20 TPS)
+- **Use**: World state updates, game logic
+- **Event**: `TickEvent.ServerTickEvent`
 
-### 2. Client Tick
-**When**: Every client game tick (FPS dependent, but capped at 20 TPS for logic)
-**Use**: Client state, UI updates, input handling
+### Client Tick
+- **When**: Every client game tick
+- **Use**: Client state, UI updates, input handling
+- **Event**: `TickEvent.ClientTickEvent`
 
-```java
-@SubscribeEvent
-public static void onClientTick(TickEvent.ClientTickEvent event) {
-    if (event.phase == TickEvent.Phase.END) {
-        // After client logic updates
-    }
-}
-```
+### Player Tick
+- **When**: For each player, every tick
+- **Use**: Per-player logic, capability updates
+- **Event**: `TickEvent.PlayerTickEvent`
 
-### 3. Player Tick
-**When**: For each player, every tick
-**Use**: Per-player logic, capability updates
+### Level Tick
+- **When**: For each loaded level (dimension), every tick
+- **Use**: Per-dimension logic, weather control
+- **Event**: `TickEvent.LevelTickEvent`
 
-```java
-@SubscribeEvent
-public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-    Player player = event.player;
-    if (event.side.isServer() && event.phase == TickEvent.Phase.END) {
-        // Server-side per-player logic
-    }
-}
-```
+**For complete tick patterns**: See [tick-handlers-guide.md](./tick-handlers-guide.md)
 
-### 4. Level Tick
-**When**: For each loaded level (dimension), every tick
-**Use**: Per-dimension logic, weather control
-
-```java
-@SubscribeEvent
-public static void onLevelTick(TickEvent.LevelTickEvent event) {
-    Level level = event.level;
-    if (!level.isClientSide && event.phase == TickEvent.Phase.END) {
-        // Server-side level logic
-    }
-}
-```
-
-## Event Priority
-
-### Priority Levels (Execution Order)
-
-```java
-EventPriority.HIGHEST  // Runs last (sees final state)
-EventPriority.HIGH
-EventPriority.NORMAL   // Default
-EventPriority.LOW
-EventPriority.LOWEST   // Runs first (can set defaults)
-```
-
-**Usage**:
-```java
-@SubscribeEvent(priority = EventPriority.HIGH)
-public static void onEvent(SomeEvent event) {
-    // Runs after NORMAL priority handlers
-}
-```
-
-**When to Use**:
-- `LOWEST`: Set defaults, run before other mods
-- `NORMAL`: Standard handling (default)
-- `HIGH`: Override other mods' behavior
-- `HIGHEST`: Final modifications, logging
-
-### Event Cancellation
-
-**Check if Cancellable**:
-```java
-if (event.isCancelable()) {
-    event.setCanceled(true);
-}
-```
-
-**Respect Cancellation**:
-```java
-@SubscribeEvent
-public static void onBlockBreak(BlockEvent.BreakEvent event) {
-    if (event.isCanceled()) {
-        return; // Another mod cancelled, respect it
-    }
-
-    // Your logic here
-}
-```
-
-**Common Cancellable Events**:
-- `BlockEvent.BreakEvent` - Block breaking
-- `LivingAttackEvent` - Entity damage
-- `PlayerInteractEvent` - Player interactions
-- `LivingDropsEvent` - Item drops
-
-## MOD Bus vs FORGE Bus
-
-### MOD Bus Events (IEventBus)
-
-**Lifecycle Events**:
-```java
-@Mod(MODID)
-public class MyMod {
-    public MyMod(IEventBus modEventBus) {
-        // Common setup
-        modEventBus.addListener(this::onCommonSetup);
-
-        // Client setup
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            modEventBus.addListener(this::onClientSetup);
-        });
-    }
-
-    private void onCommonSetup(FMLCommonSetupEvent event) {
-        event.enqueueWork(() -> {
-            // Thread-safe initialization
-            PacketHandler.register();
-        });
-    }
-
-    private void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            // Client-only initialization
-            KeyBindings.register();
-        });
-    }
-}
-```
-
-**Registry Events**:
-```java
-@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class ModEvents {
-
-    @SubscribeEvent
-    public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
-        event.register(MusicStateCapability.class);
-    }
-}
-```
-
-### FORGE Bus Events (MinecraftForge.EVENT_BUS)
-
-**Game Events**:
-```java
-@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class ForgeEvents {
-
-    @SubscribeEvent
-    public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        // Player joined game
-    }
-
-    @SubscribeEvent
-    public static void onBlockBreak(BlockEvent.BreakEvent event) {
-        // Block broken
-    }
-}
-```
-
-**Quick Reference**:
-
-| Event Category | Bus |
-|---------------|-----|
-| Registry (items, blocks) | MOD |
-| Mod setup (common, client) | MOD |
-| Capability registration | MOD |
-| Player actions (break, interact) | FORGE |
-| Entity events (spawn, death) | FORGE |
-| Tick handlers | FORGE |
-| World events (load, save) | FORGE |
+---
 
 ## Side-Specific Event Handling
 
 ### Client-Only Events
 
-**Method 1: Annotation**:
+**Method 1: Annotation** (Recommended):
 ```java
-@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = MODID, bus = Bus.FORGE, value = Dist.CLIENT)
 public class ClientEvents {
-
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiOverlayEvent.Pre event) {
         // Client-only rendering
@@ -415,25 +272,93 @@ public static void onBlockBreak(BlockEvent.BreakEvent event) {
 }
 ```
 
-**Player Type Check**:
+---
+
+## Best Practices
+
+### 1. Always Check Event Phase
 ```java
+// ✅ Good - runs once per tick
+if (event.phase == TickEvent.Phase.END) { }
+
+// ❌ Bad - runs twice (START and END)
+// No phase check
+```
+
+### 2. Check Side for Client/Server Code
+```java
+// ✅ Good
+if (event.side.isClient()) {
+    // Client rendering, sounds
+}
+
+// ❌ Bad - crashes dedicated server
+Minecraft.getInstance().player; // Client-only API
+```
+
+### 3. Use Static Methods for @EventBusSubscriber
+```java
+// ✅ Good
+@Mod.EventBusSubscriber(...)
+public class Events {
+    @SubscribeEvent
+    public static void onEvent(...) { }
+}
+
+// ❌ Bad - requires instance registration
 @SubscribeEvent
-public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-    if (event.getEntity() instanceof ServerPlayer serverPlayer) {
-        // Guaranteed server-side player
-    }
+public void onEvent(...) { } // Non-static
+```
+
+### 4. Respect Event Cancellation
+```java
+// ✅ Good
+if (event.isCanceled()) return;
+
+// ❌ Bad - ignores other mods
+// No cancellation check
+```
+
+---
+
+## Common Pitfalls
+
+### ❌ Wrong Bus for Event Type
+```java
+// ❌ Player events on MOD bus (won't fire)
+@Mod.EventBusSubscriber(bus = Bus.MOD)
+public class Events {
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) { }
+}
+
+// ✅ Use FORGE bus
+@Mod.EventBusSubscriber(bus = Bus.FORGE)
+```
+
+### ❌ Client Code on Dedicated Server
+```java
+// ❌ Crashes dedicated server
+@SubscribeEvent
+public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+    Minecraft mc = Minecraft.getInstance(); // CLIENT-ONLY
+}
+
+// ✅ Check side first
+if (event.side.isClient()) {
+    Minecraft mc = Minecraft.getInstance();
 }
 ```
 
-## Performance Optimization
-
-### Throttled Tick Handlers
-
-**Problem**: Running expensive operations every tick causes lag
-
-**Solution**: Throttle using counter
-
+### ❌ Heavy Operations Every Tick
 ```java
+// ❌ Lags server
+@SubscribeEvent
+public static void onServerTick(TickEvent.ServerTickEvent event) {
+    scanAllChunksForBlocks(); // VERY EXPENSIVE
+}
+
+// ✅ Throttle
 private static int tickCounter = 0;
 
 @SubscribeEvent
@@ -441,219 +366,43 @@ public static void onServerTick(TickEvent.ServerTickEvent event) {
     if (event.phase == TickEvent.Phase.END) {
         if (++tickCounter >= 20) { // Once per second
             tickCounter = 0;
-            expensiveOperation();
+            scanNearbyChunks();
         }
     }
 }
 ```
 
-**Adaptive Throttling**:
-```java
-private static int tickCounter = 0;
-private static final int TICK_INTERVAL = 20; // Configurable
+---
 
-@SubscribeEvent
-public static void onServerTick(TickEvent.ServerTickEvent event) {
-    if (event.phase == TickEvent.Phase.END) {
-        tickCounter++;
-        if (tickCounter >= TICK_INTERVAL) {
-            tickCounter = 0;
+## Supporting Documentation
 
-            // Only run if needed
-            if (hasWorkToDo()) {
-                doWork();
-            }
-        }
-    }
-}
-```
+### Detailed Guides
+- [Event Catalog](./event-catalog.md) - Complete list of common Forge/NeoForge events
+- [Event Priorities and Cancellation](./event-priorities-and-cancellation.md) - Priority levels, execution order, cancellation patterns
+- [Tick Handlers Guide](./tick-handlers-guide.md) - All tick types with optimization strategies
+- [Performance Optimization](./performance-optimization.md) - Throttling, early exit patterns, profiling
+- [Troubleshooting Guide](./troubleshooting.md) - Anti-patterns, "event not firing" issues, debugging
+- [Framework Comparison](./framework-comparison.md) - Forge vs NeoForge event system differences
 
-### Early Exit Pattern
+---
 
-**Avoid unnecessary work**:
-```java
-@SubscribeEvent
-public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-    // Exit early if nothing to do
-    if (event.phase != TickEvent.Phase.END) return;
-    if (!event.side.isClient()) return;
+## Quick Decision Tree
 
-    Player player = event.player;
-    if (player == null) return;
-    if (!shouldProcess(player)) return;
+**Need to run code every tick?**
+→ Use Tick Events (Server/Client/Player/Level)
 
-    // Only process when all conditions met
-    processPlayer(player);
-}
-```
+**Need to react to player actions?**
+→ Use Player Events (FORGE bus)
 
-## Best Practices
+**Need to modify block/entity behavior?**
+→ Use Block/Entity Events (FORGE bus, check if cancellable)
 
-1. **Always check event phase**:
-   ```java
-   // ✅ Good - runs once per tick
-   if (event.phase == TickEvent.Phase.END) { }
+**Need to register capabilities/commands?**
+→ Use MOD bus lifecycle events
 
-   // ❌ Bad - runs twice (START and END)
-   // No phase check
-   ```
+**Need mod initialization?**
+→ Use FMLCommonSetupEvent / FMLClientSetupEvent (MOD bus)
 
-2. **Check side for client/server specific code**:
-   ```java
-   // ✅ Good
-   if (event.side.isClient()) {
-       // Client rendering, sounds
-   }
+---
 
-   // ❌ Bad - crashes dedicated server
-   Minecraft.getInstance().player; // Client-only API
-   ```
-
-3. **Use static methods for @EventBusSubscriber**:
-   ```java
-   // ✅ Good
-   @Mod.EventBusSubscriber(...)
-   public class Events {
-       @SubscribeEvent
-       public static void onEvent(...) { }
-   }
-
-   // ❌ Bad - requires instance registration
-   @SubscribeEvent
-   public void onEvent(...) { } // Non-static
-   ```
-
-4. **Respect event cancellation**:
-   ```java
-   // ✅ Good
-   if (event.isCanceled()) return;
-
-   // ❌ Bad - ignores other mods
-   // No cancellation check
-   ```
-
-5. **Use appropriate priority**:
-   ```java
-   // ✅ Good - explicit about ordering
-   @SubscribeEvent(priority = EventPriority.HIGH)
-   public static void onEvent(...) { }
-
-   // ⚠️ Usually fine, but no control
-   @SubscribeEvent
-   public static void onEvent(...) { } // NORMAL priority
-   ```
-
-## Anti-Patterns
-
-1. ❌ **Wrong bus for event type**:
-   ```java
-   // ❌ Player events on MOD bus (won't fire)
-   @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-   public class Events {
-       @SubscribeEvent
-       public static void onPlayerTick(TickEvent.PlayerTickEvent event) { }
-   }
-
-   // ✅ Use FORGE bus
-   @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
-   ```
-
-2. ❌ **Client code on dedicated server**:
-   ```java
-   // ❌ Crashes dedicated server
-   @SubscribeEvent
-   public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-       Minecraft mc = Minecraft.getInstance(); // CLIENT-ONLY
-   }
-
-   // ✅ Check side first
-   if (event.side.isClient()) {
-       Minecraft mc = Minecraft.getInstance();
-   }
-   ```
-
-3. ❌ **Heavy operations every tick**:
-   ```java
-   // ❌ Lags server
-   @SubscribeEvent
-   public static void onServerTick(TickEvent.ServerTickEvent event) {
-       scanAllChunksForBlocks(); // VERY EXPENSIVE
-   }
-
-   // ✅ Throttle
-   if (++tickCounter >= 100) { // Every 5 seconds
-       tickCounter = 0;
-       scanNearbyChunks();
-   }
-   ```
-
-4. ❌ **Modifying state on client side**:
-   ```java
-   // ❌ Desync with server
-   @SubscribeEvent
-   public static void onBlockBreak(BlockEvent.BreakEvent event) {
-       if (event.getPlayer().level().isClientSide) {
-           player.giveExperiencePoints(10); // Client can't modify server state
-       }
-   }
-
-   // ✅ Server-side only
-   if (!event.getPlayer().level().isClientSide) {
-       player.giveExperiencePoints(10);
-   }
-   ```
-
-5. ❌ **Not checking phase**:
-   ```java
-   // ❌ Runs twice per tick
-   @SubscribeEvent
-   public static void onServerTick(TickEvent.ServerTickEvent event) {
-       counter++; // Increments 2x per tick
-   }
-
-   // ✅ Check phase
-   if (event.phase == TickEvent.Phase.END) {
-       counter++;
-   }
-   ```
-
-## Common Event Reference
-
-### Lifecycle Events (MOD Bus)
-- `FMLCommonSetupEvent` - Common setup (client + server)
-- `FMLClientSetupEvent` - Client-only setup
-- `FMLDedicatedServerSetupEvent` - Server-only setup
-- `RegisterCapabilitiesEvent` - Register capabilities
-- `RegisterCommandsEvent` - Register commands
-
-### Player Events (FORGE Bus)
-- `PlayerEvent.PlayerLoggedInEvent` - Player joins server
-- `PlayerEvent.PlayerLoggedOutEvent` - Player leaves server
-- `PlayerEvent.Clone` - Player respawns/returns from End
-- `PlayerInteractEvent.RightClickBlock` - Right-click block
-- `PlayerInteractEvent.RightClickItem` - Right-click with item
-
-### Block Events (FORGE Bus)
-- `BlockEvent.BreakEvent` - Block broken (cancellable)
-- `BlockEvent.PlaceEvent` - Block placed
-- `BlockEvent.EntityPlaceEvent` - Entity places block
-- `BlockEvent.NeighborNotifyEvent` - Block update
-
-### Entity Events (FORGE Bus)
-- `LivingDeathEvent` - Entity dies (cancellable)
-- `LivingAttackEvent` - Entity attacked (cancellable)
-- `LivingHurtEvent` - Entity hurt (cancellable)
-- `EntityJoinLevelEvent` - Entity spawns/loads
-- `LivingDropsEvent` - Entity drops items (cancellable)
-
-### Tick Events (FORGE Bus)
-- `TickEvent.ServerTickEvent` - Server game tick
-- `TickEvent.ClientTickEvent` - Client game tick
-- `TickEvent.PlayerTickEvent` - Per-player tick
-- `TickEvent.LevelTickEvent` - Per-level tick
-
-## See Also
-
-- [fabric-event-system](../fabric-event-system/SKILL.md) - Fabric callbacks
-- [mod-lifecycle-patterns](../mod-lifecycle-patterns/SKILL.md) - Initialization patterns
-- Official Forge Docs: https://docs.minecraftforge.net/en/latest/events/intro/
+Use this skill when implementing any event-driven functionality in Forge or NeoForge mods to ensure correct bus selection, proper side handling, and performance-optimized patterns.

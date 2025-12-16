@@ -4,34 +4,46 @@ description: Multi-loader Minecraft mod architecture. Covers Common/Forge/Fabric
 allowed-tools: mcp__intellij__get_project_modules, Read
 ---
 
-# Multi-Loader Project Patterns - Cross-Platform Mod Architecture
+# Multi-Loader Project Patterns
 
-This skill provides comprehensive guidance on building Minecraft mods that support multiple mod loaders (Forge, NeoForge, Fabric, Quilt) from a single codebase.
+## What This Covers
 
-## Overview
+- Multi-loader architecture (Common/Forge/Fabric modules)
+- Module organization and code placement
+- Platform abstraction (ServiceLoader, @ExpectPlatform)
+- Multi-loader project detection
+- Module responsibility patterns
 
-### What Are Multi-Loader Projects?
+## When to Use
 
-Multi-loader projects allow a single mod to run on multiple mod loaders:
-- **Forge** (ModLoader, widely used)
-- **NeoForge** (Forge fork for MC 1.20.2+)
-- **Fabric** (Lightweight, fast development)
-- **Quilt** (Fabric fork with enhanced features)
+- Building mods that support multiple loaders (Forge, NeoForge, Fabric, Quilt)
+- Converting single-loader mod to multi-loader
+- Analyzing multi-loader project structure
+- Determining where code belongs in multi-loader projects
+- Implementing platform abstraction layers
+
+---
+
+## Multi-Loader Architecture Overview
+
+### What Is Multi-Loader?
+
+Multi-loader projects allow a single mod to run on multiple mod loaders from a shared codebase:
+- **Forge** / **NeoForge** (ModLoader, widely used)
+- **Fabric** / **Quilt** (Lightweight, fast development)
 
 **Benefits**:
-- ✅ Wider audience (support more players)
-- ✅ Shared codebase (reduce code duplication)
-- ✅ Faster development (write once, deploy everywhere)
-- ✅ Consistent features (same mod on all loaders)
+- ✅ Wider audience (2x or more players)
+- ✅ Shared codebase (less duplication)
+- ✅ Write once, deploy everywhere
 
 **Challenges**:
-- ⚠️ Platform abstraction needed (different APIs)
-- ⚠️ Build complexity (multiple modules)
-- ⚠️ Testing required (on each platform)
+- ⚠️ Platform abstraction required
+- ⚠️ More complex build setup
+- ⚠️ Must test on each platform
 
-### Common Architectures
+### Common Architecture Pattern
 
-**Pattern 1: Common + Platform Modules**
 ```
 mymod/
 ├── common/      (Shared code, platform-agnostic)
@@ -39,34 +51,24 @@ mymod/
 └── fabric/      (Fabric-specific implementation)
 ```
 
-**Pattern 2: Architectury Framework**
-```
-Uses Architectury API for abstraction
-Same structure, but with Architectury helpers
-```
-
-**Pattern 3: MultiLoader Template**
-```
-Similar to Pattern 1, but with standardized build scripts
-```
+**Alternative**: Use Architectury framework for additional abstraction helpers
 
 ---
 
-## Module Structure
+## Module Organization
 
 ### The Common Module
 
 **Purpose**: Platform-agnostic code that works everywhere
 
-**What goes in common/**:
-- ✅ Item/Block/Entity **classes** (not registration!)
-- ✅ Shared logic (crafting, mechanics, algorithms)
+**What Goes in common/**:
+- ✅ Item/Block/Entity **classes** (logic, not registration)
+- ✅ Shared game mechanics and algorithms
 - ✅ Data models (NBT structures, save data)
 - ✅ Utility classes (helpers, constants)
-- ✅ Interfaces and abstract classes
-- ✅ Common resources (models, textures, recipes shared by all)
+- ✅ Service **interfaces** (platform abstraction)
 
-**What DOESN'T go in common/**:
+**What DOESN'T Go in common/**:
 - ❌ Registry code (DeferredRegister, Registry.register)
 - ❌ Event handlers (@SubscribeEvent, event registration)
 - ❌ Platform-specific APIs (Forge/Fabric exclusive features)
@@ -94,19 +96,17 @@ public class RubySword extends SwordItem {
 
 **Purpose**: Platform-specific code and registration
 
-**What goes in forge/**:
+**What Goes in forge/**:
 - ✅ Forge registration (DeferredRegister)
 - ✅ Forge events (@SubscribeEvent)
-- ✅ Forge-specific features (Capabilities, ForgeHooks)
 - ✅ Mod entrypoint (class with @Mod annotation)
-- ✅ Platform implementation of services
+- ✅ Platform **implementation** of services
 
-**What goes in fabric/**:
+**What Goes in fabric/**:
 - ✅ Fabric registration (Registry.register)
-- ✅ Fabric events (event interface registration)
-- ✅ Fabric-specific features (Fabric API exclusive)
+- ✅ Fabric events (event callback registration)
 - ✅ Mod entrypoint (implements ModInitializer)
-- ✅ Platform implementation of services
+- ✅ Platform **implementation** of services
 
 **Example (Forge)**:
 ```java
@@ -135,48 +135,6 @@ public class ModItemsFabric {
 }
 ```
 
-### Directory Layout Example
-
-**Complete multi-loader structure**:
-```
-mymod/
-├── common/
-│   ├── src/main/java/com/mod/
-│   │   ├── items/
-│   │   │   ├── RubySword.java       (Item class)
-│   │   │   └── ModItems.java        (Item references)
-│   │   ├── blocks/
-│   │   ├── platform/
-│   │   │   └── PlatformHelper.java  (Service interface)
-│   │   └── MyMod.java               (Common init logic)
-│   └── src/main/resources/
-│       ├── assets/mymod/            (Shared textures, models)
-│       └── data/mymod/              (Shared recipes, loot)
-│
-├── forge/
-│   ├── src/main/java/com/mod/forge/
-│   │   ├── MyModForge.java          (Mod entrypoint)
-│   │   ├── ModItemsForge.java       (Forge registration)
-│   │   ├── platform/
-│   │   │   └── ForgePlatformHelper.java  (Service impl)
-│   │   └── events/
-│   └── src/main/resources/
-│       └── META-INF/mods.toml       (Forge metadata)
-│
-├── fabric/
-│   ├── src/main/java/com/mod/fabric/
-│   │   ├── MyModFabric.java         (Mod entrypoint)
-│   │   ├── ModItemsFabric.java      (Fabric registration)
-│   │   └── platform/
-│   │       └── FabricPlatformHelper.java  (Service impl)
-│   └── src/main/resources/
-│       └── fabric.mod.json          (Fabric metadata)
-│
-├── build.gradle                     (Root build file)
-├── settings.gradle                  (Module includes)
-└── gradle.properties                (Version properties)
-```
-
 ---
 
 ## Platform Abstraction
@@ -195,7 +153,7 @@ FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT
 
 **Can't use Forge code in common/**, and **can't use Fabric code in common/**!
 
-### Solution 1: Service Interfaces + ServiceLoader
+### Solution: Service Interfaces + ServiceLoader
 
 **Step 1: Define interface in common/**:
 ```java
@@ -297,34 +255,13 @@ public class MyMod {
 }
 ```
 
-### Solution 2: @ExpectPlatform (Architectury)
-
-**Uses dev.architectury.injectables.annotations.ExpectPlatform**:
-
-```java
-// common/src/main/java/com/mod/platform/PlatformHelper.java
-public class PlatformHelper {
-    @ExpectPlatform
-    public static Platform getPlatform() {
-        throw new AssertionError();  // Replaced at runtime
-    }
-}
-
-// forge/src/main/java/com/mod/forge/platform/PlatformHelperImpl.java
-public class PlatformHelperImpl {
-    public static Platform getPlatform() {
-        return Platform.FORGE;
-    }
-}
-```
-
-**At compile time**, Architectury generates code to call the platform impl.
+**For @ExpectPlatform pattern (Architectury)**: See [platform-abstraction.md](./platform-abstraction.md)
 
 ---
 
-## Detection with IntelliJ MCP
+## Multi-Loader Project Detection
 
-### Using get_project_modules()
+### Using IntelliJ MCP
 
 **Detect multi-loader project**:
 ```
@@ -347,95 +284,16 @@ Analysis:
 Modules found: ["common", "forge", "fabric"]
 → Supports: Forge + Fabric
 
-Modules found: ["common", "forge", "fabric", "quilt"]
-→ Supports: Forge + Fabric + Quilt
-
 Modules found: ["common", "neoforge", "fabric"]
 → Supports: NeoForge + Fabric
-```
 
-### Analyzing Build Files
-
-**Read settings.gradle**:
-```groovy
-include 'common'
-include 'forge'
-include 'fabric'
-
-→ Confirms 3-module setup
-```
-
-**Read gradle.properties**:
-```properties
-# Minecraft version
-minecraft_version=1.20.1
-
-# Loader versions
-forge_version=47.1.0
-fabric_loader_version=0.15.0
-fabric_api_version=0.92.0+1.20.1
-
-→ Version information for each platform
+Modules found: ["common", "forge", "fabric", "quilt"]
+→ Supports: Forge + Fabric + Quilt
 ```
 
 ---
 
-## Progressive Skill Loading
-
-This skill uses **progressive loading** to optimize token usage. The main file (this file) provides overview and core concepts. For detailed patterns and examples, see:
-
-### Supporting Files
-
-1. **[Module Structure](./module-structure.md)** (~250 lines)
-   - Detailed directory layouts for each module
-   - Source set organization (main/client/server)
-   - Resource file organization (per-platform vs shared)
-   - Build script structure (root vs module build.gradle)
-   - Real examples from popular multi-loader mods
-
-2. **[Platform Abstraction](./platform-abstraction.md)** (~300 lines)
-   - ServiceLoader pattern implementation (detailed)
-   - @ExpectPlatform pattern (Architectury)
-   - Conditional code patterns (@OnlyIn, @Environment)
-   - Mixing platform-specific APIs safely
-   - Registry abstraction examples
-   - Event system abstraction
-   - Real code examples from multi-loader mods
-
-3. **[Gradle Configuration](./gradle-configuration.md)** (~250 lines)
-   - Multi-module gradle setup (settings.gradle, root build.gradle)
-   - Dependency management across modules (common dependencies)
-   - Shadow/relocate for platform-specific libraries
-   - JAR merging strategies (single JAR vs multiple JARs)
-   - Publishing multi-loader artifacts (CurseForge, Modrinth)
-   - Version property management
-   - Example build.gradle files for each module
-
-### When to Load Supporting Files
-
-**Load [Module Structure](./module-structure.md)** when:
-- Creating new multi-loader project from scratch
-- Organizing existing code into modules
-- Need detailed directory layout guidance
-- Questions about where code belongs
-
-**Load [Platform Abstraction](./platform-abstraction.md)** when:
-- Implementing platform services
-- Need to call platform-specific APIs from common code
-- Writing registry or event abstraction layers
-- Real implementation examples needed
-
-**Load [Gradle Configuration](./gradle-configuration.md)** when:
-- Setting up multi-module gradle project
-- Configuring dependencies
-- Publishing mod
-- Build script issues
-
----
-
-## Quick Reference
-
-### Code Placement Decision Tree
+## Code Placement Decision Tree
 
 **Question 1**: Does this code use Forge/Fabric-specific APIs?
 - **Yes** → Goes in forge/ or fabric/ module
@@ -453,7 +311,9 @@ This skill uses **progressive loading** to optimize token usage. The main file (
 - **Yes** → Goes in common/ module
 - **No** → Probably platform-specific, goes in forge/fabric/
 
-### Module Responsibility Summary
+---
+
+## Module Responsibility (Quick Reference)
 
 | Component | Common | Forge | Fabric |
 |-----------|--------|-------|--------|
@@ -476,7 +336,7 @@ This skill uses **progressive loading** to optimize token usage. The main file (
 
 **Common** (item class):
 ```java
-// common/src/main/java/com/mod/items/RubyS word.java
+// common/src/main/java/com/mod/items/RubySword.java
 public class RubySword extends SwordItem { ... }
 ```
 
@@ -523,76 +383,24 @@ public class FabricConfigHelper implements ConfigHelper {
 }
 ```
 
-### Pattern 3: Client/Server Code Separation
-
-**Common code** (both sides):
-```java
-// common/src/main/java/com/mod/MyMod.java
-public class MyMod {
-    public static void init() {
-        // Common init (both client and server)
-        registerItems();
-        registerBlocks();
-    }
-}
-```
-
-**Platform modules** (proxy pattern):
-```java
-// forge/src/main/java/com/mod/forge/MyModForge.java
-@Mod(MOD_ID)
-public class MyModForge {
-    public MyModForge() {
-        MyMod.init();  // Common init
-
-        // Register client-only code
-        if (FMLLoader.getDist() == Dist.CLIENT) {
-            ClientInit.init();
-        }
-    }
-}
-```
-
 ---
 
 ## Benefits and Trade-offs
 
 ### Benefits
-
-**Wider Reach**:
-- ✅ Mod works on Forge AND Fabric (2x audience)
-- ✅ Players can choose their preferred loader
-
-**Code Reuse**:
-- ✅ Core logic written once (in common/)
-- ✅ Less duplication, easier maintenance
-- ✅ Bug fixes apply to all platforms
-
-**Consistent Experience**:
-- ✅ Same features on all loaders
-- ✅ Same textures, models, recipes
-- ✅ Unified player experience
+- ✅ Wider reach (2x audience)
+- ✅ Code reuse (write once)
+- ✅ Consistent features across loaders
 
 ### Trade-offs
-
-**Complexity**:
-- ⚠️ More modules = more files
-- ⚠️ Platform abstraction adds boilerplate
-- ⚠️ Steeper learning curve
-
-**Build Time**:
-- ⚠️ Must build for each platform
-- ⚠️ Longer CI/CD pipelines
-- ⚠️ More test coverage needed
-
-**Testing Burden**:
-- ⚠️ Must test on Forge AND Fabric
-- ⚠️ Platform-specific bugs possible
-- ⚠️ Compatibility issues to watch
+- ⚠️ More complex build setup
+- ⚠️ Platform abstraction boilerplate
+- ⚠️ Must test on all platforms
+- ⚠️ Longer build times
 
 **Worth It If**:
 - ✅ Large audience (popular mod)
-- ✅ Long-term project (multi-year)
+- ✅ Long-term project
 - ✅ Team can handle complexity
 
 **Not Worth It If**:
@@ -602,9 +410,16 @@ public class MyModForge {
 
 ---
 
-## Summary
+## Supporting Documentation
 
-Multi-loader projects enable Minecraft mods to run on multiple mod loaders (Forge, NeoForge, Fabric, Quilt) from a shared codebase.
+### Detailed Guides
+- [Module Structure](./module-structure.md) - Detailed directory layouts, source sets, resource organization
+- [Platform Abstraction](./platform-abstraction.md) - ServiceLoader, @ExpectPlatform, registry/event abstraction
+- [Gradle Configuration](./gradle-configuration.md) - Multi-module setup, dependencies, publishing
+
+---
+
+## Quick Summary
 
 **Architecture**:
 - **common/**: Shared code (item classes, logic, utilities)
@@ -616,11 +431,8 @@ Multi-loader projects enable Minecraft mods to run on multiple mod loaders (Forg
 - @ExpectPlatform for Architectury users
 - Service interfaces in common/, impls in platforms
 
-**Detection**:
-- Use `get_project_modules()` to detect multi-loader projects
-- Module names (common, forge, fabric) indicate structure
-- Analyze build files for confirmation
-
 **Key Principle**: Keep shared logic in common/, platform-specific in forge/fabric/.
 
-For detailed patterns and examples, see the supporting files linked above.
+---
+
+Use this skill when working with multi-loader projects to ensure correct code placement, proper platform abstraction, and maintainable architecture.

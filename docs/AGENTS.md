@@ -564,7 +564,7 @@ The Qingyi plugin currently includes these production-ready agents:
    - Model: sonnet
    - Skills: rendering-patterns
 
-6. **qingyi-plugin-manager** ([agents/qingyi-plugin-manager.md](../agents/qingyi-plugin-manager.md))
+6. **qingyi-plugin-manager** ([agents/qingyi-plugin-manager.md](../.claude/agents/qingyi-plugin-manager.md))
    - Manages Qingyi plugin development itself
    - Updates CLAUDE.md when architecture changes
    - Creates/validates new agents and skills

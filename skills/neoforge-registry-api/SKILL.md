@@ -12,8 +12,7 @@ allowed-tools: Read, Grep, Glob
 - Migration from Forge to NeoForge
 - BuiltInRegistries vs ForgeRegistries
 - DeferredRegister with Supplier return types
-- Entity registration patterns
-- Breaking changes and compatibility
+- Entity, Item, and Block registration
 
 ## When to Use
 
@@ -23,9 +22,9 @@ allowed-tools: Read, Grep, Glob
 - Troubleshooting "ForgeRegistries not found" errors
 - Working with custom entities in NeoForge 1.21+
 
-## Core Knowledge
+---
 
-### NeoForge vs Forge: Key Differences
+## NeoForge vs Forge: Key Differences
 
 | Aspect | Forge 1.20 | NeoForge 1.21+ |
 |--------|-----------|----------------|
@@ -35,7 +34,66 @@ allowed-tools: Read, Grep, Glob
 | Package | `net.minecraftforge` | `net.neoforged` |
 | Registry events | MOD bus events | Same (MOD bus) |
 
-### BuiltInRegistries Pattern (NeoForge 1.21.3)
+**Key Change**: NeoForge uses `BuiltInRegistries` (vanilla) and returns `Supplier<T>` instead of `RegistryObject<T>`.
+
+---
+
+## Registration Patterns
+
+### Item Registration (NeoForge 1.21.3)
+
+**Basic Pattern**:
+```java
+public class ModItems {
+    public static final DeferredRegister<Item> ITEMS =
+        DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
+
+    // Returns Supplier<Item>, not RegistryObject<Item>
+    public static final Supplier<Item> RUBY = ITEMS.register("ruby",
+        () -> new Item(new Item.Properties()));
+
+    public static final Supplier<SwordItem> RUBY_SWORD = ITEMS.register("ruby_sword",
+        () -> new SwordItem(Tiers.IRON, 3, -2.4f, new Item.Properties()));
+
+    public static void register(IEventBus modEventBus) {
+        ITEMS.register(modEventBus);
+    }
+}
+```
+
+**Key Points**:
+- Use `BuiltInRegistries.ITEM` (not `ForgeRegistries.ITEMS`)
+- Return type is `Supplier<Item>` (not `RegistryObject<Item>`)
+- Access item via `.get()`: `ModItems.RUBY.get()`
+
+### Block Registration (NeoForge 1.21.3)
+
+**Basic Pattern**:
+```java
+public class ModBlocks {
+    public static final DeferredRegister<Block> BLOCKS =
+        DeferredRegister.create(BuiltInRegistries.BLOCK, MODID);
+
+    public static final Supplier<Block> RUBY_BLOCK = BLOCKS.register("ruby_block",
+        () -> new Block(BlockBehaviour.Properties.of()
+            .strength(5.0f, 6.0f)
+            .requiresCorrectToolForDrops()));
+
+    // Block items must be registered separately
+    public static void register(IEventBus modEventBus) {
+        BLOCKS.register(modEventBus);
+    }
+}
+```
+
+**Block Items** (separate registration):
+```java
+public static final Supplier<BlockItem> RUBY_BLOCK_ITEM =
+    ModItems.ITEMS.register("ruby_block", () ->
+        new BlockItem(ModBlocks.RUBY_BLOCK.get(), new Item.Properties()));
+```
+
+### Entity Registration (NeoForge 1.21.3)
 
 **From Apocalypse_TNT Mod**:
 ```java
@@ -57,478 +115,234 @@ public class ModEntities {
 }
 ```
 
-**Key Changes from Forge**:
-- ✅ `BuiltInRegistries.ENTITY_TYPE` instead of `ForgeRegistries.ENTITY_TYPES`
-- ✅ `Supplier<EntityType<T>>` instead of `RegistryObject<EntityType<T>>`
-- ✅ More flexible generics (can use `Supplier` interface)
+**Key Points**:
+- Use `BuiltInRegistries.ENTITY_TYPE` (not `ForgeRegistries.ENTITY_TYPES`)
+- Entity type builder specifies factory, category, size, tracking
+- Return type is `Supplier<EntityType<T>>`
 
-### Item Registration (NeoForge)
-
-**Basic Pattern**:
-```java
-public class ModItems {
-    public static final DeferredRegister<Item> ITEMS =
-        DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
-
-    public static final Supplier<Item> CUSTOM_ITEM =
-        ITEMS.register("custom_item", () -> new Item(new Item.Properties()));
-}
-```
-
-**With Properties**:
-```java
-public static final Supplier<Item> SPECIAL_ITEM =
-    ITEMS.register("special_item", () -> new Item(new Item.Properties()
-        .stacksTo(1)
-        .rarity(Rarity.EPIC)
-        .fireResistant()));
-```
-
-### Block Registration (NeoForge)
-
-**Block + BlockItem Pattern**:
-```java
-public class ModBlocks {
-    public static final DeferredRegister<Block> BLOCKS =
-        DeferredRegister.create(BuiltInRegistries.BLOCK, MODID);
-
-    public static final Supplier<Block> CUSTOM_BLOCK =
-        BLOCKS.register("custom_block", () -> new Block(
-            BlockBehaviour.Properties.of()
-                .strength(3.0F)
-                .requiresCorrectToolForDrops()
-        ));
-}
-
-// Corresponding BlockItem
-public class ModItems {
-    public static final Supplier<BlockItem> CUSTOM_BLOCK_ITEM =
-        ITEMS.register("custom_block", () -> new BlockItem(
-            ModBlocks.CUSTOM_BLOCK.get(),
-            new Item.Properties()
-        ));
-}
-```
-
-### Entity Registration Deep Dive (from Apocalypse_TNT)
-
-**Complete Entity Setup**:
-```java
-// 1. DeferredRegister
-public static final DeferredRegister<EntityType<?>> ENTITIES =
-    DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, MODID);
-
-// 2. Entity Type Registration
-public static final Supplier<EntityType<GroundActivatedTnt>> GROUND_TNT =
-    ENTITIES.register("ground_tnt", () -> EntityType.Builder
-        .<GroundActivatedTnt>of(
-            GroundActivatedTnt::new,           // Factory method reference
-            MobCategory.MISC                    // Category (affects spawning)
-        )
-        .sized(0.98F, 0.98F)                   // Width, Height
-        .clientTrackingRange(10)                // Render distance (chunks)
-        .updateInterval(10)                     // Sync frequency (ticks)
-        .build("ground_tnt"));                  // Build key (must match registry name)
-
-// 3. Entity Class
-public class GroundActivatedTnt extends Entity {
-    public GroundActivatedTnt(EntityType<? extends GroundActivatedTnt> type, Level level) {
-        super(type, level);
-        this.blocksBuilding = true;  // Can't place blocks on this entity
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        // Custom behavior
-    }
-
-    // Additional methods...
-}
-```
-
-**Entity Spawning**:
-```java
-// In-world spawning
-GroundActivatedTnt entity = ModEntities.GROUND_TNT.get().create(level);
-if (entity != null) {
-    entity.setPos(x, y, z);
-    level.addFreshEntity(entity);
-}
-```
-
-### Sound Event Registration (NeoForge)
-
-**Pattern** (similar to Forge):
-```java
-public class ModSounds {
-    public static final DeferredRegister<SoundEvent> SOUNDS =
-        DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, MODID);
-
-    public static final Supplier<SoundEvent> EXPLOSION_SOUND =
-        SOUNDS.register("explosion", () ->
-            SoundEvent.createVariableRangeEvent(new ResourceLocation(MODID, "explosion"))
-        );
-}
-```
-
-**Playing Sound**:
-```java
-level.playSound(null, pos, ModSounds.EXPLOSION_SOUND.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-```
+---
 
 ## Migration from Forge to NeoForge
 
-### Step 1: Update build.gradle
+### Step 1: Update Package Imports
 
-**Before (Forge)**:
-```gradle
-plugins {
-    id 'net.minecraftforge.gradle' version '5.1.+'
-}
-```
-
-**After (NeoForge)**:
-```gradle
-plugins {
-    id 'net.neoforged.gradle.userdev' version '7.0.+'
-}
-```
-
-### Step 2: Update Package Imports
-
-**Find and Replace**:
-- `net.minecraftforge` → `net.neoforged.neoforge`
-- `ForgeRegistries` → `BuiltInRegistries` (for vanilla registries)
-- `@Mod` → `@Mod` (same, but check annotation changes)
-
-**Example Migration**:
+**Replace**:
 ```java
-// Forge 1.20
+// Old (Forge)
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-DeferredRegister<Item> ITEMS =
-    DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
-RegistryObject<Item> ITEM = ITEMS.register(...);
-
-// NeoForge 1.21
+// New (NeoForge)
 import net.minecraft.core.registries.BuiltInRegistries;
 import java.util.function.Supplier;
-
-DeferredRegister<Item> ITEMS =
-    DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
-Supplier<Item> ITEM = ITEMS.register(...);
 ```
 
-### Step 3: Update Registry Types
+### Step 2: Change Registry References
 
-**Forge → NeoForge Registry Mapping**:
-
-| Forge 1.20 | NeoForge 1.21 |
-|------------|---------------|
-| `ForgeRegistries.ITEMS` | `BuiltInRegistries.ITEM` |
-| `ForgeRegistries.BLOCKS` | `BuiltInRegistries.BLOCK` |
-| `ForgeRegistries.ENTITY_TYPES` | `BuiltInRegistries.ENTITY_TYPE` |
-| `ForgeRegistries.SOUND_EVENTS` | `BuiltInRegistries.SOUND_EVENT` |
-| `ForgeRegistries.BLOCK_ENTITY_TYPES` | `BuiltInRegistries.BLOCK_ENTITY_TYPE` |
-
-### Step 4: Update Return Types
-
-**Before (Forge)**:
+**Replace ForgeRegistries with BuiltInRegistries**:
 ```java
-public static final RegistryObject<Item> CUSTOM_ITEM = ...;
+// Old (Forge)
+DeferredRegister.create(ForgeRegistries.ITEMS, MODID)
+DeferredRegister.create(ForgeRegistries.BLOCKS, MODID)
+DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, MODID)
 
-public void useItem() {
-    Item item = ModItems.CUSTOM_ITEM.get();
-}
+// New (NeoForge)
+DeferredRegister.create(BuiltInRegistries.ITEM, MODID)
+DeferredRegister.create(BuiltInRegistries.BLOCK, MODID)
+DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, MODID)
 ```
 
-**After (NeoForge)**:
+### Step 3: Update Return Types
+
+**Change RegistryObject to Supplier**:
 ```java
-public static final Supplier<Item> CUSTOM_ITEM = ...;
+// Old (Forge)
+public static final RegistryObject<Item> RUBY =
+    ITEMS.register("ruby", () -> new Item(new Item.Properties()));
 
-public void useItem() {
-    Item item = ModItems.CUSTOM_ITEM.get();  // Same .get() method
-}
+// New (NeoForge)
+public static final Supplier<Item> RUBY =
+    ITEMS.register("ruby", () -> new Item(new Item.Properties()));
 ```
 
-**Why Supplier?** More flexible, part of standard Java library, can be used with other APIs.
+**Access remains the same**: Both use `.get()` to retrieve the registered object.
 
-### Step 5: Check Mod Metadata
+### Step 4: Update build.gradle
 
-**Before (mods.toml)**:
-```toml
-modLoader="javafml"
-loaderVersion="[47,)"
+**Change forge dependency to neoforge**:
+```groovy
+// Old (Forge)
+minecraft 'net.minecraftforge:forge:1.20.1-47.1.0'
+
+// New (NeoForge)
+implementation "net.neoforged:neoforge:${neo_version}"
 ```
 
-**After (neoforge.mods.toml or mods.toml)**:
-```toml
-modLoader="javafml"
-loaderVersion="[1,)"
-```
+**For complete migration guide**: See [Forge to NeoForge Migration](./forge-to-neoforge-migration.md)
 
-## NeoForge-Specific Features
+---
 
-### 1. Modern Entity Registration (from Apocalypse_TNT)
+## Common Registration Patterns
 
-**Advanced Entity Builder**:
+### Pattern 1: Item with Custom Properties
+
 ```java
-EntityType.Builder.<CustomEntity>of(CustomEntity::new, MobCategory.CREATURE)
-    .sized(0.6F, 1.8F)                    // Hitbox dimensions
-    .clientTrackingRange(10)               // Client render distance
-    .updateInterval(3)                     // Network sync interval
-    .setShouldReceiveVelocityUpdates(true) // Velocity sync
-    .build("custom_entity");
+public static final Supplier<Item> MAGICAL_DUST = ITEMS.register("magical_dust",
+    () -> new Item(new Item.Properties()
+        .stacksTo(16)
+        .rarity(Rarity.RARE)
+        .fireResistant()));
 ```
 
-### 2. Supplier Flexibility
+### Pattern 2: Tool Item
 
-**Can use method references**:
 ```java
-public static final Supplier<Item> ITEM = ITEMS.register("item", CustomItem::new);
-
-// Instead of lambda
-public static final Supplier<Item> ITEM = ITEMS.register("item", () -> new CustomItem());
+public static final Supplier<PickaxeItem> RUBY_PICKAXE =
+    ITEMS.register("ruby_pickaxe", () ->
+        new PickaxeItem(ModTiers.RUBY, 1, -2.8f, new Item.Properties()));
 ```
 
-### 3. Registry Helper Methods
+### Pattern 3: Block with Custom Behavior
 
-**Check if registered**:
 ```java
-boolean isRegistered = BuiltInRegistries.ITEM.containsKey(
-    new ResourceLocation(MODID, "custom_item")
-);
+public static final Supplier<Block> SPECIAL_BLOCK = BLOCKS.register("special_block",
+    () -> new SpecialBlock(BlockBehaviour.Properties.of()
+        .strength(3.0f)
+        .sound(SoundType.METAL)
+        .lightLevel(state -> 15)));
 ```
 
-**Get by ResourceLocation**:
+### Pattern 4: Custom Entity
+
 ```java
-Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(MODID, "custom_item"));
+public static final Supplier<EntityType<CustomEntity>> CUSTOM_ENTITY =
+    ENTITIES.register("custom_entity", () -> EntityType.Builder
+        .of(CustomEntity::new, MobCategory.CREATURE)
+        .sized(0.6F, 1.8F)
+        .clientTrackingRange(8)
+        .build("custom_entity"));
 ```
 
-## Common Patterns
+---
 
-### Pattern 1: Centralized Registration (from Apocalypse_TNT)
+## BuiltInRegistries Reference (Quick Lookup)
 
-**ModEntities.java**:
+### Common Registries
+
 ```java
-public class ModEntities {
-    public static final DeferredRegister<EntityType<?>> ENTITIES =
-        DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, MODID);
-
-    public static final Supplier<EntityType<GroundActivatedTnt>> GROUND_TNT =
-        ENTITIES.register("ground_tnt", () -> ...);
-
-    // More entities...
-
-    public static void register(IEventBus modEventBus) {
-        ENTITIES.register(modEventBus);
-    }
-}
+BuiltInRegistries.ITEM           // Items
+BuiltInRegistries.BLOCK          // Blocks
+BuiltInRegistries.ENTITY_TYPE    // Entity types
+BuiltInRegistries.BLOCK_ENTITY_TYPE  // Block entities
+BuiltInRegistries.SOUND_EVENT    // Sounds
+BuiltInRegistries.MOB_EFFECT     // Potion effects
+BuiltInRegistries.POTION         // Potions
+BuiltInRegistries.ENCHANTMENT    // Enchantments
+BuiltInRegistries.MENU           // Container menus
+BuiltInRegistries.RECIPE_TYPE    // Recipe types
+BuiltInRegistries.RECIPE_SERIALIZER  // Recipe serializers
 ```
 
-**Main Mod Class**:
+**For complete reference**: See [BuiltInRegistries Complete Reference](./builtin-registries-reference.md)
+
+---
+
+## Mod Initialization Pattern
+
+### Mod Main Class (NeoForge 1.21.3)
+
 ```java
 @Mod(MODID)
-public class ApocalypseTntMod {
-    public ApocalypseTntMod(IEventBus modEventBus) {
-        ModEntities.register(modEventBus);
+public class MyMod {
+    public static final String MODID = "mymod";
+
+    public MyMod(IEventBus modEventBus) {
+        // Register deferred registers
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModEntities.register(modEventBus);
+
+        // Common setup
+        modEventBus.addListener(this::commonSetup);
+
+        // Client setup (conditional)
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+            () -> () -> modEventBus.addListener(this::clientSetup));
+    }
+
+    private void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            // Thread-safe initialization
+        });
+    }
+
+    private void clientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> {
+            // Client-only initialization
+            EntityRenderers.register(ModEntities.CUSTOM_ENTITY.get(),
+                CustomEntityRenderer::new);
+        });
     }
 }
 ```
 
-### Pattern 2: Grouped Entity Types
+---
 
-**By Category**:
+## Common Issues and Solutions
+
+### Issue 1: Cannot Find Symbol: ForgeRegistries
+**Error**: `cannot find symbol: variable ForgeRegistries`
+
+**Cause**: Using Forge imports in NeoForge project
+
+**Solution**: Replace with `BuiltInRegistries`
 ```java
-// Hostile entities
-public static final Supplier<EntityType<CustomZombie>> CUSTOM_ZOMBIE = ...;
-public static final Supplier<EntityType<CustomSkeleton>> CUSTOM_SKELETON = ...;
+// Change from:
+import net.minecraftforge.registries.ForgeRegistries;
 
-// Projectiles
-public static final Supplier<EntityType<CustomArrow>> CUSTOM_ARROW = ...;
-public static final Supplier<EntityType<CustomFireball>> CUSTOM_FIREBALL = ...;
-
-// Misc
-public static final Supplier<EntityType<GroundActivatedTnt>> GROUND_TNT = ...;
+// To:
+import net.minecraft.core.registries.BuiltInRegistries;
 ```
 
-### Pattern 3: Entity Factory Pattern
+### Issue 2: Type Mismatch with RegistryObject
+**Error**: `incompatible types: Supplier<Item> cannot be converted to RegistryObject<Item>`
 
-**Reusable Builder**:
-```java
-private static <T extends Entity> Supplier<EntityType<T>> registerEntity(
-    String name,
-    EntityType.EntityFactory<T> factory,
-    MobCategory category,
-    float width,
-    float height
-) {
-    return ENTITIES.register(name, () -> EntityType.Builder
-        .of(factory, category)
-        .sized(width, height)
-        .clientTrackingRange(10)
-        .updateInterval(10)
-        .build(name));
-}
+**Cause**: Using Forge return types in NeoForge
 
-// Usage
-public static final Supplier<EntityType<CustomEntity>> CUSTOM =
-    registerEntity("custom", CustomEntity::new, MobCategory.MISC, 1.0F, 1.0F);
-```
+**Solution**: Change `RegistryObject<T>` to `Supplier<T>`
 
-## Best Practices
+### Issue 3: Registry Not Found
+**Error**: Registry name not found during initialization
 
-1. **Use BuiltInRegistries for vanilla types**:
-   ```java
-   // ✅ Correct
-   DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
+**Check**:
+- DeferredRegister created with correct registry
+- `.register(modEventBus)` called in mod constructor
+- Registry name uses lowercase snake_case
 
-   // ❌ Old Forge style (may not exist in NeoForge)
-   DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
-   ```
+**For comprehensive troubleshooting**: See [NeoForge Registry Troubleshooting](./neoforge-registry-troubleshooting.md)
 
-2. **Match entity build key with registry name**:
-   ```java
-   // ✅ Good
-   ENTITIES.register("ground_tnt", () -> EntityType.Builder
-       ...
-       .build("ground_tnt"));  // Same name
+---
 
-   // ❌ Mismatch can cause issues
-   ENTITIES.register("ground_tnt", () -> EntityType.Builder
-       ...
-       .build("tnt_entity"));  // Different name
-   ```
+## Supporting Documentation
 
-3. **Set appropriate entity tracking ranges**:
-   ```java
-   // Small entities (items, particles)
-   .clientTrackingRange(4)
-   .updateInterval(20)
+### Detailed Guides
+- [BuiltInRegistries Complete Reference](./builtin-registries-reference.md) - All available registries with examples
+- [Forge to NeoForge Migration](./forge-to-neoforge-migration.md) - Step-by-step migration process
+- [Entity Registration Deep Dive](./entity-registration-deep-dive.md) - Advanced entity registration patterns
+- [NeoForge Registry Troubleshooting](./neoforge-registry-troubleshooting.md) - Common errors and fixes
 
-   // Regular entities (mobs, TNT)
-   .clientTrackingRange(10)
-   .updateInterval(10)
+---
 
-   // Large/important entities (bosses, structures)
-   .clientTrackingRange(16)
-   .updateInterval(3)
-   ```
+## Quick Migration Checklist
 
-4. **Use Supplier type for flexibility**:
-   ```java
-   // ✅ More flexible
-   public static final Supplier<Item> ITEM = ...;
+- [ ] Replace `net.minecraftforge` imports with `net.neoforged`
+- [ ] Change `ForgeRegistries` to `BuiltInRegistries`
+- [ ] Update return types: `RegistryObject<T>` → `Supplier<T>`
+- [ ] Update registry names (plural → singular): `ITEMS` → `ITEM`, `BLOCKS` → `BLOCK`
+- [ ] Update build.gradle dependencies
+- [ ] Test compilation and runtime
+- [ ] Verify all registrations work correctly
 
-   // ⚠️ Works but less flexible
-   public static final RegistryObject<Item> ITEM = ...;
-   ```
+---
 
-## Anti-Patterns
-
-1. ❌ **Mixing Forge and NeoForge imports**:
-   ```java
-   // ❌ Don't mix
-   import net.minecraftforge.registries.ForgeRegistries;
-   import net.neoforged.neoforge.registries.DeferredRegister;
-   ```
-
-2. ❌ **Wrong entity category**:
-   ```java
-   // ❌ TNT is not a monster
-   EntityType.Builder.of(TntEntity::new, MobCategory.MONSTER)
-
-   // ✅ Use MISC for non-living entities
-   EntityType.Builder.of(TntEntity::new, MobCategory.MISC)
-   ```
-
-3. ❌ **Forgetting to call register() method**:
-   ```java
-   // ❌ Static helper method never invoked
-   public static void register(IEventBus modEventBus) {
-       ENTITIES.register(modEventBus);
-   }
-   // Missing: ModEntities.register(modEventBus) in main class
-   ```
-
-4. ❌ **Null entity on spawn**:
-   ```java
-   // ❌ Not checking for null
-   GroundActivatedTnt entity = ModEntities.GROUND_TNT.get().create(level);
-   entity.setPos(x, y, z);  // NPE if create() returns null
-
-   // ✅ Always check
-   GroundActivatedTnt entity = ModEntities.GROUND_TNT.get().create(level);
-   if (entity != null) {
-       entity.setPos(x, y, z);
-       level.addFreshEntity(entity);
-   }
-   ```
-
-## Pitfalls to Avoid
-
-### Pitfall 1: Incomplete Migration
-
-**Symptom**: ClassNotFoundException for ForgeRegistries
-
-**Cause**: Missed imports during migration
-
-**Fix**: Search entire project for `net.minecraftforge` and replace
-
-### Pitfall 2: Entity Not Rendering
-
-**Symptom**: Entity exists but invisible
-
-**Cause**: Missing renderer registration (client-only)
-
-**Fix**:
-```java
-@SubscribeEvent
-public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
-    event.registerEntityRenderer(
-        ModEntities.GROUND_TNT.get(),
-        TntRenderer::new  // Or custom renderer
-    );
-}
-```
-
-### Pitfall 3: Build Key Mismatch
-
-**Symptom**: Entity spawns but has wrong properties
-
-**Cause**: Build key doesn't match registry name
-
-**Fix**: Always use same name in both places
-
-## Verification Checklist
-
-- [ ] All imports use `net.neoforged` package
-- [ ] `BuiltInRegistries` used for vanilla types
-- [ ] Return type is `Supplier<T>` (not `RegistryObject<T>`)
-- [ ] DeferredRegister registered to MOD bus
-- [ ] Entity build key matches registry name
-- [ ] Entity tracking ranges appropriate for entity type
-- [ ] Renderer registered for entities (client-side)
-- [ ] Entity categories correct (MISC for non-living)
-
-## Migration Checklist (Forge → NeoForge)
-
-- [ ] Update build.gradle plugins
-- [ ] Update gradle.properties versions
-- [ ] Replace all `net.minecraftforge` imports
-- [ ] Replace `ForgeRegistries` with `BuiltInRegistries`
-- [ ] Change `RegistryObject` to `Supplier` where needed
-- [ ] Update mods.toml metadata
-- [ ] Test all registrations work
-- [ ] Verify entities spawn correctly
-- [ ] Check client rendering
-
-## See Also
-
-- [forge-registry-api](../forge-registry-api/SKILL.md) - Forge patterns
-- [fabric-registry-api](../fabric-registry-api/SKILL.md) - Fabric equivalent
-- Official NeoForge Docs: https://docs.neoforged.net/
+Use this skill when working with NeoForge 1.20+ to ensure correct registration patterns and smooth migration from Forge.
