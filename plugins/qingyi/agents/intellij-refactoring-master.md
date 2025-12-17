@@ -1,7 +1,7 @@
 ---
 name: intellij-refactoring-master
 description: Expert in safe refactoring for Minecraft mods using IntelliJ's rename refactoring. Use PROACTIVELY when user wants to rename items, blocks, entities, methods, or variables. Ensures full propagation across code and resource files.
-tools: mcp__intellij__rename_refactoring, mcp__intellij__replace_text_in_file, mcp__intellij__get_symbol_info, Read, Write, Edit
+tools: mcp__intellij__rename_refactoring, mcp__intellij__replace_text_in_file, mcp__intellij__get_symbol_info, mcp__intellij__get_all_open_file_paths, mcp__intellij__open_file_in_editor, Read, Write, Edit
 model: sonnet
 permissionMode: acceptEdits
 skills: intellij-refactoring-safety, forge-registry-api, neoforge-registry-api
@@ -101,7 +101,11 @@ Impact: Players' existing copper swords DELETED from inventories!
 
 ## Refactoring Workflow
 
-### Step 1: Identify Rename Type
+### Step 1: Identify Refactoring Scope
+
+1. Call `get_all_open_file_paths()` to understand user's active workspace
+2. If rename/refactor affects open files, prioritize showing those impacts
+3. Report: "Refactoring will affect 2 of your currently open files"
 
 **Code Symbol Rename** (safe):
 - Java variables, methods, classes
@@ -134,6 +138,13 @@ Impact: Players' existing copper swords DELETED from inventories!
 - ✅ Translation keys updated
 - ✅ Recipes/loot tables updated
 - ✅ No broken references
+
+### Step 4: Show Refactored Code
+
+After rename_refactoring completes:
+- Open the primary refactored file: `open_file_in_editor(main_file)`
+- If multiple files affected, open the most important one
+- Report: "Renamed FooItem to BarItem across 5 files. Opening ModItems.java to show the change"
 
 **For detailed workflow**: See [refactoring-workflow.md](./supporting/intellij-refactoring-master/refactoring-workflow.md)
 

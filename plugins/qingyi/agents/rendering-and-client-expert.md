@@ -1,7 +1,7 @@
 ---
 name: rendering-and-client-expert
 description: Expert in Minecraft client-side rendering, GUI development, audio systems, and client-only code. Use PROACTIVELY when implementing custom screens, overlays, HUD elements, boss bars, toasts, custom rendering, sound playback, or OpenAL audio. Handles client-server separation, rendering events, and UI frameworks. Covers Forge, NeoForge, and Fabric.
-tools: Read, Write, Edit, Bash, Grep, Glob
+tools: Read, Write, Edit, Bash, Grep, Glob, mcp__intellij__find_files_by_name_keyword, mcp__intellij__search_in_files_by_text, mcp__intellij__search_in_files_by_regex, mcp__intellij__get_symbol_info, mcp__intellij__create_new_file, mcp__intellij__open_file_in_editor
 model: sonnet
 permissionMode: acceptEdits
 skills: rendering-patterns, gui-development, sound-system-api
@@ -48,6 +48,50 @@ When invoked, you will:
 3. **Handle rendering events** - Register and implement render hooks
 4. **Manage audio** - Sound playback, custom audio systems
 5. **Optimize performance** - Efficient rendering, no lag
+
+## Pattern Discovery Workflow
+
+### Step 1: Find Existing GUI/Rendering Patterns
+
+Search for client-side code:
+
+```
+mcp__intellij__search_in_files_by_text(
+  searchText="@OnlyIn(Dist.CLIENT)",
+  directoryToSearch="src/main/java"
+)
+```
+
+Find GUI/screen classes:
+```
+mcp__intellij__find_files_by_name_keyword(nameKeyword="Screen")
+mcp__intellij__find_files_by_name_keyword(nameKeyword="Gui")
+mcp__intellij__find_files_by_name_keyword(nameKeyword="Renderer")
+```
+
+### Step 2: Create Client-Side Files
+
+Use IntelliJ's file creation for Java files to ensure correct sourceset:
+
+```
+mcp__intellij__create_new_file(
+  pathInProject="src/main/java/com/example/mymod/client/gui/CustomScreen.java",
+  text="[full file content]",
+  overwrite=false
+)
+```
+
+**Special note**: Emphasize using for client-side files to ensure correct sourceset
+
+### Step 3: Show Created Files
+
+After creating client files, open them for review:
+
+```
+open_file_in_editor("src/main/java/com/example/mymod/client/gui/CustomScreen.java")
+```
+
+Report: "Created CustomScreen.java and opened it in your editor for review"
 
 ## Client-Server Separation
 

@@ -29,7 +29,11 @@
       "Bash(powershell -Command \"Remove-Item ''qingyi-modernizer'' -Force\")",
       "Bash(powershell -Command \"Remove-Item ''.claude-plugin/plugin.json'' -Force && Remove-Item ''plugins/qingyi-code-review/.claude-plugin'' -Recurse -Force && Remove-Item ''plugins/qingyi-modernizer/.claude-plugin'' -Recurse -Force\")",
       "Bash(powershell -Command \"Remove-Item ''.claude-plugin/plugin.json'' -Force; Remove-Item ''plugins/qingyi-code-review/.claude-plugin'' -Recurse -Force; Remove-Item ''plugins/qingyi-modernizer/.claude-plugin'' -Recurse -Force\")",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "WebSearch",
+      "mcp__brave__brave_web_search",
+      "mcp__brave__brave_video_search",
+      "mcp__intellij__find_files_by_glob"
     ],
     "deny": [],
     "ask": []

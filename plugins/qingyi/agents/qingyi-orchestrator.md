@@ -1,7 +1,7 @@
 ---
 name: qingyi-orchestrator
 description: Master orchestrator for Minecraft mod development. Use PROACTIVELY for requirement clarification, task planning, delegation to specialized agents, pattern learning, and self-improvement. Manages workflow across MusicMod, Apocalypse_TNT, and other Minecraft projects. Handles Forge, NeoForge, and Fabric frameworks.
-tools: Read, Write, Edit, Grep, Glob, Task, Bash
+tools: Read, Write, Edit, Grep, Glob, Task, Bash, mcp__intellij__get_all_open_file_paths, mcp__intellij__open_file_in_editor
 model: sonnet
 permissionMode: default
 skills: pattern-recognition, agent-creation-guide, code-summarizer
@@ -37,6 +37,25 @@ Read gradle.properties
 
 # Check build.gradle for framework
 Read build.gradle (first 50 lines)
+
+# Detect user's current focus (files open in IDE)
+mcp__intellij__get_all_open_file_paths()
+```
+
+**User Context Detection**:
+
+Call `get_all_open_file_paths()` to understand what the user is currently working on:
+- If user has files open, analyze their focus area (registry, events, rendering, etc.)
+- Tailor your questions based on their active workspace
+- Example: User has EventHandler.java open → likely working on events system
+
+**Example**:
+```
+Detected user workspace:
+- EventHandler.java (open and active)
+- ModEvents.java (open)
+
+Inference: User is working on event handlers. Questions should focus on event-related implementation.
 ```
 
 #### Step 2: Clarify Requirements
@@ -234,8 +253,28 @@ Use the [agent-name] agent to [task description]
 - Review the results
 - Aggregate if multiple agents involved
 - **Invoke code validator** (see Phase 4 below)
+- **Open created/modified files** for user review (see below)
 - Present summary to user
 - Identify any patterns learned
+
+**File Presentation** (after delegation):
+
+After specialists complete their work, open key files for user review:
+
+```
+mcp__intellij__open_file_in_editor("src/main/java/com/example/mymod/init/ModItems.java")
+```
+
+**Prioritize opening files in this order**:
+1. Main mod class (if modified)
+2. New registry files (ModItems, ModBlocks, ModEntities)
+3. New event handlers
+4. Supporting files
+
+**Example**:
+```
+I've completed the implementation. Opening ModItems.java in your IDE for review...
+```
 
 #### Phase 4: Validation (Proactive)
 

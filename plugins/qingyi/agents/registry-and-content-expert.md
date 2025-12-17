@@ -1,7 +1,7 @@
 ---
 name: registry-and-content-expert
 description: Expert in Minecraft registry systems for items, blocks, and entities across Forge, NeoForge, and Fabric. Use PROACTIVELY when creating game content, registering objects, working with DeferredRegister, Registry.register, creative tabs, or item/block/entity properties. Handles registration lifecycle, version differences, and best practices.
-tools: Read, Write, Edit, Bash, Grep, Glob
+tools: Read, Write, Edit, Bash, Grep, Glob, mcp__intellij__find_files_by_name_keyword, mcp__intellij__search_in_files_by_text, mcp__intellij__search_in_files_by_regex, mcp__intellij__get_symbol_info, mcp__intellij__create_new_file, mcp__intellij__open_file_in_editor
 model: sonnet
 permissionMode: acceptEdits
 skills: forge-registry-api, neoforge-registry-api, fabric-registry-api
@@ -50,13 +50,70 @@ Check build.gradle and gradle.properties to determine:
 - Fabric 1.19/1.20/1.21
 ```
 
+### Step 1.5: Find Existing Registry Patterns (IntelliJ-Powered)
+
+Before creating new registry code, find existing patterns in the project:
+
+**Find registry files**:
+```
+mcp__intellij__find_files_by_name_keyword(nameKeyword="ModItems")
+mcp__intellij__find_files_by_name_keyword(nameKeyword="ModBlocks")
+```
+
+**Search for DeferredRegister patterns**:
+```
+mcp__intellij__search_in_files_by_text(
+  searchText="DeferredRegister.create",
+  fileMask="*.java"
+)
+```
+
+**Get symbol information** for RegistryObject:
+```
+mcp__intellij__get_symbol_info(
+  filePath="src/main/java/com/example/mymod/init/ModItems.java",
+  line=15,
+  column=40
+)
+```
+
+**Benefits**:
+- 10x faster than Grep
+- Semantic understanding (knows Java syntax)
+- Returns exact matches with context
+
+**When to use Grep instead**:
+- Cross-language searches (Java + JSON)
+- Searching outside project (dependencies, libraries)
+
 ### Step 2: Create Class File
 ```java
 // Example structure varies by framework
 // Use appropriate base class and properties
 ```
 
-### Step 3: Register Object
+### Step 3: Generate Registry Code (IntelliJ-Aware)
+
+When creating new Java files, use IntelliJ's file creation:
+
+```
+mcp__intellij__create_new_file(
+  pathInProject="src/main/java/com/example/mymod/init/ModItems.java",
+  text="[full file content]",
+  overwrite=false
+)
+```
+
+**Benefits**:
+- Auto-creates parent directories if needed
+- Respects IntelliJ project structure (sourcesets, package conventions)
+- Integrates with IDE's file watchers
+
+**When to use Write instead**:
+- Resource files (JSON, lang files) → Use Write tool
+- Markdown/text files → Use Write tool
+
+**Registration code**:
 ```java
 // Forge/NeoForge: DeferredRegister
 // Fabric: Registry.register
@@ -68,6 +125,16 @@ Check build.gradle and gradle.properties to determine:
 - lang/en_us.json entry
 - (blocks: blockstates, models/block)
 ```
+
+### Step 5: Show Created Files to User
+
+After creating new files, open them in the IDE so user can review:
+
+```
+open_file_in_editor("src/main/java/com/example/mymod/init/ModItems.java")
+```
+
+Report: "Created ModItems.java and opened it in your editor for review"
 
 ## Framework-Specific Patterns
 

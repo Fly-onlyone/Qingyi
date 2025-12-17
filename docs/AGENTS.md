@@ -635,13 +635,18 @@ The Qingyi plugin currently includes these production-ready agents:
     - Skills: pattern-recognition
 
 13. **github-code-search-agent** ([plugins/qingyi/agents/github-code-search-agent.md](../plugins/qingyi/agents/github-code-search-agent.md))
-    - Community code discovery and framework source analysis specialist
-    - Searches across GitHub for modding examples, migration patterns, and implementations
+    - **Enhanced v2.0** - Comprehensive GitHub research specialist with issue tracking, PR analysis, and version management
+    - Community code discovery and framework source analysis
+    - **NEW**: Issue research for known problems, workarounds, and solutions
+    - **NEW**: Migration PR analysis with diffs and migration patterns
+    - **NEW**: Framework version tracking and compatibility research
+    - **NEW**: Fork workflow for experimenting with example mods
+    - **NEW**: Commit analysis for tracking breaking changes
     - Provides 5-10 real code examples per query with repository attribution
     - Accesses official Forge/NeoForge/Fabric source code directly
-    - Invoked PROACTIVELY for finding external examples and community solutions
-    - Tools: mcp__github__search_code, mcp__github__get_file_contents, mcp__github__search_repositories, mcp__github__list_commits, mcp__github__get_commit, Read, Write
-    - Model: haiku (cost-efficient for code search tasks)
+    - Invoked PROACTIVELY for finding external examples, troubleshooting, migration research, and version compatibility
+    - Tools: mcp__github__search_code, mcp__github__get_file_contents, mcp__github__search_repositories, mcp__github__list_commits, mcp__github__get_commit, mcp__github__search_issues, mcp__github__issue_read, mcp__github__search_pull_requests, mcp__github__pull_request_read, mcp__github__list_releases, mcp__github__get_latest_release, mcp__github__list_tags, mcp__github__get_tag, mcp__github__fork_repository, Read, Write
+    - Model: haiku (cost-efficient for comprehensive GitHub research)
     - Skills: pattern-recognition
 
 ### Suggested Future Agents

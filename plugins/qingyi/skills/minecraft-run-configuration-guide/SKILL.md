@@ -1,99 +1,29 @@
 ---
 name: minecraft-run-configuration-guide
-description: IntelliJ run configurations for Minecraft modding. Covers runClient, runServer, runData, program arguments, JVM options, data generation providers, testing workflows. Use when executing or debugging Minecraft mods.
+description: IntelliJ run configurations for Minecraft modding including runClient, runServer, runData, GameTest. Covers testing workflows, data generation, debugging, JVM options, program arguments, IntelliJ MCP integration. Use when executing or debugging mods.
 allowed-tools: mcp__intellij__get_run_configurations, mcp__intellij__execute_run_configuration
 ---
 
 # Minecraft Run Configuration Guide
 
-## What This Covers
-
-- IntelliJ run configurations for Minecraft modding
-- runClient, runServer, runData configuration types
-- Testing and debugging workflows
-- Data generation with datagen providers
-- JVM options and program arguments
-
-## When to Use
-
-- Testing mod features in Minecraft
-- Debugging code with breakpoints
-- Generating data files (recipes, loot, models)
-- Running automated tests
-- Verifying features work in-game
-
----
-
 ## Run Configuration Types (Quick Reference)
 
-### runClient
-**Purpose**: Launch Minecraft client with mod loaded (graphical game)
+| Configuration | Purpose | Startup Time | Use For |
+|--------------|---------|--------------|---------|
+| **runClient** | Minecraft client with GUI | 30-90s | Visual features, items, blocks, GUIs, rendering |
+| **runServer** | Dedicated server (no GUI) | 15-45s | Server logic, commands, multiplayer, performance |
+| **runData** | Data file generation | 10-30s | Recipes, loot tables, models, tags |
+| **runGameTest** | Automated testing | Varies | Integration tests, CI/CD pipelines |
 
-**Use for**:
-- Visual features (items, blocks, textures)
-- GUI testing (custom screens, HUDs)
-- Client-side rendering, sounds, music
-- Keybindings and creative tabs
-
-**Startup time**: 30-90 seconds
-
-**Test workflow**:
-1. Run configuration
-2. Create new world (Creative mode)
-3. Open inventory → Check creative tab
-4. Test functionality
-
-### runServer
-**Purpose**: Launch dedicated server (no graphics)
-
-**Use for**:
-- Server-side logic (commands, events)
-- Multiplayer features
-- World generation
-- Performance testing (no rendering overhead)
-
-**Startup time**: 15-45 seconds
-
-**Test workflow**:
-1. Run configuration
-2. Wait for "Done!" message
-3. Connect from Minecraft client (localhost)
-4. Test server-side features
-
-### runData
-**Purpose**: Generate data files (recipes, loot tables, models, etc.)
-
-**Use for**:
-- Creating recipe JSON files
-- Generating loot tables
-- Creating block/item models
-- Tag generation
-
-**Output location**: `src/generated/resources/`
-
-**Test workflow**:
-1. Run configuration
-2. Wait for completion
-3. Check `generated/resources/` for output
-4. Copy to `src/main/resources/` if needed
-
-### runGameTest (Optional)
-**Purpose**: Run automated game tests
-
-**Use for**:
-- Automated feature testing
-- Integration tests
-- CI/CD pipelines
-
-**Requires**: GameTest framework setup
+**Detailed guide**: [Run Configuration Types](./guides/run-config-types.md)
 
 ---
 
 ## Using IntelliJ MCP Tools
 
-### Get Available Run Configurations
+### Get Available Configurations
 
-```
+```java
 mcp__intellij__get_run_configurations()
 
 Returns:
@@ -104,271 +34,273 @@ Returns:
 ]
 ```
 
-### Execute Run Configuration
+### Execute Configuration
 
-```
+```java
 mcp__intellij__execute_run_configuration(
   configurationName: "runClient",
   timeout: 120000  // 2 minutes
 )
 ```
 
-**Monitoring Output**:
-- Watch for "Mod loading complete" → Successful startup
-- Check for errors in console
-- Verify resources loaded correctly
+**Monitor for**:
+- "Mod loading complete" → Success
+- Error messages in console
+- Resource loading confirmations
 
 ---
 
-## Common Configuration Patterns
+## Common Testing Workflows
 
-### Pattern 1: Test New Item
+### Workflow 1: Test New Item
 
-1. Add item to mod code
-2. Run `runClient`
-3. Create world → Open inventory
-4. Verify item appears with correct texture
-5. Test item functionality
+```
+1. Add item to ModItems.java
+2. Run runClient
+3. Create world (Creative)
+4. Open inventory → Check creative tab
+5. Verify texture and functionality
+```
 
-### Pattern 2: Generate Recipes
+### Workflow 2: Generate Recipes
 
-1. Create DataGenerator class with recipe provider
-2. Run `runData`
-3. Check `generated/resources/data/modid/recipes/`
-4. Copy to `src/main/resources/` if satisfied
+```
+1. Create RecipeProvider with recipes
+2. Run runData
+3. Check generated/resources/data/modid/recipes/
+4. Copy to src/main/resources/ if satisfied
+```
 
-### Pattern 3: Test Server Commands
+### Workflow 3: Test Server Commands
 
-1. Add command to mod
-2. Run `runServer`
+```
+1. Add command registration
+2. Run runServer
 3. Wait for "Done!" message
 4. Type command in server console
-5. Verify command works correctly
+5. Verify command executes correctly
+```
+
+### Workflow 4: Debug with Breakpoints
+
+```
+1. Set breakpoint in code
+2. Run runClient (Debug mode)
+3. Trigger feature in-game
+4. Step through code when breakpoint hits
+5. Inspect variables, fix issues
+```
+
+**Complete workflows**: [Testing Workflows Guide](./guides/testing-workflows.md)
 
 ---
 
-## Data Generation Setup
+## Data Generation Quick Reference
 
-### Forge/NeoForge Data Generation
+### Recipe Generation
 
-**Main class setup**:
+**Forge/NeoForge**:
 ```java
-@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class DataGenerators {
-
-    @SubscribeEvent
-    public static void gatherData(GatherDataEvent event) {
-        DataGenerator generator = event.getGenerator();
-        PackOutput output = generator.getPackOutput();
-        ExistingFileHelper fileHelper = event.getExistingFileHelper();
-
-        // Recipes
-        generator.addProvider(event.includeServer(),
-            new ModRecipeProvider(output));
-
-        // Loot tables
-        generator.addProvider(event.includeServer(),
-            new ModLootTableProvider(output));
-
-        // Block states and models
-        generator.addProvider(event.includeClient(),
-            new ModBlockStateProvider(output, MODID, fileHelper));
-
-        // Item models
-        generator.addProvider(event.includeClient(),
-            new ModItemModelProvider(output, MODID, fileHelper));
-    }
+@Override
+protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
+    ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.RUBY_SWORD.get())
+        .pattern("R")
+        .pattern("R")
+        .pattern("S")
+        .define('R', ModItems.RUBY.get())
+        .define('S', Items.STICK)
+        .unlockedBy("has_ruby", has(ModItems.RUBY.get()))
+        .save(consumer);
 }
 ```
 
-**Run**: Execute `runData` configuration
-
-**Output**: `src/generated/resources/`
-
-### Fabric Data Generation
-
-**Main class setup**:
+**Fabric**:
 ```java
-public class ModDataGenerator implements DataGeneratorEntrypoint {
-
-    @Override
-    public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
-        FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
-
-        // Recipes
-        pack.addProvider(ModRecipeProvider::new);
-
-        // Loot tables
-        pack.addProvider(ModLootTableProvider::new);
-
-        // Models
-        pack.addProvider(ModModelProvider::new);
-    }
+public void generate(Consumer<RecipeJsonProvider> consumer) {
+    ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, ModItems.RUBY_SWORD)
+        .pattern("R")
+        .pattern("R")
+        .pattern("S")
+        .input('R', ModItems.RUBY)
+        .input('S', Items.STICK)
+        .criterion("has_ruby", conditionsFromItem(ModItems.RUBY))
+        .offerTo(consumer);
 }
 ```
 
-**Register in fabric.mod.json**:
-```json
-"entrypoints": {
-  "datagen": [
-    "com.mod.datagen.ModDataGenerator"
-  ]
-}
-```
-
-**Run**: Execute `runData` configuration
+**Complete datagen guide**: [Data Generation Setup](./guides/datagen-setup.md)
 
 ---
 
-## JVM Options and Program Arguments
+## JVM Options & Program Arguments
 
 ### Common JVM Options
 
-**Increase memory allocation**:
 ```
--Xmx4G  // Max heap size: 4GB
--Xms2G  // Initial heap size: 2GB
+# Increase memory (for large mods)
+-Xmx4G -Xms2G
+
+# Enable hot swap (faster testing)
+-XX:+AllowEnhancedClassRedefinition
+
+# Profiling (performance analysis)
+-Xprof
 ```
 
-**Enable debugging**:
+### Program Arguments
+
 ```
--Xdebug
--Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+# Run in offline mode
+--username Dev --uuid 00000000-0000-0000-0000-000000000000
+
+# Specify world
+--world MyTestWorld
+
+# Data generation (specific providers)
+--mod mymod --all --output generated/resources/
 ```
 
-**Performance profiling**:
-```
--XX:+UnlockDiagnosticVMOptions
--XX:+LogCompilation
-```
-
-### Common Program Arguments
-
-**Skip splash screen** (faster startup):
-```
---nogui  // For runServer
-```
-
-**Specify data generation**:
-```
---mod modid --all --output src/generated/resources/
-```
-
-**Enable mixins debug**:
-```
--Dmixin.debug=true
-```
-
-**For detailed configuration**: See [JVM Options and Arguments](./jvm-options-and-arguments.md)
+**Detailed configuration**: [JVM & Arguments Guide](./guides/jvm-arguments.md)
 
 ---
 
-## Testing Workflow Best Practices
+## Debugging Tips
 
-### 1. Quick Feature Test (runClient)
-```
-1. Make code changes
-2. Run runClient
-3. Create test world
-4. Verify feature works
-5. Iterate as needed
-```
+### Breakpoint Best Practices
 
-### 2. Server-Only Feature Test (runServer)
-```
-1. Make code changes
-2. Run runServer
-3. Wait for startup
-4. Test via server console or by connecting
-5. Check server logs for errors
-```
+✅ **DO**:
+- Set breakpoints in event handlers
+- Use conditional breakpoints for specific cases
+- Inspect variable values when paused
 
-### 3. Data Generation Workflow (runData)
+❌ **DON'T**:
+- Set breakpoints in tick handlers (fires too frequently)
+- Leave breakpoints in production code
+
+### Console Log Filtering
+
 ```
-1. Create/modify data providers
-2. Run runData
-3. Check generated/ folder
-4. Review generated files
-5. Copy to main resources if correct
+# Filter for your mod
+grep "modid"
+
+# Filter for errors
+grep "ERROR"
+
+# Filter for warnings
+grep "WARN"
 ```
 
-### 4. Full Integration Test
-```
-1. Run runClient → Test client features
-2. Run runServer → Test server features
-3. Run runData → Generate resources
-4. Build JAR → Test in clean environment
-```
+### Common Debug Scenarios
+
+**Item not appearing**:
+1. Set breakpoint in item registration
+2. Verify registration runs
+3. Check creative tab assignment
+4. Verify resource files exist
+
+**Event not firing**:
+1. Set breakpoint in event handler
+2. Trigger event in-game
+3. If not hit → Check event bus registration
+4. Verify @SubscribeEvent annotation
+
+**Complete debugging guide**: [Debugging Strategies](./guides/debugging-strategies.md)
 
 ---
 
-## Common Issues and Solutions
+## Framework-Specific Patterns
 
-### Issue 1: Configuration Not Found
-**Symptom**: IntelliJ doesn't show run configurations
+### Forge/NeoForge Run Configurations
 
-**Solution**:
-1. Refresh Gradle project (Gradle tool window → Reload)
-2. Run `./gradlew genIntellijRuns` (Forge) or `./gradlew idea` (Fabric)
-3. Restart IntelliJ
+Generated by ForgeGradle/NeoGradle:
+- `runClient` → Launch client
+- `runServer` → Launch server
+- `runData` → Data generation
+- `runGameTestServer` → GameTest framework
 
-### Issue 2: Mod Not Loading
-**Symptom**: Mod doesn't appear in game
+### Fabric Run Configurations
+
+Generated by Loom:
+- `runClient` → Launch client
+- `runServer` → Launch server
+- `runDatagen` → Data generation (Fabric API)
+
+**Framework comparison**: [Framework Run Config Differences](./guides/framework-differences.md)
+
+---
+
+## Troubleshooting
+
+### Configuration Not Found
+
+**Error**: "Run configuration 'runClient' not found"
+
+**Fix**:
+1. Refresh Gradle project
+2. Run `gradlew tasks` to regenerate configs
+3. Restart IntelliJ IDEA
+
+### Startup Failure
+
+**Error**: Minecraft crashes during startup
 
 **Check**:
-- Console output for mod loading messages
-- `mods.toml` or `fabric.mod.json` syntax
-- Correct modid in all files
-- Main mod class has proper annotations
+1. Console for error messages
+2. Registry errors (missing items/blocks)
+3. Mod conflicts in `mods/` folder
+4. Java version compatibility
 
-### Issue 3: Long Startup Time
-**Solutions**:
-- Increase JVM memory (`-Xmx4G`)
-- Disable unnecessary mods in development
-- Use SSD for project files
-- Skip splash screen with `--nogui` (server)
+### Datagen Not Generating
 
-### Issue 4: Data Generation Fails
+**Error**: `runData` completes but no files created
+
 **Check**:
-- DataGenerator class registered correctly
-- Providers added to event
-- Output directory permissions
-- No syntax errors in provider classes
+1. DataGenerator properly registered to mod bus
+2. Providers added to datagen event
+3. Output directory path correct
+4. Providers actually generating content
 
-**For comprehensive troubleshooting**: See [Troubleshooting Guide](./troubleshooting-guide.md)
-
----
-
-## Supporting Documentation
-
-### Detailed Guides
-- [Detailed Run Config Reference](./detailed-run-config-reference.md) - Complete docs for each configuration type with startup sequences
-- [JVM Options and Arguments](./jvm-options-and-arguments.md) - JVM tuning, program arguments, debugging setup
-- [Data Generation Guide](./data-generation-guide.md) - Complete data generation setup for recipes, loot, models, tags
-- [Troubleshooting Guide](./troubleshooting-guide.md) - Common issues, error messages, fixes
+**Complete troubleshooting**: [Run Config Troubleshooting](./guides/troubleshooting.md)
 
 ---
 
-## Quick Decision Tree
+## Quick Reference Commands
 
-**Need to test visual features?**
-→ Use `runClient`
+```bash
+# List available tasks
+./gradlew tasks
 
-**Need to test server logic?**
-→ Use `runServer`
+# Run client
+./gradlew runClient
 
-**Need to generate data files?**
-→ Use `runData`
+# Run server
+./gradlew runServer
 
-**Need automated testing?**
-→ Use `runGameTest` (requires setup)
+# Generate data
+./gradlew runData
 
-**Mod not loading?**
-→ Check console output, verify mod metadata
-
-**Slow startup?**
-→ Increase JVM memory, use SSD
+# Clean and rebuild
+./gradlew clean build
+```
 
 ---
 
-Use this skill when working with IntelliJ run configurations to test, debug, and generate data for Minecraft mods efficiently.
+## Detailed Guides
+
+### Core Guides
+- **[Run Configuration Types](./guides/run-config-types.md)** - Detailed breakdown of runClient, runServer, runData, runGameTest
+- **[Testing Workflows Guide](./guides/testing-workflows.md)** - Step-by-step testing procedures for various features
+- **[Data Generation Setup](./guides/datagen-setup.md)** - Complete datagen implementation with all provider types
+
+### Advanced Topics
+- **[JVM & Arguments Guide](./guides/jvm-arguments.md)** - Memory settings, profiling, custom arguments
+- **[Debugging Strategies](./guides/debugging-strategies.md)** - Breakpoints, logging, common debug scenarios
+- **[Framework Differences](./guides/framework-differences.md)** - Forge vs Fabric run configuration variations
+
+### Troubleshooting
+- **[Run Config Troubleshooting](./guides/troubleshooting.md)** - Solutions to common run configuration issues
+- **[Performance Optimization](./guides/performance-optimization.md)** - Faster startup, memory tuning
+
+---
+
+Use this skill when testing, debugging, or generating data for Minecraft mods to ensure efficient development workflows.
