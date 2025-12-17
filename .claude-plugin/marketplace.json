@@ -7,14 +7,14 @@
   },
   "metadata": {
     "description": "Minecraft mod development plugins with specialized agents and skills",
-    "version": "1.2.0"
+    "version": "1.3.0"
   },
   "plugins": [
     {
       "name": "qingyi",
       "source": "./plugins/qingyi",
       "description": "Minecraft mod development plugin with specialized agents and skills for improved code accuracy and token efficiency. Supports Forge, NeoForge, Fabric, and Quilt frameworks.",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "author": {
         "name": "Fly",
         "email": "",
@@ -36,10 +36,13 @@
       "strict": false,
       "agents": [
         "./agents/qingyi-orchestrator.md",
+        "./agents/qingyi-plugin-manager.md",
         "./agents/registry-and-content-expert.md",
         "./agents/events-and-lifecycle-expert.md",
         "./agents/data-and-persistence-expert.md",
         "./agents/rendering-and-client-expert.md",
+        "./agents/brave-search-agent.md",
+        "./agents/github-code-search-agent.md",
         "./agents/intellij-code-navigator.md",
         "./agents/minecraft-code-validator.md",
         "./agents/intellij-refactoring-master.md",
