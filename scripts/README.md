@@ -1,114 +1,29 @@
-# Qingyi Plugin Update Scripts
+# Qingyi Plugin Development Scripts
 
-This directory contains scripts to streamline the plugin reinstall process after making changes to agents, skills, or other plugin components.
+This directory contains scripts and documentation for plugin development and quality assurance.
 
-## Why These Scripts Exist
+## Plugin Auto-Update
 
-Claude Code does **not** have auto-update or watch mode for local plugins. After modifying plugin source files, you must manually:
-1. Uninstall the current version
-2. Reinstall from the marketplace
-3. Restart Claude Code
+Claude Code now has **built-in auto-update functionality** for local plugins. When you modify plugin source files (agents, skills, CLAUDE.md, etc.), Claude Code automatically detects changes and reloads the plugin.
 
-These scripts automate steps 1-2.
+**No manual reinstall required!**
 
 ## Available Scripts
 
-### Windows
+### Quality Assurance
 
-**Batch Script** (Command Prompt):
-```bash
-scripts\reinstall-plugin.bat
-```
-
-**PowerShell Script**:
+**validate-plugin.ps1** - Validates plugin structure and configuration:
 ```powershell
-.\scripts\reinstall-plugin.ps1
+.\scripts\validate-plugin.ps1
 ```
 
-### Linux/macOS
+Checks:
+- ✅ YAML frontmatter syntax in agents and skills
+- ✅ File structure and naming conventions
+- ✅ Cross-references between components
+- ✅ Markdown formatting and links
 
-**Bash Script**:
-```bash
-./scripts/reinstall-plugin.sh
-```
-
-## Usage
-
-### After Making Plugin Changes
-
-1. **Edit plugin files** (agents, skills, CLAUDE.md, etc.)
-2. **Run the appropriate script** for your platform
-3. **Restart Claude Code** to load changes
-4. **Test the updated plugin**
-
-### From Command Line
-
-**Windows (Command Prompt)**:
-```cmd
-cd "C:\Users\PC\Documents\Minecraft\My Project\Qingyi"
-scripts\reinstall-plugin.bat
-```
-
-**Windows (PowerShell)**:
-```powershell
-cd "C:\Users\PC\Documents\Minecraft\My Project\Qingyi"
-.\scripts\reinstall-plugin.ps1
-```
-
-**Linux/macOS**:
-```bash
-cd "/path/to/Qingyi"
-./scripts/reinstall-plugin.sh
-```
-
-### From Claude Code (via Bash tool)
-
-The orchestrator agent will automatically run the script when creating/updating plugin components:
-
-```bash
-bash scripts/reinstall-plugin.bat
-```
-
-## What the Scripts Do
-
-1. **Uninstall** current plugin version from Claude Code
-2. **Install** updated version from `qingyi-marketplace`
-3. **Display status** and remind you to restart Claude Code
-
-## Prerequisites
-
-Before running these scripts, ensure:
-
-- ✅ **Marketplace is configured**: `marketplace.json` exists in `.claude-plugin/` directory
-- ✅ **Marketplace is added**: `/plugin marketplace add "C:\Users\PC\Documents\Minecraft\My Project\Qingyi"`
-- ✅ **Plugin was previously installed**: `/plugin install qingyi@qingyi-marketplace`
-
-## Troubleshooting
-
-### "Plugin not found" error
-
-**Cause**: Marketplace not added or plugin never installed
-
-**Solution**:
-```bash
-# Add marketplace
-/plugin marketplace add "C:\Users\PC\Documents\Minecraft\My Project\Qingyi"
-
-# Install plugin
-/plugin install qingyi@qingyi-marketplace
-```
-
-### Script doesn't work
-
-**Cause**: `claude` command not in PATH
-
-**Solution**: Use the full path to claude CLI or add it to your PATH
-
-### Changes not reflected after reinstall
-
-**Cause**: Claude Code caches plugin data
-
-**Solution**: Fully restart Claude Code (close and reopen)
+**quality-check.md** - Quality assurance checklist for plugin development. Review before releases.
 
 ## Development Workflow
 
@@ -117,13 +32,13 @@ Before running these scripts, ensure:
 ```
 1. Work on plugin features (add agents, skills, etc.)
    ↓
-2. Review changes with git
+2. Run validation script to check for errors
    ↓
-3. Commit to version control
+3. Review changes with git
    ↓
-4. Run reinstall script
+4. Commit to version control
    ↓
-5. Restart Claude Code
+5. Claude Code auto-reloads plugin
    ↓
 6. Test new features
 ```
@@ -132,8 +47,8 @@ Before running these scripts, ensure:
 
 The `qingyi-orchestrator` agent is configured to:
 - **Always work in source directory** (not installed plugin location)
-- **Automatically run reinstall script** after creating/updating components
-- **Prompt user to restart** Claude Code
+- **Rely on auto-update** for changes to take effect
+- **Validate changes** using the validation script
 
 This ensures a smooth development workflow when the orchestrator improves the plugin through pattern learning.
 
@@ -141,7 +56,5 @@ This ensures a smooth development workflow when the orchestrator improves the pl
 
 These scripts are checked into git because:
 - They're part of the development workflow
-- They reference project-specific paths/marketplace names
+- They help maintain plugin quality
 - They should be shared with contributors
-
-If you fork this plugin, update the marketplace name in the scripts to match your setup.

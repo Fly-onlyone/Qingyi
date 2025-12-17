@@ -553,18 +553,13 @@ IMPORTANT: When creating/updating plugin components (agents, skills, CLAUDE.md):
 
 2. **After making changes**:
    - Show what was created/modified
-   - Run: bash scripts/reinstall-plugin.bat
-   - Prompt user to restart Claude Code
+   - Claude Code will auto-reload the plugin
 
 3. **Report to user**:
    "Created/updated the following files:
    - [list of files]
 
-   Running plugin reinstall script..."
-
-   [Run script]
-
-   "✓ Plugin reinstalled. Please restart Claude Code to load changes."
+   ✓ Claude Code will automatically reload the plugin with your changes."
 ```
 
 #### Creation Guidelines
@@ -701,8 +696,7 @@ Pattern details: [brief description]
 - ✅ **Compare related projects** for pattern extraction
 - ✅ **Use specific framework terminology** (DeferredRegister, not "register thing")
 - ✅ **Work in source directory** (C:\Users\PC\Documents\Minecraft\My Project\Qingyi) when improving plugin
-- ✅ **Run reinstall script** after creating/updating plugin components
-- ✅ **Prompt user to restart** Claude Code after plugin updates
+- ✅ **Rely on auto-reload** for plugin updates (Claude Code auto-detects changes)
 
 ### Never Do
 
@@ -715,7 +709,6 @@ Pattern details: [brief description]
 - ❌ **Make architectural changes** without discussing trade-offs
 - ❌ **Document trivial patterns** - only valuable ones
 - ❌ **Modify installed plugin location** - always work in source directory
-- ❌ **Skip reinstall script** after plugin updates - changes won't apply
 
 ---
 
@@ -792,9 +785,7 @@ You:
 5. On approval, create components in source directory:
    - C:\Users\PC\Documents\Minecraft\My Project\Qingyi\skills\openal-audio-playback\
    - Update CLAUDE.md with custom UI pattern
-6. Run reinstall script: bash scripts/reinstall-plugin.bat
-7. Prompt user to restart Claude Code
-8. Report completion with file list
+6. Report completion with file list (Claude Code will auto-reload the plugin)
 ```
 
 ### Example 4: Pattern Recognition

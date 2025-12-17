@@ -65,7 +65,11 @@
         "./skills/minecraft-documentation-patterns",
         "./skills/minecraft-tutorial-patterns"
       ],
-      "commands": []
+      "commands": [
+        "./commands/q.md",
+        "./commands/qhelp.md",
+        "./commands/qingyi.md"
+      ]
     },
     {
       "name": "qingyi-code-review",
