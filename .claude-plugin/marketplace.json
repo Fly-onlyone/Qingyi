@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "qingyi",
-      "source": "./plugins/qingyi",
+      "source": "./../plugins/qingyi",
       "description": "Minecraft mod development plugin with specialized agents and skills for improved code accuracy and token efficiency. Supports Forge, NeoForge, Fabric, and Quilt frameworks.",
       "version": "1.3.2",
       "author": {
@@ -76,7 +76,7 @@
     },
     {
       "name": "qingyi-code-review",
-      "source": "./plugins/qingyi-code-review",
+      "source": "./../plugins/qingyi-code-review",
       "description": "AI-powered code review for Java and Minecraft mods with security, performance, and quality analysis. Compatible with Qingyi but usable independently.",
       "version": "1.0.0",
       "author": {
@@ -104,7 +104,7 @@
     },
     {
       "name": "qingyi-modernizer",
-      "source": "./plugins/qingyi-modernizer",
+      "source": "./../plugins/qingyi-modernizer",
       "description": "Safe, incremental modernization for legacy codebases including Minecraft mod version migrations (1.19→1.20, Forge→NeoForge, monolithic→multi-loader). Uses strangler fig pattern for zero-downtime upgrades.",
       "version": "1.0.0",
       "author": {
