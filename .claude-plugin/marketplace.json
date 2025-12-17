@@ -36,10 +36,13 @@
       "strict": false,
       "agents": [
         "./agents/qingyi-orchestrator.md",
+        "./agents/qingyi-plugin-manager.md",
         "./agents/registry-and-content-expert.md",
         "./agents/events-and-lifecycle-expert.md",
         "./agents/data-and-persistence-expert.md",
         "./agents/rendering-and-client-expert.md",
+        "./agents/brave-search-agent.md",
+        "./agents/github-code-search-agent.md",
         "./agents/intellij-code-navigator.md",
         "./agents/minecraft-code-validator.md",
         "./agents/intellij-refactoring-master.md",
