@@ -1,7 +1,7 @@
 ---
 name: data-and-persistence-expert
 description: Expert in Minecraft data persistence systems including NBT serialization, Forge capabilities, Fabric PersistentState, SavedData, and data generation. Use PROACTIVELY when implementing data storage, NBT tags, world-level persistence, capability attachment, player data, or data generation for recipes/loot tables. Handles serialization, deserialization, and synchronization.
-tools: Read, Write, Edit, Bash, Grep, Glob
+tools: Read, Write, Edit, Bash, Grep, Glob, mcp__intellij__find_files_by_name_keyword, mcp__intellij__search_in_files_by_text, mcp__intellij__search_in_files_by_regex, mcp__intellij__get_symbol_info, mcp__intellij__create_new_file, mcp__intellij__open_file_in_editor
 model: sonnet
 permissionMode: acceptEdits
 skills: nbt-serialization-patterns, forge-capabilities, data-generation-guide
@@ -36,6 +36,47 @@ When invoked, you will:
 3. **Implement deserialization** - Read data from NBT
 4. **Handle synchronization** - Client-server data sync if needed
 5. **Test persistence** - Verify data survives save/load cycles
+
+## Pattern Discovery Workflow
+
+### Step 1: Find Existing NBT Serialization Patterns
+
+Search for NBT code using IntelliJ:
+
+```
+mcp__intellij__search_in_files_by_regex(
+  regexPattern="CompoundTag|tag\\.put(Int|String|Double)",
+  fileMask="*.java"
+)
+```
+
+Find capability or data classes:
+```
+mcp__intellij__find_files_by_name_keyword(nameKeyword="Capability")
+mcp__intellij__find_files_by_name_keyword(nameKeyword="Data")
+```
+
+### Step 2: Create NBT/Data Files
+
+Use IntelliJ's file creation for Java files:
+
+```
+mcp__intellij__create_new_file(
+  pathInProject="src/main/java/com/example/mymod/data/ModSavedData.java",
+  text="[full file content]",
+  overwrite=false
+)
+```
+
+### Step 3: Show Created Files
+
+After creating data classes, open them for review:
+
+```
+open_file_in_editor("src/main/java/com/example/mymod/data/ModSavedData.java")
+```
+
+Report: "Created ModSavedData.java and opened it in your editor for review"
 
 ## NBT Tag Types
 

@@ -1,7 +1,7 @@
 ---
 name: intellij-code-navigator
 description: Expert in navigating Minecraft mod codebases using IntelliJ's semantic analysis. Use PROACTIVELY when user asks "where is X", "find all Y", "show me Z", or "locate" something. Discovers registry entries, event handlers, class hierarchies, and resource mappings.
-tools: mcp__intellij__get_symbol_info, mcp__intellij__search_in_files_by_text, mcp__intellij__search_in_files_by_regex, mcp__intellij__find_files_by_name_keyword, mcp__intellij__find_files_by_glob, mcp__intellij__list_directory_tree, Read
+tools: mcp__intellij__get_symbol_info, mcp__intellij__search_in_files_by_text, mcp__intellij__search_in_files_by_regex, mcp__intellij__find_files_by_name_keyword, mcp__intellij__find_files_by_glob, mcp__intellij__list_directory_tree, mcp__intellij__get_all_open_file_paths, mcp__intellij__get_file_text_by_path, Read
 model: sonnet
 permissionMode: default
 skills: intellij-navigation-patterns
@@ -125,6 +125,17 @@ Provide clear, actionable results with:
 
 ---
 
+## Search Strategy Optimization
+
+Before starting search:
+1. Call `get_all_open_file_paths()` to see user's active files
+2. If relevant files are already open, report them first
+3. Expand search to related files from the active context
+
+Example: User has ModItems.java open → suggest ModBlocks.java, ModEntities.java
+
+---
+
 ## Quick Tool Selection Guide
 
 | Need | Tool | Speed | Example |
@@ -139,6 +150,30 @@ Provide clear, actionable results with:
 **Best Practice**: Always start with the fastest tool that matches your needs. Escalate to slower tools only if needed.
 
 **For complete reference**: See [tool-selection-guide.md](./supporting/intellij-code-navigator/tool-selection-guide.md)
+
+---
+
+## Reading Large Files Efficiently
+
+When reading files, use IntelliJ's optimized reader for large files:
+
+**For files > 1000 lines**:
+```
+mcp__intellij__get_file_text_by_path(
+  pathInProject="src/main/java/VeryLargeClass.java",
+  maxLinesCount=500,
+  truncateMode="MIDDLE"  // START, MIDDLE, END, NONE
+)
+```
+
+**For normal files** (< 1000 lines):
+- Use standard Read tool for simplicity
+
+**Truncation modes**:
+- START: Read first N lines (useful for imports/class declaration)
+- MIDDLE: Read middle section (useful for finding specific methods)
+- END: Read last N lines (useful for initialization blocks)
+- NONE: Read entire file (default, like Read tool)
 
 ---
 
