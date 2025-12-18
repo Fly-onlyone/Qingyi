@@ -177,6 +177,80 @@ The Qingyi plugin currently includes these production-ready skills:
     - Supporting files: run-client-server.md, data-generation.md, custom-configurations.md
     - Used by: intellij-build-and-test-runner
 
+14. **fabric-registry-api** ([skills/fabric-registry-api/](../plugins/qingyi/skills/fabric-registry-api/))
+    - Fabric registry system using Registry.register with Identifiers
+    - Item, block, entity registration for Fabric/Quilt mods
+    - Creative tab organization and Fabric lifecycle integration
+    - Used by: registry-and-content-expert, minecraft-tutorial-engineer
+
+15. **minecraft-documentation-patterns** ([skills/minecraft-documentation-patterns/](../plugins/qingyi/skills/minecraft-documentation-patterns/))
+    - Documentation patterns for Minecraft mods (10-100+ pages)
+    - Registry documentation templates and examples
+    - Event handler API documentation patterns
+    - Mixin documentation guidelines
+    - Multi-loader documentation guides
+    - Supporting files: registry-docs-examples.md, event-handler-docs.md, mixin-documentation.md
+    - Used by: minecraft-docs-architect
+
+16. **minecraft-tutorial-patterns** ([skills/minecraft-tutorial-patterns/](../plugins/qingyi/skills/minecraft-tutorial-patterns/))
+    - Educational tutorial patterns with progressive difficulty
+    - Beginner → Intermediate → Advanced → Expert progression
+    - Exercise templates with starter code and solutions
+    - Common mistakes documentation
+    - Framework comparison templates (Forge vs NeoForge vs Fabric)
+    - Supporting files: exercise-templates.md, common-mistakes.md, framework-comparisons.md
+    - Used by: minecraft-tutorial-engineer
+
+17. **minecraft-architecture-patterns** ([skills/minecraft-architecture-patterns/](../plugins/qingyi/skills/minecraft-architecture-patterns/))
+    - Architectural design patterns for Minecraft mods
+    - Client/server separation guidelines (CRITICAL)
+    - Registry organization patterns
+    - Event-driven architecture patterns
+    - Data persistence strategies
+    - Multi-loader abstraction patterns
+    - Supporting files: client-server-separation.md, package-structures.md
+    - Used by: minecraft-architect-reviewer
+
+### Companion Plugin Skills
+
+These skills are available in separate plugins (qingyi-code-review, qingyi-modernizer):
+
+18. **minecraft-code-review-patterns** (qingyi-code-review plugin)
+    - Code review checklists specific to Minecraft mods
+    - Registry validation patterns
+    - Event handler safety checks
+    - Client/server separation validation
+    - NBT security guidelines
+    - Performance pattern detection
+    - Resource file validation
+    - Supporting files: security-vulnerabilities.md, performance-antipatterns.md
+    - Used by: code-reviewer
+
+19. **java-security-patterns** (qingyi-code-review plugin)
+    - Java security best practices (OWASP Top 10)
+    - Input validation patterns
+    - Cryptographic implementation guidelines
+    - Secrets management
+    - Dependency vulnerability awareness
+    - Used by: code-reviewer
+
+20. **mod-migration-guide** (qingyi-modernizer plugin)
+    - Migration strategies for Minecraft mods
+    - Version upgrade patterns (1.19 → 1.20 → 1.21)
+    - Framework migration (Forge → NeoForge)
+    - Multi-loader conversion (monolithic → common/forge/fabric)
+    - Backward compatibility preservation
+    - Supporting files: forge-to-neoforge.md, minecraft-version-migrations.md, multi-loader-conversion.md
+    - Used by: legacy-modernizer
+
+21. **gradle-migration-patterns** (qingyi-modernizer plugin)
+    - Gradle build system migration for Minecraft mods
+    - ForgeGradle → NeoGradle migration
+    - Multi-project build configuration
+    - Dependency management across versions
+    - Supporting files: build-examples.md
+    - Used by: legacy-modernizer
+
 ## See Also
 
 - [skills/README.md](../skills/README.md)

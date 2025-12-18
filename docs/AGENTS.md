@@ -649,6 +649,67 @@ The Qingyi plugin currently includes these production-ready agents:
     - Model: haiku (cost-efficient for comprehensive GitHub research)
     - Skills: pattern-recognition
 
+14. **minecraft-docs-architect** ([plugins/qingyi/agents/minecraft-docs-architect.md](../plugins/qingyi/agents/minecraft-docs-architect.md))
+    - Comprehensive technical documentation generator for Minecraft mods (10-100+ pages)
+    - Auto-detects framework (Forge/NeoForge/Fabric) from project files
+    - Standard documentation structure: Overview, Architecture, Registry, Events, Persistence, Client-side, Resources, API
+    - Uses real code examples from actual project, not pseudocode
+    - Supports single file (DOCUMENTATION.md) or folder structure (/docs)
+    - Invoked PROACTIVELY when generating mod documentation, API guides, or architectural deep-dives
+    - Tools: Read, Write, Edit, Bash, Grep, Glob, Task
+    - Model: sonnet
+    - Skills: minecraft-documentation-patterns, forge-registry-api, neoforge-registry-api, forge-event-system, nbt-serialization-patterns, pattern-recognition, multi-loader-project-patterns
+
+15. **minecraft-tutorial-engineer** ([plugins/qingyi/agents/minecraft-tutorial-engineer.md](../plugins/qingyi/agents/minecraft-tutorial-engineer.md))
+    - Step-by-step tutorial creator for Minecraft mod development
+    - Progressive difficulty: Beginner (items, blocks) → Intermediate (events, NBT) → Advanced (networking, datagen) → Expert (mixins, multi-loader)
+    - Framework comparisons showing Forge vs NeoForge vs Fabric side-by-side
+    - Includes common mistakes section and hands-on exercises with solutions
+    - Invoked PROACTIVELY when creating educational content, onboarding materials, or feature implementation guides
+    - Tools: Read, Write, Edit, Grep, Glob
+    - Model: haiku (cost-efficient for tutorial generation)
+    - Skills: minecraft-tutorial-patterns, forge-registry-api, neoforge-registry-api, forge-event-system, rendering-patterns, code-summarizer
+
+16. **minecraft-architect-reviewer** ([plugins/qingyi/agents/minecraft-architect-reviewer.md](../plugins/qingyi/agents/minecraft-architect-reviewer.md))
+    - Architecture review specialist for Minecraft mods
+    - Systematic review: Package structure, Client/Server separation (CRITICAL), Registry organization, Event handlers, Data persistence
+    - Detects architectural smells: God Class, Client-Server violations, Registry leakage, Tight coupling
+    - Pattern recognition: Singleton, Registry, Strategy, Observer, Facade, Builder, Factory
+    - Generates comprehensive review reports with severity-prioritized issues
+    - Invoked PROACTIVELY for architectural decisions, system design validation, and identifying architectural smells
+    - Tools: Read, Edit, Grep, Glob, Task
+    - Model: sonnet
+    - Skills: minecraft-architecture-patterns, pattern-recognition, multi-loader-project-patterns, forge-registry-api, neoforge-registry-api, forge-event-system, nbt-serialization-patterns
+
+### Companion Plugin Agents
+
+These agents are available in separate plugins (qingyi-code-review, qingyi-modernizer):
+
+17. **code-reviewer** (qingyi-code-review plugin)
+    - Elite code review specialist with AI-powered analysis
+    - Auto-detects Minecraft mod context and applies framework-specific checks
+    - Security analysis: OWASP Top 10 (injection, authentication, XSS, deserialization, etc.)
+    - Performance analysis: Algorithm efficiency, resource management, caching, concurrency
+    - Minecraft-specific: Client/Server separation, Registry validation, Event handler safety, NBT security
+    - Educational approach with explanations for every issue
+    - Complements minecraft-code-validator (deep/educational vs fast/automated)
+    - Invoked on-demand for reviewing implementations, pull requests, and critical code sections
+    - Tools: Read, Edit, Grep, Glob, Task
+    - Model: sonnet
+    - Skills: minecraft-code-review-patterns, java-security-patterns, pattern-recognition
+
+18. **legacy-modernizer** (qingyi-modernizer plugin)
+    - Migration and modernization specialist for Minecraft mods
+    - Migration types: Version upgrade, Framework migration (Forge→NeoForge), Multi-loader conversion
+    - Uses Strangler Fig Pattern for safe incremental migration
+    - Pre-migration analysis: Current state assessment, breaking changes, risk analysis
+    - Phased migration plans with rollback strategies
+    - Backward compatibility: World data preservation, registry remapping, config migration
+    - Invoked PROACTIVELY for Minecraft version migrations, framework migrations, and codebase modernization
+    - Tools: Read, Write, Edit, Bash, Grep, Glob
+    - Model: haiku (cost-efficient for migration planning)
+    - Skills: mod-migration-guide, gradle-migration-patterns, pattern-recognition
+
 ### Suggested Future Agents
 
 Additional agents that could be added:

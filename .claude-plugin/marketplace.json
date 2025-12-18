@@ -47,7 +47,10 @@
         "./agents/minecraft-code-validator.md",
         "./agents/intellij-refactoring-master.md",
         "./agents/intellij-project-analyzer.md",
-        "./agents/intellij-build-and-test-runner.md"
+        "./agents/intellij-build-and-test-runner.md",
+        "./agents/minecraft-docs-architect.md",
+        "./agents/minecraft-tutorial-engineer.md",
+        "./agents/minecraft-architect-reviewer.md"
       ],
       "skills": [
         "./skills/forge-registry-api",
@@ -71,7 +74,9 @@
       "commands": [
         "./commands/q.md",
         "./commands/qhelp.md",
-        "./commands/qingyi.md"
+        "./commands/qingyi.md",
+        "./commands/minecraft-doc-generate.md",
+        "./commands/mod-explain.md"
       ]
     },
     {
@@ -95,12 +100,16 @@
       ],
       "category": "quality",
       "strict": false,
-      "agents": [],
+      "agents": [
+        "./agents/code-reviewer.md"
+      ],
       "skills": [
         "./skills/java-security-patterns",
         "./skills/minecraft-code-review-patterns"
       ],
-      "commands": []
+      "commands": [
+        "./commands/mod-review.md"
+      ]
     },
     {
       "name": "qingyi-modernizer",
@@ -125,12 +134,16 @@
       ],
       "category": "modernization",
       "strict": false,
-      "agents": [],
+      "agents": [
+        "./agents/legacy-modernizer.md"
+      ],
       "skills": [
         "./skills/gradle-migration-patterns",
         "./skills/mod-migration-guide"
       ],
-      "commands": []
+      "commands": [
+        "./commands/mod-refactor.md"
+      ]
     }
   ]
 }

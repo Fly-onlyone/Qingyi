@@ -234,6 +234,21 @@ When task is complex or project structure is unknown:
 **For build, test, and execution**:
 → Use `intellij-build-and-test-runner`
 
+**For documentation generation** (API docs, architecture overviews):
+→ Use `minecraft-docs-architect`
+
+**For tutorial creation & code explanation**:
+→ Use `minecraft-tutorial-engineer`
+
+**For architectural review** (design patterns, structure validation):
+→ Use `minecraft-architect-reviewer`
+
+**For comprehensive code review** (security, performance, quality):
+→ Use `code-reviewer` (from qingyi-code-review plugin)
+
+**For version/framework migration** (Forge→NeoForge, 1.20→1.21):
+→ Use `legacy-modernizer` (from qingyi-modernizer plugin)
+
 #### Delegation Pattern
 
 ```markdown
@@ -432,7 +447,59 @@ When user asks discovery questions:
 
 ---
 
-#### Phase 6: Refactoring (On-Demand)
+#### Phase 6: Documentation (On-Demand)
+
+**When users request documentation OR after major feature completion**:
+
+```markdown
+## Documentation Phase
+
+When user requests documentation or after completing significant features:
+
+1. **Determine documentation type** - Choose appropriate approach:
+   - Full mod docs → Use `minecraft-docs-architect`
+   - Tutorial/explanation → Use `minecraft-tutorial-engineer`
+   - Architecture review → Use `minecraft-architect-reviewer`
+
+2. **Invoke documentation agent**
+
+   Use the minecraft-docs-architect agent to generate comprehensive documentation.
+
+   Context: [Project name, framework, key features]
+   Output format: [Single file / docs folder / wiki format]
+
+3. **Review generated documentation** - Verify:
+   - Framework correctly detected
+   - All registries documented
+   - Code examples accurate
+   - Cross-references working
+
+4. **Report to user** - Include documentation status:
+   - "✓ Generated DOCUMENTATION.md (85 pages)"
+   - "✓ Documented 15 items, 3 blocks, 2 entities"
+   - "✓ Architecture diagrams included"
+```
+
+**When to invoke documentation agents**:
+- ✅ User explicitly requests documentation
+- ✅ After major feature implementation complete
+- ✅ When preparing for release
+- ✅ When onboarding new developers
+
+**When NOT to invoke**:
+- ❌ Minor bug fixes
+- ❌ Single file changes
+- ❌ Resource-only updates
+
+**Documentation improves maintainability by**:
+- Providing reference for future development
+- Onboarding new contributors faster
+- Recording architectural decisions
+- Creating API reference for integrations
+
+---
+
+#### Phase 7: Refactoring (On-Demand)
 
 **When users request rename operations, use safe refactoring**:
 

@@ -1,0 +1,11 @@
+{
+  "name": "qingyi-modernizer",
+  "version": "1.0.0",
+  "description": "Legacy code modernization and migration plugin. Handles Minecraft version upgrades, framework migrations (Forge to NeoForge), and multi-loader conversions. Companion to Qingyi plugin.",
+  "author": "Qingyi",
+  "repository": "https://github.com/yourusername/qingyi-modernizer",
+  "tags": ["migration", "modernization", "minecraft", "refactoring"],
+  "requires": {
+    "claude-code": ">=1.0.0"
+  }
+}

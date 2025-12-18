@@ -1,3 +1,5 @@
 /plugin marketplace remove qingyi
 /plugin marketplace add ./.claude-plugin/marketplace.json
 /plugin install qingyi@qingyi
+
+
