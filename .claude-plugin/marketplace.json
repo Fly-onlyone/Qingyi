@@ -114,8 +114,8 @@
     {
       "name": "qingyi-modernizer",
       "source": "./../plugins/qingyi-modernizer",
-      "description": "Safe, incremental modernization for legacy codebases including Minecraft mod version migrations (1.19→1.20, Forge→NeoForge, monolithic→multi-loader). Uses strangler fig pattern for zero-downtime upgrades.",
-      "version": "1.0.0",
+      "description": "Safe, incremental modernization for legacy codebases including Minecraft mod version migrations (1.19→1.20, Forge→NeoForge, monolithic→multi-loader). Includes comprehensive refactoring, technical debt analysis, and context restoration tools. Uses strangler fig pattern for zero-downtime upgrades.",
+      "version": "1.1.0",
       "author": {
         "name": "Fly",
         "email": "",
@@ -130,7 +130,10 @@
         "version-upgrade",
         "forge",
         "neoforge",
-        "fabric"
+        "fabric",
+        "technical-debt",
+        "clean-code",
+        "context-restoration"
       ],
       "category": "modernization",
       "strict": false,
@@ -142,7 +145,10 @@
         "./skills/mod-migration-guide"
       ],
       "commands": [
-        "./commands/mod-refactor.md"
+        "./commands/mod-refactor.md",
+        "./commands/refactor-clean.md",
+        "./commands/tech-debt.md",
+        "./commands/context-restore.md"
       ]
     }
   ]

@@ -33,7 +33,8 @@
       "WebSearch",
       "mcp__brave__brave_web_search",
       "mcp__brave__brave_video_search",
-      "mcp__intellij__find_files_by_glob"
+      "mcp__intellij__find_files_by_glob",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
