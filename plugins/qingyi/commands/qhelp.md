@@ -10,7 +10,7 @@ Display comprehensive help for the Qingyi Minecraft mod development plugin.
 
 Qingyi is a specialized Claude Code plugin for Minecraft mod development with intelligent agents and framework-specific skills.
 
-**Version**: 1.1.0
+**Version**: 1.3.2
 **Location**: C:\Users\PC\Documents\Minecraft\My Project\Qingyi
 **Supported Projects**: MusicMod1_TheFatRat, Apocalypse_TNT, and other Minecraft mods
 
@@ -148,26 +148,34 @@ When orchestrator finds genuinely new patterns, it proposes updating CLAUDE.md w
 ```
 Qingyi/
 ├── .claude-plugin/
-│   ├── plugin.json
-│   └── commands/
-│       ├── qingyi.md  (this command)
-│       ├── q.md       (short alias)
-│       └── qhelp.md   (this help)
-├── agents/
-│   ├── qingyi-orchestrator.md
-│   ├── registry-and-content-expert.md
-│   ├── events-and-lifecycle-expert.md
-│   ├── data-and-persistence-expert.md
-│   └── rendering-and-client-expert.md
-└── skills/
-    ├── forge-registry-api/
-    ├── neoforge-registry-api/
-    ├── forge-event-system/
-    ├── nbt-serialization-patterns/
-    ├── rendering-patterns/
-    ├── pattern-recognition/
-    ├── agent-creation-guide/
-    └── code-summarizer/
+│   └── marketplace.json
+├── plugins/
+│   ├── qingyi/
+│   │   ├── commands/
+│   │   │   ├── qingyi.md  (this command)
+│   │   │   ├── q.md       (short alias)
+│   │   │   └── qhelp.md   (this help)
+│   │   ├── agents/
+│   │   │   ├── qingyi-orchestrator.md
+│   │   │   ├── registry-and-content-expert.md
+│   │   │   ├── events-and-lifecycle-expert.md
+│   │   │   ├── data-and-persistence-expert.md
+│   │   │   └── rendering-and-client-expert.md
+│   │   └── skills/
+│   │       ├── forge-registry-api/
+│   │       ├── neoforge-registry-api/
+│   │       ├── fabric-registry-api/
+│   │       ├── forge-event-system/
+│   │       ├── fabric-event-system/
+│   │       ├── gui-development/
+│   │       ├── sound-system-api/
+│   │       ├── mod-lifecycle-patterns/
+│   │       ├── forge-capabilities/
+│   │       ├── data-generation-guide/
+│   │       ├── nbt-serialization-patterns/
+│   │       └── rendering-patterns/
+│   ├── qingyi-code-review/
+│   └── qingyi-modernizer/
 ```
 
 ## Quick Reference

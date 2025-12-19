@@ -240,10 +240,7 @@ When task is complex or project structure is unknown:
 **For tutorial creation & code explanation**:
 → Use `minecraft-tutorial-engineer`
 
-**For architectural review** (design patterns, structure validation):
-→ Use `minecraft-architect-reviewer`
-
-**For comprehensive code review** (security, performance, quality):
+**For comprehensive code review** (security, performance, quality, architecture):
 → Use `code-reviewer` (from qingyi-code-review plugin)
 
 **For version/framework migration** (Forge→NeoForge, 1.20→1.21):
@@ -459,7 +456,7 @@ When user requests documentation or after completing significant features:
 1. **Determine documentation type** - Choose appropriate approach:
    - Full mod docs → Use `minecraft-docs-architect`
    - Tutorial/explanation → Use `minecraft-tutorial-engineer`
-   - Architecture review → Use `minecraft-architect-reviewer`
+   - Architecture review → Use `code-reviewer` (from qingyi-code-review plugin)
 
 2. **Invoke documentation agent**
 
