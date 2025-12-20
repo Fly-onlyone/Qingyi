@@ -523,10 +523,10 @@ Track token usage before/after:
 
 ## See Also
 
-- [CLAUDE.md](../../CLAUDE.md) - Plugin development conventions
-- [docs/AGENTS.md](../../docs/AGENTS.md) - Agent creation guide
-- [docs/SKILLS.md](../../docs/SKILLS.md) - Skill development best practices
-- [docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md) - Plugin architecture overview
+- [CLAUDE.md](../CLAUDE.md) - Plugin development conventions
+- [docs/AGENTS.md](../docs/AGENTS.md) - Agent creation guide
+- [docs/SKILLS.md](../docs/SKILLS.md) - Skill development best practices
+- [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) - Plugin architecture overview
 
 ## Contributing
 

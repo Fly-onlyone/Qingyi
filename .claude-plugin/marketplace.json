@@ -12,148 +12,124 @@
   "plugins": [
     {
       "name": "qingyi",
-      "source": "./../plugins/qingyi",
-      "description": "Minecraft mod development plugin with specialized agents and skills for improved code accuracy and token efficiency. Supports Forge, NeoForge, Fabric, and Quilt frameworks.",
+      "source": "./",
+      "description": "Minecraft mod development plugin with specialized agents and skills for improved code accuracy and token efficiency.",
       "version": "1.3.2",
       "author": {
-        "name": "Fly",
-        "email": "",
-        "url": ""
+        "name": "Fly"
       },
       "license": "MIT",
+      "category": "game-development",
       "keywords": [
         "minecraft",
         "modding",
         "forge",
         "neoforge",
         "fabric",
-        "quilt",
-        "game-development",
-        "code-accuracy",
-        "token-efficiency"
+        "quilt"
       ],
-      "category": "game-development",
       "strict": false,
       "agents": [
-        "./agents/qingyi-orchestrator.md",
-        "./agents/qingyi-plugin-manager.md",
-        "./agents/registry-and-content-expert.md",
-        "./agents/events-and-lifecycle-expert.md",
-        "./agents/data-and-persistence-expert.md",
-        "./agents/rendering-and-client-expert.md",
-        "./agents/brave-search-agent.md",
-        "./agents/github-code-search-agent.md",
-        "./agents/intellij-code-navigator.md",
-        "./agents/minecraft-code-validator.md",
-        "./agents/intellij-refactoring-master.md",
-        "./agents/intellij-project-analyzer.md",
-        "./agents/intellij-build-and-test-runner.md",
-        "./agents/minecraft-docs-architect.md",
-        "./agents/minecraft-tutorial-engineer.md"
-      ],
-      "skills": [
-        "./skills/forge-registry-api",
-        "./skills/neoforge-registry-api",
-        "./skills/fabric-registry-api",
-        "./skills/forge-event-system",
-        "./skills/fabric-event-system",
-        "./skills/nbt-serialization-patterns",
-        "./skills/rendering-patterns",
-        "./skills/gui-development",
-        "./skills/sound-system-api",
-        "./skills/minecraft-architecture-patterns",
-        "./skills/multi-loader-project-patterns",
-        "./skills/mod-lifecycle-patterns",
-        "./skills/forge-capabilities",
-        "./skills/data-generation-guide",
-        "./skills/intellij-navigation-patterns",
-        "./skills/intellij-refactoring-safety",
-        "./skills/intellij-inspection-guide",
-        "./skills/minecraft-run-configuration-guide",
-        "./skills/pattern-recognition",
-        "./skills/agent-creation-guide",
-        "./skills/code-summarizer",
-        "./skills/minecraft-documentation-patterns",
-        "./skills/minecraft-tutorial-patterns"
+        "./plugins/qingyi/agents/qingyi-orchestrator.md",
+        "./plugins/qingyi/agents/qingyi-plugin-manager.md",
+        "./plugins/qingyi/agents/registry-and-content-expert.md",
+        "./plugins/qingyi/agents/events-and-lifecycle-expert.md",
+        "./plugins/qingyi/agents/data-and-persistence-expert.md",
+        "./plugins/qingyi/agents/rendering-and-client-expert.md",
+        "./plugins/qingyi/agents/brave-search-agent.md",
+        "./plugins/qingyi/agents/github-code-search-agent.md",
+        "./plugins/qingyi/agents/intellij-code-navigator.md",
+        "./plugins/qingyi/agents/minecraft-code-validator.md",
+        "./plugins/qingyi/agents/intellij-refactoring-master.md",
+        "./plugins/qingyi/agents/intellij-project-analyzer.md",
+        "./plugins/qingyi/agents/intellij-build-and-test-runner.md",
+        "./plugins/qingyi/agents/minecraft-docs-architect.md",
+        "./plugins/qingyi/agents/minecraft-tutorial-engineer.md"
       ],
       "commands": [
-        "./commands/q.md",
-        "./commands/qhelp.md",
-        "./commands/qingyi.md",
-        "./commands/minecraft-doc-generate.md",
-        "./commands/mod-explain.md"
+        "./plugins/qingyi/commands/q.md",
+        "./plugins/qingyi/commands/qhelp.md",
+        "./plugins/qingyi/commands/qingyi.md",
+        "./plugins/qingyi/commands/minecraft-doc-generate.md",
+        "./plugins/qingyi/commands/mod-explain.md"
+      ],
+      "skills": [
+        "./plugins/qingyi/skills/forge-registry-api",
+        "./plugins/qingyi/skills/neoforge-registry-api",
+        "./plugins/qingyi/skills/fabric-registry-api",
+        "./plugins/qingyi/skills/forge-event-system",
+        "./plugins/qingyi/skills/fabric-event-system",
+        "./plugins/qingyi/skills/nbt-serialization-patterns",
+        "./plugins/qingyi/skills/rendering-patterns",
+        "./plugins/qingyi/skills/gui-development",
+        "./plugins/qingyi/skills/sound-system-api",
+        "./plugins/qingyi/skills/minecraft-architecture-patterns",
+        "./plugins/qingyi/skills/multi-loader-project-patterns",
+        "./plugins/qingyi/skills/mod-lifecycle-patterns",
+        "./plugins/qingyi/skills/forge-capabilities",
+        "./plugins/qingyi/skills/data-generation-guide",
+        "./plugins/qingyi/skills/intellij-navigation-patterns",
+        "./plugins/qingyi/skills/intellij-refactoring-safety",
+        "./plugins/qingyi/skills/intellij-inspection-guide",
+        "./plugins/qingyi/skills/minecraft-run-configuration-guide",
+        "./plugins/qingyi/skills/pattern-recognition",
+        "./plugins/qingyi/skills/agent-creation-guide",
+        "./plugins/qingyi/skills/code-summarizer",
+        "./plugins/qingyi/skills/minecraft-documentation-patterns",
+        "./plugins/qingyi/skills/minecraft-tutorial-patterns"
       ]
     },
     {
       "name": "qingyi-code-review",
-      "source": "./../plugins/qingyi-code-review",
-      "description": "AI-powered code review for Java and Minecraft mods with security, performance, and quality analysis. Compatible with Qingyi but usable independently.",
+      "source": "./",
+      "description": "AI-powered code review for Java and Minecraft mods.",
       "version": "1.0.0",
       "author": {
-        "name": "Fly",
-        "email": "",
-        "url": ""
+        "name": "Fly"
       },
       "license": "MIT",
+      "category": "quality",
       "keywords": [
         "code-review",
         "minecraft",
         "java",
-        "security",
-        "quality-assurance",
-        "performance"
+        "security"
       ],
-      "category": "quality",
       "strict": false,
-      "agents": [
-        "./agents/code-reviewer.md"
-      ],
+      "agents": ["./plugins/qingyi-code-review/agents/code-reviewer.md"],
+      "commands": ["./plugins/qingyi-code-review/commands/mod-review.md"],
       "skills": [
-        "./skills/java-security-patterns",
-        "./skills/minecraft-code-review-patterns"
-      ],
-      "commands": [
-        "./commands/mod-review.md"
+        "./plugins/qingyi-code-review/skills/java-security-patterns",
+        "./plugins/qingyi-code-review/skills/minecraft-code-review-patterns"
       ]
     },
     {
       "name": "qingyi-modernizer",
-      "source": "./../plugins/qingyi-modernizer",
-      "description": "Safe, incremental modernization for legacy codebases including Minecraft mod version migrations (1.19→1.20, Forge→NeoForge, monolithic→multi-loader). Includes comprehensive refactoring, technical debt analysis, and context restoration tools. Uses strangler fig pattern for zero-downtime upgrades.",
+      "source": "./",
+      "description": "Safe, incremental modernization for legacy codebases including Minecraft mod migrations.",
       "version": "1.1.0",
       "author": {
-        "name": "Fly",
-        "email": "",
-        "url": ""
+        "name": "Fly"
       },
       "license": "MIT",
+      "category": "modernization",
       "keywords": [
         "refactoring",
         "migration",
-        "modernization",
         "minecraft",
-        "version-upgrade",
-        "forge",
-        "neoforge",
-        "fabric",
-        "technical-debt",
-        "clean-code",
-        "context-restoration"
+        "version-upgrade"
       ],
-      "category": "modernization",
       "strict": false,
-      "agents": [
-        "./agents/legacy-modernizer.md"
+      "agents": ["./plugins/qingyi-modernizer/agents/legacy-modernizer.md"],
+      "commands": [
+        "./plugins/qingyi-modernizer/commands/mod-refactor.md",
+        "./plugins/qingyi-modernizer/commands/refactor-clean.md",
+        "./plugins/qingyi-modernizer/commands/tech-debt.md",
+        "./plugins/qingyi-modernizer/commands/context-restore.md"
       ],
       "skills": [
-        "./skills/gradle-migration-patterns",
-        "./skills/mod-migration-guide"
-      ],
-      "commands": [
-        "./commands/mod-refactor.md",
-        "./commands/refactor-clean.md",
-        "./commands/tech-debt.md",
-        "./commands/context-restore.md"
+        "./plugins/qingyi-modernizer/skills/gradle-migration-patterns",
+        "./plugins/qingyi-modernizer/skills/mod-migration-guide"
       ]
     }
   ]

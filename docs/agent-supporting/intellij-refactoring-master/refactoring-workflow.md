@@ -48,13 +48,13 @@ public class ModItems {}  // Class
 **Examples**:
 ```java
 ITEMS.register("ruby_sword", () -> new Item());  // Registry name
-         ‘
+         ï¿½
     THIS STRING IS PERMANENT
 ```
 
 **Tool to Use**: `replace_text_in_file()` + manual resource updates
 
-**Safety Level**:   **DANGER** - World breaking change
+**Safety Level**: ï¿½ **DANGER** - World breaking change
 
 #### Type 1.3: Resource File Reference
 
@@ -92,7 +92,7 @@ get_symbol_info(
     line=15,
     column=30
 )
-’ Returns: Field RUBY_SWORD of type RegistryObject<Item>
+ï¿½ Returns: Field RUBY_SWORD of type RegistryObject<Item>
 ```
 
 2. **Execute rename refactoring**:
@@ -102,7 +102,7 @@ rename_refactoring(
     symbolName="RUBY_SWORD",
     newName="SAPPHIRE_SWORD"
 )
-’ IntelliJ updates all references automatically
+ï¿½ IntelliJ updates all references automatically
 ```
 
 3. **Verify success**:
@@ -125,7 +125,7 @@ Result: "Renamed successfully, updated 15 occurrences"
 
 1. **WARN USER FIRST**:
 ```markdown
-  WARNING: Registry Name Change Detected
+ï¿½ WARNING: Registry Name Change Detected
 
 Changing registry name from "ruby_sword" to "sapphire_sword" will:
 - DELETE all Ruby Swords from player inventories
@@ -188,9 +188,9 @@ No occurrences found
 ```
 Found 3 occurrences:
 - src/main/java/com/mod/OldClass.java (line 45)
-  ’ Manual review needed
+  ï¿½ Manual review needed
 - test/java/com/mod/TestClass.java (line 12)
-  ’ Test code needs updating
+  ï¿½ Test code needs updating
 ```
 
 **Action**: Review and update manually if needed
@@ -214,8 +214,8 @@ BUILD SUCCESSFUL in 12s
 **If build fails**:
 ```
 ERROR: Cannot find symbol RUBY_SWORD
-’ Rename didn't propagate to all files
-’ Manual fix required
+ï¿½ Rename didn't propagate to all files
+ï¿½ Manual fix required
 ```
 
 **Time**: 10-30 seconds depending on project size
@@ -228,22 +228,22 @@ ERROR: Cannot find symbol RUBY_SWORD
 
 #### Resource Update 4.1: Identify Required Updates
 
-**If registry name changed** (ruby_sword ’ sapphire_sword):
+**If registry name changed** (ruby_sword ï¿½ sapphire_sword):
 
 **Required File Updates**:
 ```
 1. Model file rename:
    assets/modid/models/item/ruby_sword.json
-   ’ assets/modid/models/item/sapphire_sword.json
+   ï¿½ assets/modid/models/item/sapphire_sword.json
 
 2. Texture file rename:
    assets/modid/textures/item/ruby_sword.png
-   ’ assets/modid/textures/item/sapphire_sword.png
+   ï¿½ assets/modid/textures/item/sapphire_sword.png
 
 3. Translation key update:
    assets/modid/lang/en_us.json
    "item.modid.ruby_sword": "Ruby Sword"
-   ’ "item.modid.sapphire_sword": "Sapphire Sword"
+   ï¿½ "item.modid.sapphire_sword": "Sapphire Sword"
 
 4. Recipe updates:
    data/modid/recipes/ruby_sword.json
@@ -363,8 +363,8 @@ execute_run_configuration(
 **If errors found**:
 ```
 ERROR: Failed to load model for modid:sapphire_sword
-’ Model file not renamed correctly
-’ Go back to Step 4
+ï¿½ Model file not renamed correctly
+ï¿½ Go back to Step 4
 ```
 
 #### Test 5.2: In-Game Verification
@@ -403,8 +403,8 @@ ERROR: Failed to load model for modid:sapphire_sword
    - Check inventory
 
 Expected (if registry name changed):
-    Ruby swords DELETED from inventory
-    Ruby ore blocks REPLACED with air
+  ï¿½ Ruby swords DELETED from inventory
+  ï¿½ Ruby ore blocks REPLACED with air
 
 This confirms world-breaking change!
 ```
@@ -413,7 +413,7 @@ This confirms world-breaking change!
 ```markdown
 ## Version 2.0.0 - BREAKING CHANGES
 
-  Registry name changed: ruby_sword ’ sapphire_sword
+ï¿½ Registry name changed: ruby_sword ï¿½ sapphire_sword
 - All Ruby Swords in existing worlds will be deleted
 - Recommend starting fresh world
 - See migration guide for advanced users
@@ -429,37 +429,37 @@ This confirms world-breaking change!
 
 ```
 User wants to rename "RUBY_SWORD"
-  “
+  ï¿½
 Is it a Java symbol or registry string?
     Java Symbol (variable/method/class)
-      “
+      ï¿½
     Use rename_refactoring()
-      “
+      ï¿½
      SAFE - No world impact
   
     Registry String ("ruby_sword")
-       “
+       ï¿½
      Has mod been released?
          No (still in development)
-           “
+           ï¿½
          Safe to change
          Update registry + resources
           OK
        
          Yes (players have worlds)
-            “
+            ï¿½
           WARN USER about world breaking
               User cancels
-                “
+                ï¿½
               Only rename Java symbol
               Keep registry name
                SAFE
             
               User confirms
-                 “
+                 ï¿½
                Update registry + resources
                Document breaking change
-                 WORLD BREAKING
+               ï¿½ WORLD BREAKING
 ```
 
 ### Decision Tree 2: Resource Update Scope
@@ -467,37 +467,37 @@ Is it a Java symbol or registry string?
 ```
 Registry name changed?
     No
-      “
+      ï¿½
     No resource updates needed
      DONE
   
     Yes
-       “
+       ï¿½
      Find all resource references
-       “
+       ï¿½
      For each resource type:
          Model files?
-           “
+           ï¿½
          Rename .json files
          
        
          Texture files?
-           “
+           ï¿½
          Rename .png files
          
        
          Lang files?
-           “
+           ï¿½
          Update translation keys
          
        
          Recipe files?
-           “
+           ï¿½
          Rename files + update contents
          
        
          Other data files?
-            “
+            ï¿½
           Search and update all references
           
 ```
@@ -517,7 +517,7 @@ Registry name changed?
 3.  DONE (30 seconds)
 ```
 
-**Example**: Rename helper method `initItems()` ’ `registerItems()`
+**Example**: Rename helper method `initItems()` ï¿½ `registerItems()`
 
 ### Variation 2: Complete Item Rename (Slow Path)
 
@@ -557,7 +557,7 @@ Registry name changed?
 6.  DONE (1-2 minutes)
 ```
 
-**Example**: Move `com.mod.item` ’ `com.mod.content.item`
+**Example**: Move `com.mod.item` ï¿½ `com.mod.content.item`
 
 ---
 
@@ -638,7 +638,7 @@ In-game console:
 **Don't**:
 ```java
 // Text replacement - DANGEROUS
-"RUBY_SWORD" ’ "SAPPHIRE_SWORD"
+"RUBY_SWORD" ï¿½ "SAPPHIRE_SWORD"
 // Will change EVERY occurrence, including unrelated variables!
 ```
 
@@ -656,15 +656,15 @@ rename_refactoring("ModItems.java", "RUBY_SWORD", "SAPPHIRE_SWORD")
 **Don't**:
 ```
 // Silently change registry name
-ITEMS.register("ruby_sword", ...) ’ ITEMS.register("sapphire_sword", ...)
+ITEMS.register("ruby_sword", ...) ï¿½ ITEMS.register("sapphire_sword", ...)
 // User doesn't know this breaks worlds!
 ```
 
 **Do**:
 ```
-  This will break existing worlds. Continue? (yes/no)
+ï¿½ This will break existing worlds. Continue? (yes/no)
 User confirms: yes
-’ Update registry + document breaking change
+ï¿½ Update registry + document breaking change
 ```
 
 ### Practice 3: Update All Resources Together
@@ -675,7 +675,7 @@ User confirms: yes
 ```
 // Only update model file
 // Forget texture, lang, recipes
-’ Item shows up with missing texture (purple/black checkerboard)
+ï¿½ Item shows up with missing texture (purple/black checkerboard)
 ```
 
 **Do**:
@@ -698,7 +698,7 @@ Checklist:
 ```
 // Rename item
 // Immediately commit and push
-’ Mod doesn't load, player complaints!
+ï¿½ Mod doesn't load, player complaints!
 ```
 
 **Do**:
@@ -720,7 +720,7 @@ Checklist:
 // Change registry names
 // Release as patch version (1.5.1)
 // No changelog entry
-’ Users confused why items disappeared
+ï¿½ Users confused why items disappeared
 ```
 
 **Do**:
@@ -729,7 +729,7 @@ Checklist:
 // Release as major version (2.0.0)
 // Changelog:
   BREAKING: Registry names changed
-  - ruby_sword ’ sapphire_sword
+  - ruby_sword ï¿½ sapphire_sword
   - Existing worlds will lose these items
   - Recommend fresh world
 ```

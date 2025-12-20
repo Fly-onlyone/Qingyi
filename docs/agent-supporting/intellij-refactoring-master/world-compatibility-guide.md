@@ -67,7 +67,7 @@ ITEMS.register("ruby_sword", () -> new SwordItem(...))
 
 // Version 2.0 (registry name changed)
 ITEMS.register("sapphire_sword", () -> new SwordItem(...))
-// World loads, looks for "ruby_sword", not found ’ DELETED
+// World loads, looks for "ruby_sword", not found ï¿½ DELETED
 ```
 
 ---
@@ -350,11 +350,11 @@ ITEMS.register("bronze_sword", ...)
 ```markdown
 ## Version 2.0.0 - BREAKING CHANGES
 
-  Registry Names Changed  
+ï¿½ Registry Names Changed ï¿½
 
 The following items have been renamed:
-- `copper_sword` ’ `bronze_sword`
-- `copper_pickaxe` ’ `bronze_pickaxe`
+- `copper_sword` ï¿½ `bronze_sword`
+- `copper_pickaxe` ï¿½ `bronze_pickaxe`
 
 **Impact**:
 - Existing worlds will LOSE these items from inventories
@@ -402,7 +402,7 @@ public static final RegistryObject<Item> BRONZE_SWORD = ITEMS.register(
 // Display warning tooltip on copper_sword
 @Override
 public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
-    tooltip.add(Component.literal("  Deprecated! Use Bronze Sword instead").withStyle(ChatFormatting.RED));
+    tooltip.add(Component.literal("ï¿½ Deprecated! Use Bronze Sword instead").withStyle(ChatFormatting.RED));
 }
 
 // Version 2.0.0 (remove old)
@@ -480,9 +480,9 @@ Execute planned refactoring:
 ```
 Look for warnings:
 - "Missing registry entries for modid:ruby_sword"
-  ’ Registry name changed or removed
+  ï¿½ Registry name changed or removed
 - "Successfully remapped modid:ruby_sword to modid:sapphire_sword"
-  ’ Alias working correctly
+  ï¿½ Alias working correctly
 ```
 
 ### Automated Test Script
@@ -529,7 +529,7 @@ echo "Test complete. Check results above."
 ```markdown
 ## [2.0.0] - 2024-XX-XX
 
-###   BREAKING CHANGES
+### ï¿½ BREAKING CHANGES
 
 #### Registry Name Changes
 
@@ -543,7 +543,7 @@ The following registry names have been changed:
 
 **What This Means**:
 - L Existing worlds will LOSE these items/blocks
--   Recommend starting a fresh world with 2.0.0
+- ï¿½ Recommend starting a fresh world with 2.0.0
 - 9 Worlds from 1.x will still load, but items will be gone
 
 **Migration Guide**:
@@ -574,7 +574,7 @@ public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
     // Check if world was created with old version
     if (isOldWorldVersion(level)) {
         player.sendSystemMessage(
-            Component.literal("  Warning: This world was created with an older version of ExampleMod.")
+            Component.literal("ï¿½ Warning: This world was created with an older version of ExampleMod.")
                 .withStyle(ChatFormatting.RED)
         );
         player.sendSystemMessage(
@@ -645,7 +645,7 @@ public class RegistryMigration {
 **Lifecycle**:
 ```
 Version 1.0:   copper_sword registered
-Version 2.0:   bronze_sword registered + alias copper ’ bronze
+Version 2.0:   bronze_sword registered + alias copper ï¿½ bronze
 Version 3.0:   bronze_sword registered (alias can be removed)
 ```
 
@@ -761,25 +761,25 @@ public static final Item BRONZE_SWORD = Registry.register(
 - =4 Rename registry string
 - =4 Remove registry entry
 - =4 Change mod ID
-- =4 Change registry type (ITEM ” BLOCK)
+- =4 Change registry type (ITEM ï¿½ BLOCK)
 
 ### Decision Tree
 
 ```
 User wants to rename item
-  “
+  ï¿½
 Has mod been released?
-    No (alpha/dev) ’ Safe to change registry
+    No (alpha/dev) ï¿½ Safe to change registry
     Yes (released)
-      “
+      ï¿½
     Is Java symbol or registry name?
-        Java symbol ’ SAFE, use rename_refactoring
+        Java symbol ï¿½ SAFE, use rename_refactoring
         Registry name
-          “
+          ï¿½
         Critical rename?
-            No ’ Keep old name, rename Java only
+            No ï¿½ Keep old name, rename Java only
             Yes
-              “
+              ï¿½
             Choose strategy:
                 Add alias (graceful migration)
                 Document breaking change (major version)

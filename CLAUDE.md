@@ -4,11 +4,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Qingyi** is a Claude Code plugin (v1.1.0) that provides specialized AI agents and reusable skills for Minecraft mod development. It supports Forge, NeoForge, Fabric, and Quilt frameworks.
+**Qingyi** is a Claude Code plugin (v1.3.2) that provides specialized AI agents and reusable skills for Minecraft mod development. It supports Forge, NeoForge, Fabric, and Quilt frameworks.
 
 **This is NOT a traditional software project** - there are no build/test commands. This is a plugin configuration project with markdown-based agents and skills that Claude Code loads to assist with Minecraft modding.
 
 **Plugin Marketplace**: [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
+
+## Project Structure
+
+```
+Qingyi/                                    ← Marketplace root
+├── .claude-plugin/
+│   └── marketplace.json                   ← Defines 3 plugins from this repo
+├── plugins/
+│   ├── qingyi/                           ← Main plugin (15 agents, 5 commands, 23 skills)
+│   │   ├── agents/
+│   │   ├── commands/
+│   │   └── skills/
+│   ├── qingyi-code-review/               ← Code review plugin (1 agent, 1 command, 2 skills)
+│   │   ├── agents/
+│   │   ├── commands/
+│   │   └── skills/
+│   └── qingyi-modernizer/                ← Modernization plugin (1 agent, 4 commands, 2 skills)
+│       ├── agents/
+│       ├── commands/
+│       └── skills/
+├── docs/
+│   ├── agent-supporting/                 ← Supporting docs for specific agents
+│   │   ├── brave-search-agent/
+│   │   ├── github-code-search-agent/
+│   │   ├── intellij-code-navigator/
+│   │   └── ... (6 agent doc sets)
+│   ├── AGENTS.md                         ← Agent creation guide
+│   └── SKILLS.md                         ← Skill creation guide
+├── scripts/
+│   ├── install.bat                       ← Windows installation script
+│   ├── install.sh                        ← Linux/macOS installation script
+│   └── uninstall.bat                     ← Uninstall script
+└── CLAUDE.md                             ← This file
+```
+
+**Key Design**: All 3 plugins use `"source": "./"` to copy the entire marketplace root (including `docs/`) to the plugin cache, ensuring agents can access supporting documentation.
 
 ## Plugin Architecture
 

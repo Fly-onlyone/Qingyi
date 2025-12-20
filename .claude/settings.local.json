@@ -14,7 +14,21 @@
       "WebSearch",
       "mcp__brave__brave_web_search",
       "mcp__brave__brave_video_search",
-      "mcp__intellij__find_files_by_glob"
+      "mcp__intellij__find_files_by_glob",
+      "mcp__intellij__get_run_configurations",
+      "Bash(mkdir:*)",
+      "Bash(where powershell)",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\PC\\\\Documents\\\\Minecraft\\\\My Project\\\\Qingyi && scripts\\\\qingyi-refresh.bat\")",
+      "Bash(powershell -ExecutionPolicy Bypass -NoProfile -File \"C:\\\\Users\\\\PC\\\\Documents\\\\Minecraft\\\\My Project\\\\Qingyi\\\\scripts\\\\qingyi-refresh.ps1\":*)",
+      "Bash(cmd /c \"C:\\\\Users\\\\PC\\\\Documents\\\\Minecraft\\\\My Project\\\\Qingyi\\\\qingyi-refresh.bat\" -WhatIf)",
+      "mcp__intellij__execute_run_configuration",
+      "mcp__intellij__execute_terminal_command",
+      "Bash(mklink:*)",
+      "Bash(dir:*)",
+      "Bash(cmd /c \"cd .claude-plugin && mklink /D plugins ..\\\\plugins\")",
+      "Bash(cmd /c \"mklink /D \"\".claude-plugin\\\\plugins\"\" \"\"plugins\"\"\")",
+      "Bash(cmd /c \"mklink /D plugins ..\\\\plugins 2>&1\")",
+      "Bash(powershell -Command \"New-Item -ItemType SymbolicLink -Path ''.claude-plugin\\\\plugins'' -Target ''plugins''\")"
     ],
     "deny": [],
     "ask": []
