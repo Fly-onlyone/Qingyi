@@ -12,51 +12,50 @@ Qingyi is a specialized Claude Code plugin for Minecraft mod development with in
 
 **Version**: 1.3.2
 **Location**: C:\Users\PC\Documents\Minecraft\My Project\Qingyi
-**Supported Projects**: MusicMod1_TheFatRat, Apocalypse_TNT, and other Minecraft mods
+**Architecture**: Direct delegation to specialist agents (skill-based routing)
 
-## Available Agents
+## How It Works
 
-### 1. qingyi-orchestrator
-**Master task manager and intelligent router**
-- Auto-detects project context (project name, framework, version)
-- Asks clarifying questions to understand requirements
-- Creates detailed task breakdown plans
-- Delegates to specialized agents
-- Updates CLAUDE.md with learned patterns
-- Self-improvement capability
+1. **You invoke**: `/qingyi <task>` or `/q <task>`
+2. **Auto-detection**: Detect project and framework from build files
+3. **Task routing**: Use Task Routing table (CLAUDE.md) to select specialist
+4. **Delegation**: Invoke specialist with structured context
+5. **Execution**: Agent uses framework-specific skills
+6. **Post-processing**: Validate, open files, present summary
 
-### 2. registry-and-content-expert
+The `agent-delegation` skill provides routing logic, delegation templates, and agent catalog.
+
+## Available Specialist Agents
+
+### 1. registry-and-content-expert
 **Items, blocks, entities registration**
 - DeferredRegister patterns (Forge/NeoForge)
 - Registry.register patterns (Fabric)
 - Item/Block/Entity properties and builders
 - Creative tabs and item groups
-- Version-specific registration differences
 
-**Skills**: forge-registry-api, neoforge-registry-api
+**Skills**: forge-registry-api, neoforge-registry-api, fabric-registry-api
 
-### 3. events-and-lifecycle-expert
+### 2. events-and-lifecycle-expert
 **Event systems, tick handlers, mod lifecycle**
 - Forge event bus (@SubscribeEvent, MOD vs FORGE bus)
 - Fabric callbacks and hooks
 - Mod initialization phases
 - Tick handlers (client/server/world/entity)
-- Event priority and cancellation
-- Client/server separation
 
-**Skills**: forge-event-system
+**Skills**: forge-event-system, fabric-event-system
 
-### 4. data-and-persistence-expert
+### 3. data-and-persistence-expert
 **NBT, capabilities, SavedData, data generation**
 - NBT serialization/deserialization (CompoundTag, ListTag)
-- Forge capability system (ICapabilityProvider, AttachCapabilitiesEvent)
+- Forge capability system (ICapabilityProvider)
 - Fabric persistent state (PersistentState)
 - SavedData for world-level persistence
 - Data generation (recipes, loot tables, tags)
 
-**Skills**: nbt-serialization-patterns
+**Skills**: nbt-serialization-patterns, forge-capabilities, data-generation-guide
 
-### 5. rendering-and-client-expert
+### 4. rendering-and-client-expert
 **GUI, rendering, audio, client-side code**
 - Boss bars (BossEvent, ServerBossEvent)
 - Custom screens and overlays
@@ -65,30 +64,144 @@ Qingyi is a specialized Claude Code plugin for Minecraft mod development with in
 - Advancement UI customization
 - Client-only code separation (@OnlyIn)
 
-**Skills**: rendering-patterns
+**Skills**: rendering-patterns, gui-development, sound-system-api
+
+### 5. intellij-code-navigator
+**Code search, pattern discovery, semantic navigation**
+- Finding existing implementations ("where is X?")
+- Discovering registry entries
+- Locating event handlers
+- Symbol lookup and analysis
+
+**Skills**: intellij-navigation-patterns
+
+### 6. minecraft-code-validator
+**Code validation, IntelliJ inspections, auto-fixing**
+- Detect errors and warnings
+- Auto-fix common issues (imports, annotations)
+- Validate registry patterns, event handlers
+
+**Skills**: intellij-inspection-guide, forge-event-system, forge-registry-api
+
+### 7. intellij-refactoring-master
+**Safe refactoring, symbol renaming**
+- Rename items, blocks, entities (scope-aware)
+- Resource file synchronization
+- Breaking change detection
+
+**Skills**: intellij-refactoring-safety, forge-registry-api
+
+### 8. intellij-project-analyzer
+**Project structure analysis**
+- Detect multi-loader projects
+- Analyze module architecture
+- Understand dependencies
+
+**Skills**: multi-loader-project-patterns, pattern-recognition
+
+### 9. intellij-build-and-test-runner
+**Build, test, and execution**
+- Run Minecraft client/server
+- Execute tests and verify mod loading
+- Monitor console for errors
+
+**Skills**: minecraft-run-configuration-guide
+
+### 10. minecraft-docs-architect
+**Comprehensive documentation generation**
+- API reference documentation (10-100+ pages)
+- Architecture guides
+- Registry/event handler docs
+
+**Skills**: minecraft-documentation-patterns
+
+### 11. minecraft-tutorial-engineer
+**Educational content creation**
+- Step-by-step tutorials
+- Onboarding guides
+- Progressive difficulty learning paths
+
+**Skills**: minecraft-tutorial-patterns
+
+### 12. brave-search-agent
+**Web research, documentation lookup**
+- Find official documentation
+- Discover migration guides
+- Research API changes
+
+**Skills**: pattern-recognition
+
+### 13. github-code-search-agent
+**GitHub code search, community patterns**
+- Find real-world mod examples
+- Discover framework implementations
+- Locate migration PRs
+
+**Skills**: pattern-recognition
+
+### 14. code-reviewer (qingyi-code-review plugin)
+**Security and performance review**
+- OWASP Top 10 security analysis
+- Performance optimization
+- Architecture review
+
+**Skills**: java-security-patterns, minecraft-code-review-patterns
+
+### 15. legacy-modernizer (qingyi-modernizer plugin)
+**Framework migration, version upgrades**
+- Forge → NeoForge migration
+- Minecraft version upgrades (1.20 → 1.21)
+- Gradle build system updates
+
+**Skills**: gradle-migration-patterns, mod-migration-guide
+
+### 16. qingyi-plugin-manager
+**Qingyi plugin development**
+- Creating new agents/skills
+- Updating CLAUDE.md
+- Plugin maintenance
+
+**Skills**: agent-creation-guide, pattern-recognition
 
 ## Available Skills
 
 **Framework-Specific Skills**:
-- **forge-registry-api** - Forge registration patterns with real examples from MusicMod
-- **neoforge-registry-api** - NeoForge registration + migration guide from Apocalypse_TNT
-- **forge-event-system** - Event system patterns from both user mods
-- **nbt-serialization-patterns** - NBT handling patterns
-- **rendering-patterns** - Client-side rendering, GUI, boss bars, audio
+- **forge-registry-api** - Forge registration patterns
+- **neoforge-registry-api** - NeoForge registration + migration
+- **fabric-registry-api** - Fabric Registry.register patterns
+- **forge-event-system** - Forge event bus patterns
+- **fabric-event-system** - Fabric callbacks and hooks
+- **nbt-serialization-patterns** - NBT handling
+- **rendering-patterns** - Client-side rendering, GUI, boss bars
+- **gui-development** - Custom screens and UI
+- **sound-system-api** - OpenAL audio playback
 
-**Helper Skills**:
-- **pattern-recognition** - Identify reusable patterns across projects
-- **agent-creation-guide** - Self-improvement system for creating new agents/skills
-- **code-summarizer** - Token-efficient code analysis with JSON output
+**Architecture Skills**:
+- **multi-loader-project-patterns** - Common/platform module architecture
+- **mod-lifecycle-patterns** - Mod initialization phases
+- **forge-capabilities** - Capability system
+- **data-generation-guide** - Datagen for recipes, loot tables
+
+**IntelliJ Integration Skills**:
+- **intellij-navigation-patterns** - Semantic code search
+- **intellij-refactoring-safety** - Safe refactoring patterns
+- **intellij-inspection-guide** - IntelliJ inspection catalog
+- **minecraft-run-configuration-guide** - runClient, runServer, runData
+
+**Plugin Development Skills**:
+- **agent-creation-guide** - Creating new agents/skills
+- **pattern-recognition** - Identifying reusable patterns
+- **code-summarizer** - Token-efficient code analysis
+- **agent-delegation** - Task routing and delegation patterns (NEW)
 
 ## Framework Support
 
 - ✅ **Forge** (1.19.x - 1.20.x)
 - ✅ **NeoForge** (1.20.x - 1.21.x)
-- ✅ **Fabric** (1.19.x - 1.21.x) - Partial support
-- ❌ **Quilt** - Not supported
+- ✅ **Fabric** (1.19.x - 1.21.x)
+- ⚠️ **Quilt** - Limited support (similar to Fabric)
 
-The orchestrator auto-detects your framework and uses the appropriate skills!
+The system auto-detects your framework and uses appropriate patterns!
 
 ## Usage Examples
 
@@ -99,7 +212,6 @@ The orchestrator auto-detects your framework and uses the appropriate skills!
 /qingyi create a boss bar countdown system
 /qingyi help me fix NBT serialization in my capability
 /qingyi register a new entity type with custom AI
-/qingyi improve the plugin based on my current project
 ```
 
 ### Using Short Alias
@@ -110,37 +222,43 @@ The orchestrator auto-detects your framework and uses the appropriate skills!
 /q create a custom screen
 ```
 
-### Self-Improvement
+### Direct Agent Invocation
+
+You can also invoke agents directly:
 
 ```
-/qingyi improve the plugin based on my current project
+Use the registry-and-content-expert agent to create a custom sword.
+
+Context:
+- Project: MusicMod
+- Framework: Forge 1.20.1
+- Files: ModItems.java
+- Background: Uses DeferredRegister pattern
+
+Expected: RegistryObject entry, model JSON, translation
 ```
-This analyzes your current mod, identifies new patterns, and proposes creating new agents/skills.
 
-## CLAUDE.md Learning System
+## Task Routing Quick Reference
 
-The plugin automatically learns from your code:
-- **MusicMod/CLAUDE.md** - Pre-seeded with 7 patterns (Singleton, OpenAL audio, custom UI, etc.)
-- **Apocalypse_TNT/CLAUDE.md** - Pre-seeded with 7 patterns (Orchestrator, Boss bars, SavedData, etc.)
+| Task Type | Specialist Agent |
+|-----------|------------------|
+| Items, blocks, entities | registry-and-content-expert |
+| Events, tick handlers | events-and-lifecycle-expert |
+| NBT, capabilities, persistence | data-and-persistence-expert |
+| GUI, rendering, audio | rendering-and-client-expert |
+| Code search | intellij-code-navigator |
+| Code validation | minecraft-code-validator |
+| Refactoring | intellij-refactoring-master |
+| Documentation | minecraft-docs-architect |
 
-When orchestrator finds genuinely new patterns, it proposes updating CLAUDE.md with your approval.
-
-## How It Works
-
-1. **You invoke**: `/qingyi <task>` or `/q <task>`
-2. **Auto-detection**: Orchestrator detects your project and framework from build files
-3. **Clarification**: Asks targeted questions about details it can't determine
-4. **Planning**: Creates a detailed task breakdown plan
-5. **Delegation**: Routes to the appropriate specialized agent(s)
-6. **Execution**: Agent uses framework-specific skills to complete the task
-7. **Learning**: Updates CLAUDE.md if new patterns discovered
+For complete routing table, see CLAUDE.md Task Routing section.
 
 ## Getting Started
 
 1. Navigate to your Minecraft mod project directory
-2. Type `/qingyi` or `/q` followed by what you want to do
-3. Answer any clarifying questions
-4. Review the task plan
+2. Type `/qingyi` or `/q` followed by your task
+3. System auto-detects project/framework
+4. Routes to appropriate specialist agent
 5. Get accurate, framework-specific implementation
 
 ## Plugin Structure
@@ -152,38 +270,52 @@ Qingyi/
 ├── plugins/
 │   ├── qingyi/
 │   │   ├── commands/
-│   │   │   ├── qingyi.md  (this command)
+│   │   │   ├── qingyi.md  (main command)
 │   │   │   ├── q.md       (short alias)
 │   │   │   └── qhelp.md   (this help)
 │   │   ├── agents/
-│   │   │   ├── qingyi-orchestrator.md
 │   │   │   ├── registry-and-content-expert.md
 │   │   │   ├── events-and-lifecycle-expert.md
 │   │   │   ├── data-and-persistence-expert.md
-│   │   │   └── rendering-and-client-expert.md
+│   │   │   ├── rendering-and-client-expert.md
+│   │   │   ├── intellij-code-navigator.md
+│   │   │   ├── minecraft-code-validator.md
+│   │   │   ├── intellij-refactoring-master.md
+│   │   │   ├── intellij-project-analyzer.md
+│   │   │   ├── intellij-build-and-test-runner.md
+│   │   │   ├── minecraft-docs-architect.md
+│   │   │   ├── minecraft-tutorial-engineer.md
+│   │   │   ├── brave-search-agent.md
+│   │   │   ├── github-code-search-agent.md
+│   │   │   └── qingyi-plugin-manager.md
 │   │   └── skills/
+│   │       ├── agent-delegation/         (NEW)
 │   │       ├── forge-registry-api/
 │   │       ├── neoforge-registry-api/
 │   │       ├── fabric-registry-api/
 │   │       ├── forge-event-system/
 │   │       ├── fabric-event-system/
-│   │       ├── gui-development/
-│   │       ├── sound-system-api/
-│   │       ├── mod-lifecycle-patterns/
-│   │       ├── forge-capabilities/
-│   │       ├── data-generation-guide/
 │   │       ├── nbt-serialization-patterns/
-│   │       └── rendering-patterns/
+│   │       ├── rendering-patterns/
+│   │       ├── ... (23 skills total)
 │   ├── qingyi-code-review/
 │   └── qingyi-modernizer/
 ```
 
-## Quick Reference
+## Command Reference
 
 | Command | Purpose |
 |---------|---------|
-| `/qingyi <task>` | Main command - invoke orchestrator with task |
+| `/qingyi <task>` | Main command - delegate to specialists |
 | `/q <task>` | Quick alias - same as /qingyi |
 | `/qhelp` | Show this help |
 
-**Need more help?** Check the agents/ and skills/ directories in the plugin folder for detailed documentation.
+## New in v1.3.2
+
+- ✨ **Direct delegation** - No orchestrator middleman
+- ✨ **agent-delegation skill** - Routing patterns and agent catalog
+- ✨ **Task Routing in CLAUDE.md** - Always-available quick reference
+- ✅ Removed orchestrator agent (simplified architecture)
+- ✅ More efficient token usage
+
+**Need more details?** Check CLAUDE.md for Task Routing table and delegation patterns, or browse the agents/ and skills/ directories.

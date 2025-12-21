@@ -2,10 +2,16 @@
 description: Quick alias for Qingyi plugin (usage: /q <task>)
 ---
 
-Use the qingyi-orchestrator agent to help with Minecraft mod development.
+For Minecraft mod development: {0}
 
-Task request: {0}
+Use the Task Routing guide in CLAUDE.md to delegate directly to specialist agents based on task type.
 
-The orchestrator will auto-detect your project and framework, then help you complete the task efficiently.
+**How delegation works**:
+1. Auto-detect project and framework from build files
+2. Identify task domain (items, events, NBT, GUI, etc.)
+3. Route to appropriate specialist agent using delegation pattern
+4. Follow post-delegation workflow (validate, open files, report)
 
-If no task provided, remind the user: Use `/qhelp` to see available agents and usage examples, or `/qingyi` for more detailed usage information.
+The `agent-delegation` skill provides detailed patterns and agent catalog when needed.
+
+If no task provided, remind user: Use `/qhelp` to see available agents and examples.

@@ -30,7 +30,6 @@
       ],
       "strict": false,
       "agents": [
-        "./plugins/qingyi/agents/qingyi-orchestrator.md",
         "./plugins/qingyi/agents/qingyi-plugin-manager.md",
         "./plugins/qingyi/agents/registry-and-content-expert.md",
         "./plugins/qingyi/agents/events-and-lifecycle-expert.md",
@@ -54,6 +53,7 @@
         "./plugins/qingyi/commands/mod-explain.md"
       ],
       "skills": [
+        "./plugins/qingyi/skills/agent-delegation",
         "./plugins/qingyi/skills/forge-registry-api",
         "./plugins/qingyi/skills/neoforge-registry-api",
         "./plugins/qingyi/skills/fabric-registry-api",

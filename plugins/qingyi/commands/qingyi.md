@@ -2,36 +2,47 @@
 description: Minecraft mod development assistant (usage: /qingyi <task>)
 ---
 
-Use the qingyi-orchestrator agent to help with Minecraft mod development.
+For Minecraft mod development: {0}
 
-Task request: {0}
+**Direct delegation workflow**:
+1. **Auto-detect** project and framework from build files (gradle.properties, build.gradle, mods.toml)
+2. **Identify task domain** based on request keywords
+3. **Select specialist agent** using Task Routing table in CLAUDE.md
+4. **Delegate with context**:
+   ```
+   Use the [agent-name] agent to [task].
 
-The orchestrator will:
-1. Auto-detect your current project and framework from build files
-2. Clarify any requirements needed through targeted questions
-3. Create a detailed task breakdown plan
-4. Delegate to the appropriate specialized agents
-5. Report results and update CLAUDE.md if new patterns are found
+   Context:
+   - Project: [ProjectName]
+   - Framework: [Forge/NeoForge/Fabric + version]
+   - Files: [key files]
+   - Background: [relevant context]
 
-If no task is provided, show a brief usage guide with examples:
+   Expected: [deliverables]
+   ```
+5. **Post-delegation**: Validate (if Java), open files, present summary
+
+The `agent-delegation` skill provides detailed patterns, agent catalog, and error handling guidance.
+
+---
+
+If no task is provided, show usage guide:
 
 ## Qingyi Plugin Usage
 
-**Basic syntax**: `/qingyi <your task description>`
+**Basic syntax**: `/qingyi <task description>` or `/q <task>`
 
 **Examples**:
 - `/qingyi add a new enchanted sword item to my mod`
 - `/qingyi create a boss bar countdown system`
 - `/qingyi help me fix NBT serialization in my capability`
 - `/qingyi register a new entity type`
-- `/qingyi improve the plugin based on my current project`
-
-**Quick alias**: Use `/q` for shorter commands
-**Help**: Use `/qhelp` to see all available agents and skills
 
 **Supported frameworks**:
 - Forge (1.19.x - 1.20.x)
 - NeoForge (1.20.x - 1.21.x)
-- Fabric (1.19.x - 1.21.x) - Partial support
+- Fabric (1.19.x - 1.21.x)
 
-The orchestrator will auto-detect which framework you're using and provide the correct patterns!
+**Help**: Use `/qhelp` to see all available specialist agents
+
+The system auto-detects your framework and delegates to the correct specialist with framework-specific patterns!

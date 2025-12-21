@@ -238,44 +238,67 @@ The orchestrator has a **learning mechanism** (lines 173-221 in [plugins/qingyi/
 - ❌ Anti-pattern 1
 ```
 
-## Agent Selection Guide
+## Task Routing (Quick Reference)
 
-### For Minecraft Mod Development
+When working with Minecraft mods, **delegate tasks directly to specialist agents** using this routing guide:
 
-When working with Minecraft mods, use these agents:
+| Task Domain | Agent | When to Use |
+|-------------|-------|-------------|
+| **Items, blocks, entities** | `registry-and-content-expert` | Creating game content, DeferredRegister, creative tabs |
+| **Events, tick handlers** | `events-and-lifecycle-expert` | Event handlers, @SubscribeEvent, tick systems, mod lifecycle |
+| **NBT, capabilities, persistence** | `data-and-persistence-expert` | SavedData, NBT serialization, world persistence, capabilities |
+| **GUI, rendering, audio** | `rendering-and-client-expert` | Custom screens, boss bars, HUD, OpenAL audio, client rendering |
+| **Code search & navigation** | `intellij-code-navigator` | Finding patterns, locating code, "where is X", "show me Y" |
+| **Code validation** | `minecraft-code-validator` | Validating Java files (invoke AFTER code generation) |
+| **Safe refactoring** | `intellij-refactoring-master` | Renaming items/blocks/methods, scope-aware refactoring |
+| **Project analysis** | `intellij-project-analyzer` | Understanding architecture, detecting multi-loader projects |
+| **Build & testing** | `intellij-build-and-test-runner` | Running client/server, testing in-game, verifying mod loads |
+| **Documentation** | `minecraft-docs-architect` | Generating API docs, architecture guides (10-100+ pages) |
+| **Tutorials** | `minecraft-tutorial-engineer` | Educational content, step-by-step guides, onboarding |
+| **Code review** | `code-reviewer` | Security, performance, architecture review (qingyi-code-review plugin) |
+| **Migration** | `legacy-modernizer` | Version upgrades, framework migration (qingyi-modernizer plugin) |
+| **Web research** | `brave-search-agent` | Documentation lookup, framework comparisons, tutorials |
+| **GitHub search** | `github-code-search-agent` | Community patterns, framework source, migration examples |
+| **Plugin development** | `qingyi-plugin-manager` | Creating/modifying Qingyi agents, skills, CLAUDE.md updates |
 
-| Task Domain | Agent | Tools | Skills Loaded |
-|------------|-------|-------|---------------|
-| Task planning & delegation | `qingyi-orchestrator` | All | pattern-recognition, agent-creation-guide, code-summarizer |
-| Items, blocks, entities | `registry-and-content-expert` | Read, Write, Edit, Bash, Grep, Glob | forge-registry-api, neoforge-registry-api |
-| Events, tick handlers | `events-and-lifecycle-expert` | Read, Write, Edit, Bash, Grep, Glob | forge-event-system |
-| NBT, capabilities, persistence | `data-and-persistence-expert` | Read, Write, Edit, Bash, Grep, Glob | nbt-serialization-patterns |
-| GUI, rendering, audio | `rendering-and-client-expert` | Read, Write, Edit, Bash, Grep, Glob | rendering-patterns |
-| Web research, documentation lookup | `brave-search-agent` | Brave MCP (all search tools), Read, Write | pattern-recognition |
-| GitHub code examples, framework source | `github-code-search-agent` | GitHub MCP (search, get files, commits), Read, Write | pattern-recognition |
-| Code navigation & discovery | `intellij-code-navigator` | MCP IntelliJ (search, symbol info), Read | intellij-navigation-patterns |
-| Code validation & quality | `minecraft-code-validator` | MCP IntelliJ, Read, Edit | intellij-inspection-guide, forge-event-system, forge-registry-api, neoforge-registry-api, nbt-serialization-patterns |
-| Safe refactoring & renaming | `intellij-refactoring-master` | MCP IntelliJ (rename_refactoring), Read, Write, Edit | intellij-refactoring-safety, forge-registry-api, neoforge-registry-api |
-| Project structure analysis | `intellij-project-analyzer` | MCP IntelliJ (get_project_modules, dependencies, tree), Read | multi-loader-project-patterns, pattern-recognition |
-| Build, test, and execution | `intellij-build-and-test-runner` | MCP IntelliJ (run_configurations, execute), Bash | minecraft-run-configuration-guide |
+### Delegation Pattern
 
-### For Qingyi Plugin Development
+Use this structured format when invoking agents:
 
-When working on the Qingyi plugin itself, use:
+```markdown
+Use the [agent-name] agent to [specific task].
 
-| Task Domain | Agent | Tools | Skills Loaded |
-|------------|-------|-------|---------------|
-| Plugin development & maintenance | `qingyi-plugin-manager` | Read, Write, Edit, Grep, Glob, Bash | agent-creation-guide, pattern-recognition |
+Context:
+- Project: [ProjectName]
+- Framework: [Forge 1.20.1 / NeoForge 1.21.3 / Fabric 1.20.x]
+- Files: [key files to create/modify]
+- Background: [relevant project context]
 
-**Use this agent for**:
-- Updating CLAUDE.md
-- Creating or modifying agents and skills
-- Maintaining documentation consistency
-- Validating YAML frontmatter
-- Checking cross-references
-- Quality assurance
+Expected: [deliverables]
+```
 
-**Auto-Invocation**: Agents with "Use PROACTIVELY" in their description are automatically invoked when relevant. The orchestrator is invoked for Minecraft mod tasks, while the plugin-manager is invoked for plugin development tasks.
+**Example**:
+```markdown
+Use the registry-and-content-expert agent to create a custom sword item.
+
+Context:
+- Project: MusicMod
+- Framework: Forge 1.20.1
+- Files: ModItems.java, custom_sword.json, en_us.json
+- Background: Project uses DeferredRegister, existing items follow standard pattern
+
+Expected: RegistryObject entry, item model JSON, translation
+```
+
+### Post-Delegation Workflow
+
+After a specialist agent completes:
+1. **Review results** - Check files created/modified
+2. **Validate (if Java modified)** - Invoke `minecraft-code-validator` agent
+3. **Open files for user** - Use `mcp__intellij__open_file_in_editor()`
+4. **Present summary** - Report completion with file list and validation status
+
+**For detailed delegation patterns, agent catalog, and workflows**, the `agent-delegation` skill auto-loads when relevant.
 
 ## Critical Conventions
 
