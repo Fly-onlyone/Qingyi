@@ -4,7 +4,7 @@ description: Elite code review expert specializing in modern AI-powered code ana
 tools: Read, Edit, Grep, Glob, Task
 model: sonnet
 permissionMode: default
-skills: minecraft-code-review-patterns, java-security-patterns, pattern-recognition
+skills: minecraft-code-review-patterns, java-security-patterns
 ---
 
 # Code Reviewer - Elite Code Review Specialist

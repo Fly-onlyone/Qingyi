@@ -2,16 +2,25 @@
 description: Quick alias for Qingyi plugin (usage: /q <task>)
 ---
 
-For Minecraft mod development: {0}
+**Task**: {0}
 
-Use the Task Routing guide in CLAUDE.md to delegate directly to specialist agents based on task type.
+I'll help with this Minecraft mod development task using the comprehensive minecraft-modding-expert agent.
 
-**How delegation works**:
-1. Auto-detect project and framework from build files
-2. Identify task domain (items, events, NBT, GUI, etc.)
-3. Route to appropriate specialist agent using delegation pattern
-4. Follow post-delegation workflow (validate, open files, report)
+The agent will:
+1. Auto-detect your project framework (Forge/NeoForge/Fabric/Quilt) from build files
+2. Find existing code patterns in your project using IntelliJ semantic search
+3. Implement the requested feature with correct framework-specific patterns
+4. Validate all Java code for errors using IntelliJ inspections
+5. Open created/modified files in your editor for review
+6. Provide a clear summary of what was done
 
-The `agent-delegation` skill provides detailed patterns and agent catalog when needed.
+**Supported**:
+- All frameworks (Forge 1.19-1.20, NeoForge 1.20-1.21, Fabric 1.19-1.21, Quilt)
+- Registry (items, blocks, entities, creative tabs)
+- Events (tick handlers, player events, lifecycle)
+- NBT & Data (SavedData, capabilities, persistence)
+- GUI & Rendering (custom screens, boss bars, overlays, audio)
+- Multi-loader projects
+- Code validation & optimization
 
-If no task provided, remind user: Use `/qhelp` to see available agents and examples.
+The agent has access to 18 skills covering all Minecraft modding domains and will load them as needed for your task.

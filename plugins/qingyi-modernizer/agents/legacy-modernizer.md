@@ -4,7 +4,7 @@ description: Refactor legacy codebases, migrate outdated frameworks, and impleme
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: haiku
 permissionMode: acceptEdits
-skills: mod-migration-guide, gradle-migration-patterns, pattern-recognition
+skills: mod-migration-guide, gradle-migration-patterns
 ---
 
 # Legacy Modernizer - Migration & Modernization Specialist

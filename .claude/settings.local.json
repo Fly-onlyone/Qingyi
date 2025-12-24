@@ -28,9 +28,18 @@
       "Bash(cmd /c \"cd .claude-plugin && mklink /D plugins ..\\\\plugins\")",
       "Bash(cmd /c \"mklink /D \"\".claude-plugin\\\\plugins\"\" \"\"plugins\"\"\")",
       "Bash(cmd /c \"mklink /D plugins ..\\\\plugins 2>&1\")",
-      "Bash(powershell -Command \"New-Item -ItemType SymbolicLink -Path ''.claude-plugin\\\\plugins'' -Target ''plugins''\")"
+      "Bash(powershell -Command \"New-Item -ItemType SymbolicLink -Path ''.claude-plugin\\\\plugins'' -Target ''plugins''\")",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:docs.claude.com)",
+      "WebFetch(domain:jewelhuq.medium.com)",
+      "WebFetch(domain:www.pubnub.com)",
+      "Bash(del registry-and-content-expert.md events-and-lifecycle-expert.md data-and-persistence-expert.md rendering-and-client-expert.md intellij-code-navigator.md minecraft-code-validator.md intellij-refactoring-master.md intellij-project-analyzer.md intellij-build-and-test-runner.md minecraft-docs-architect.md minecraft-tutorial-engineer.md brave-search-agent.md github-code-search-agent.md qingyi-plugin-manager.md)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "minecraft-bot"
+  ],
+  "enableAllProjectMcpServers": true
 }

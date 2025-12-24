@@ -6,15 +6,15 @@
     "url": ""
   },
   "metadata": {
-    "description": "Minecraft mod development plugins with specialized agents and skills",
-    "version": "1.3.2"
+    "description": "Comprehensive Minecraft mod development plugin - simplified architecture",
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "qingyi",
       "source": "./",
-      "description": "Minecraft mod development plugin with specialized agents and skills for improved code accuracy and token efficiency.",
-      "version": "1.3.2",
+      "description": "Comprehensive Minecraft mod development plugin with single expert agent and 18 skills for all frameworks.",
+      "version": "2.0.0",
       "author": {
         "name": "Fly"
       },
@@ -30,30 +30,14 @@
       ],
       "strict": false,
       "agents": [
-        "./plugins/qingyi/agents/qingyi-plugin-manager.md",
-        "./plugins/qingyi/agents/registry-and-content-expert.md",
-        "./plugins/qingyi/agents/events-and-lifecycle-expert.md",
-        "./plugins/qingyi/agents/data-and-persistence-expert.md",
-        "./plugins/qingyi/agents/rendering-and-client-expert.md",
-        "./plugins/qingyi/agents/brave-search-agent.md",
-        "./plugins/qingyi/agents/github-code-search-agent.md",
-        "./plugins/qingyi/agents/intellij-code-navigator.md",
-        "./plugins/qingyi/agents/minecraft-code-validator.md",
-        "./plugins/qingyi/agents/intellij-refactoring-master.md",
-        "./plugins/qingyi/agents/intellij-project-analyzer.md",
-        "./plugins/qingyi/agents/intellij-build-and-test-runner.md",
-        "./plugins/qingyi/agents/minecraft-docs-architect.md",
-        "./plugins/qingyi/agents/minecraft-tutorial-engineer.md"
+        "./plugins/qingyi/agents/minecraft-modding-expert.md"
       ],
       "commands": [
         "./plugins/qingyi/commands/q.md",
-        "./plugins/qingyi/commands/qhelp.md",
         "./plugins/qingyi/commands/qingyi.md",
-        "./plugins/qingyi/commands/minecraft-doc-generate.md",
-        "./plugins/qingyi/commands/mod-explain.md"
+        "./plugins/qingyi/commands/project-init.md"
       ],
       "skills": [
-        "./plugins/qingyi/skills/agent-delegation",
         "./plugins/qingyi/skills/forge-registry-api",
         "./plugins/qingyi/skills/neoforge-registry-api",
         "./plugins/qingyi/skills/fabric-registry-api",
@@ -71,12 +55,7 @@
         "./plugins/qingyi/skills/intellij-navigation-patterns",
         "./plugins/qingyi/skills/intellij-refactoring-safety",
         "./plugins/qingyi/skills/intellij-inspection-guide",
-        "./plugins/qingyi/skills/minecraft-run-configuration-guide",
-        "./plugins/qingyi/skills/pattern-recognition",
-        "./plugins/qingyi/skills/agent-creation-guide",
-        "./plugins/qingyi/skills/code-summarizer",
-        "./plugins/qingyi/skills/minecraft-documentation-patterns",
-        "./plugins/qingyi/skills/minecraft-tutorial-patterns"
+        "./plugins/qingyi/skills/minecraft-run-configuration-guide"
       ]
     },
     {

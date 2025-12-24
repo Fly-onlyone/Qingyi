@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "minecraft-bot": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\PC\\Documents\\Minecraft\\My Project\\Minecraft MCP\\dist\\index.js"
+      ]
+    }
+  }
+}

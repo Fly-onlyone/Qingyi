@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Qingyi** is a Claude Code plugin (v1.3.2) that provides specialized AI agents and reusable skills for Minecraft mod development. It supports Forge, NeoForge, Fabric, and Quilt frameworks.
+**Qingyi** is a Claude Code plugin (v2.0.0) that provides a comprehensive AI agent and 18 reusable skills for Minecraft mod development. It supports Forge, NeoForge, Fabric, and Quilt frameworks.
 
 **This is NOT a traditional software project** - there are no build/test commands. This is a plugin configuration project with markdown-based agents and skills that Claude Code loads to assist with Minecraft modding.
 
@@ -17,7 +17,7 @@ Qingyi/                                    ← Marketplace root
 ├── .claude-plugin/
 │   └── marketplace.json                   ← Defines 3 plugins from this repo
 ├── plugins/
-│   ├── qingyi/                           ← Main plugin (15 agents, 5 commands, 23 skills)
+│   ├── qingyi/                           ← Main plugin (1 agent, 2 commands, 18 skills)
 │   │   ├── agents/
 │   │   ├── commands/
 │   │   └── skills/
@@ -48,12 +48,14 @@ Qingyi/                                    ← Marketplace root
 
 ## Plugin Architecture
 
-The plugin uses a **Master Orchestrator + Specialist Agents + Progressive Skills** architecture:
+The plugin uses a **Simplified Single-Agent Architecture**:
 
-- **Agents** (13 implemented): Specialized AI assistants with isolated contexts for specific domains
-- **Skills** (8 implemented): Reusable knowledge modules that auto-load based on relevance
-- **Commands**: Slash command templates for quick workflows
-- **Hooks**: Event automation for validation and assistance
+- **Agent** (`minecraft-modding-expert`): Comprehensive expert handling all Minecraft modding domains
+- **Skills** (18 core skills): Reusable knowledge modules for frameworks, APIs, and patterns
+- **Commands** (`/qingyi`, `/q`): Quick access to the expert agent
+- **Framework Support**: Forge 1.19-1.20, NeoForge 1.20-1.21, Fabric/Quilt 1.19-1.21
+
+**Key Change (v2.0.0)**: Consolidated 14 specialist agents into 1 comprehensive agent for simpler usage and better auto-invocation.
 
 ## Development Workflow
 
@@ -128,46 +130,54 @@ When adding agents/skills:
 3. Update `CHANGELOG.md`
 4. Consider if README.md needs updating
 
+## How to Use the Plugin
+
+### Using the `/qingyi` or `/q` Command
+
+Simply type `/qingyi <task>` or `/q <task>` with your Minecraft modding request:
+
+```
+/qingyi add a new sword item to my mod
+/q create a boss bar countdown system
+/qingyi implement NBT serialization for player data
+/q add a custom GUI screen with buttons
+```
+
+The `minecraft-modding-expert` agent will:
+1. **Auto-detect** your framework from build.gradle and gradle.properties
+2. **Find existing patterns** in your codebase using IntelliJ semantic search
+3. **Implement** the feature with correct framework-specific code
+4. **Validate** all Java files for errors
+5. **Open files** in your editor for review
+
+### What the Agent Handles
+
+The single comprehensive agent handles ALL modding domains:
+
+**Registry**: Items, blocks, entities, creative tabs
+**Events**: Tick handlers, player events, mod lifecycle
+**NBT & Data**: SavedData, capabilities, persistence, CompoundTag
+**GUI & Rendering**: Custom screens, boss bars, HUD overlays, rendering
+**Audio**: Sound events, OpenAL custom audio playback
+**Multi-Loader**: Common/platform module patterns
+**Validation**: IntelliJ inspections for error detection
+
+### Skill Auto-Loading
+
+The agent has 18 skills pre-loaded and automatically uses them based on task relevance:
+
+- **Registry**: `forge-registry-api`, `neoforge-registry-api`, `fabric-registry-api`
+- **Events**: `forge-event-system`, `fabric-event-system`, `mod-lifecycle-patterns`
+- **Data**: `nbt-serialization-patterns`, `forge-capabilities`, `data-generation-guide`
+- **Client**: `rendering-patterns`, `gui-development`, `sound-system-api`
+- **Architecture**: `minecraft-architecture-patterns`, `multi-loader-project-patterns`
+- **IntelliJ**: `intellij-navigation-patterns`, `intellij-refactoring-safety`, `intellij-inspection-guide`, `minecraft-run-configuration-guide`
+
 ## Key Architectural Patterns
 
-### Pattern 1: Master Orchestrator with Auto-Detection
+### Pattern 1: Auto-Detection and Framework Awareness
 
-**Agent**: [plugins/qingyi/agents/qingyi-orchestrator.md](plugins/qingyi/agents/qingyi-orchestrator.md)
-
-The orchestrator is the entry point for all tasks. It:
-
-1. **Auto-detects project context** by reading:
-   - `build.gradle` → Framework type (ForgeGradle, Loom, NeoGradle)
-   - `gradle.properties` → Version numbers (minecraft_version, forge_version, etc.)
-   - `mods.toml` → Forge/NeoForge indicator
-   - `fabric.mod.json` → Fabric indicator
-
-2. **Clarifies requirements** - Only asks what it cannot detect
-
-3. **Creates task breakdown plan** - Phased implementation plans
-
-4. **Selects specialist agents** based on delegation guide:
-   - Registry/content → `registry-and-content-expert`
-   - Events/lifecycle → `events-and-lifecycle-expert`
-   - NBT/persistence → `data-and-persistence-expert`
-   - GUI/rendering/audio → `rendering-and-client-expert`
-
-5. **Delegates with context** - Provides detailed background to specialists
-
-6. **Aggregates results** - Combines outputs from multiple agents
-
-7. **Learns and improves** - Proposes new skills/agents from project analysis
-
-**Key Innovation**: The orchestrator doesn't just delegate - it continuously improves the plugin by recognizing patterns across projects and proposing new components.
-
-### Pattern 2: Agent Isolation & Framework Awareness
-
-Each agent runs in an **isolated context** with:
-- Fresh context (no conversation history from main session)
-- Restricted tools (only what's needed for their domain)
-- Pre-loaded skills (framework-specific knowledge)
-
-**Framework Detection**: Agents automatically detect which framework is being used and apply correct patterns:
+The agent automatically detects which framework is being used and applies correct patterns:
 
 ```java
 // Forge/NeoForge pattern
@@ -179,13 +189,17 @@ public static final Item CUSTOM_ITEM = Registry.register(
     Registries.ITEM, new Identifier(MODID, name), item);
 ```
 
-The same agent handles both - it detects from context which to use.
+Detection sources:
+- `build.gradle` → Framework type (ForgeGradle, Loom, NeoGradle)
+- `gradle.properties` → Version numbers (minecraft_version, forge_version, etc.)
+- `mods.toml` → Forge/NeoForge indicator
+- `fabric.mod.json` → Fabric indicator
 
-**Real Code Examples**: Agents reference actual code from:
+**Real Code Examples**: The agent references actual code from:
 - **MusicMod** (Forge 1.20.1): Audio playback, advancement UI, progress tracking
 - **Apocalypse_TNT** (NeoForge): Entity spawning, boss bars, countdown logic
 
-### Pattern 3: Progressive Skill Loading
+### Pattern 2: Progressive Skill Loading
 
 **Token Optimization Strategy**:
 
@@ -205,105 +219,11 @@ The same agent handles both - it detects from context which to use.
 
 This prevents token waste - only load what's needed for the current task.
 
-### Pattern 4: Self-Evolution System
-
-The orchestrator has a **learning mechanism** (lines 173-221 in [plugins/qingyi/agents/qingyi-orchestrator.md](plugins/qingyi/agents/qingyi-orchestrator.md)):
-
-**Workflow**:
-1. **Analyze Current Project** → Scan structure, identify patterns
-2. **Identify Opportunities** → Compare with existing agents/skills
-3. **Propose to User** → "Found pattern X, should I document it?"
-4. **Create Component** → Add skill/agent if approved
-5. **Update CLAUDE.md** → Document for reuse (only if approved)
-
-**Pattern Recognition Rules**:
-- ✅ DO compare projects with same topic (MusicMod: TheFatRat vs MusicMod: NCS)
-- ❌ DON'T compare projects with different topics (MusicMod vs Apocalypse_TNT)
-
-**CLAUDE.md Entry Format** (proposed by orchestrator):
-```markdown
-### Convention: [Pattern Name]
-**Learned**: [Date]
-**Source Project**: [ProjectName]
-**Framework**: [Forge 1.20.1/etc.]
-
-**When to Apply**:
-- Use case 1
-- Use case 2
-
-**Code Example**:
-[Real code from user's project]
-
-**Anti-Patterns to Avoid**:
-- ❌ Anti-pattern 1
-```
-
-## Task Routing (Quick Reference)
-
-When working with Minecraft mods, **delegate tasks directly to specialist agents** using this routing guide:
-
-| Task Domain | Agent | When to Use |
-|-------------|-------|-------------|
-| **Items, blocks, entities** | `registry-and-content-expert` | Creating game content, DeferredRegister, creative tabs |
-| **Events, tick handlers** | `events-and-lifecycle-expert` | Event handlers, @SubscribeEvent, tick systems, mod lifecycle |
-| **NBT, capabilities, persistence** | `data-and-persistence-expert` | SavedData, NBT serialization, world persistence, capabilities |
-| **GUI, rendering, audio** | `rendering-and-client-expert` | Custom screens, boss bars, HUD, OpenAL audio, client rendering |
-| **Code search & navigation** | `intellij-code-navigator` | Finding patterns, locating code, "where is X", "show me Y" |
-| **Code validation** | `minecraft-code-validator` | Validating Java files (invoke AFTER code generation) |
-| **Safe refactoring** | `intellij-refactoring-master` | Renaming items/blocks/methods, scope-aware refactoring |
-| **Project analysis** | `intellij-project-analyzer` | Understanding architecture, detecting multi-loader projects |
-| **Build & testing** | `intellij-build-and-test-runner` | Running client/server, testing in-game, verifying mod loads |
-| **Documentation** | `minecraft-docs-architect` | Generating API docs, architecture guides (10-100+ pages) |
-| **Tutorials** | `minecraft-tutorial-engineer` | Educational content, step-by-step guides, onboarding |
-| **Code review** | `code-reviewer` | Security, performance, architecture review (qingyi-code-review plugin) |
-| **Migration** | `legacy-modernizer` | Version upgrades, framework migration (qingyi-modernizer plugin) |
-| **Web research** | `brave-search-agent` | Documentation lookup, framework comparisons, tutorials |
-| **GitHub search** | `github-code-search-agent` | Community patterns, framework source, migration examples |
-| **Plugin development** | `qingyi-plugin-manager` | Creating/modifying Qingyi agents, skills, CLAUDE.md updates |
-
-### Delegation Pattern
-
-Use this structured format when invoking agents:
-
-```markdown
-Use the [agent-name] agent to [specific task].
-
-Context:
-- Project: [ProjectName]
-- Framework: [Forge 1.20.1 / NeoForge 1.21.3 / Fabric 1.20.x]
-- Files: [key files to create/modify]
-- Background: [relevant project context]
-
-Expected: [deliverables]
-```
-
-**Example**:
-```markdown
-Use the registry-and-content-expert agent to create a custom sword item.
-
-Context:
-- Project: MusicMod
-- Framework: Forge 1.20.1
-- Files: ModItems.java, custom_sword.json, en_us.json
-- Background: Project uses DeferredRegister, existing items follow standard pattern
-
-Expected: RegistryObject entry, item model JSON, translation
-```
-
-### Post-Delegation Workflow
-
-After a specialist agent completes:
-1. **Review results** - Check files created/modified
-2. **Validate (if Java modified)** - Invoke `minecraft-code-validator` agent
-3. **Open files for user** - Use `mcp__intellij__open_file_in_editor()`
-4. **Present summary** - Report completion with file list and validation status
-
-**For detailed delegation patterns, agent catalog, and workflows**, the `agent-delegation` skill auto-loads when relevant.
 
 ## Critical Conventions
 
 ### Naming Conventions
-- **Agents**: `kebab-case.md` (e.g., `qingyi-orchestrator.md`)
+- **Agents**: `kebab-case.md` (e.g., `minecraft-modding-expert.md`)
 - **Skills**: `kebab-case/SKILL.md` (e.g., `forge-event-system/SKILL.md`)
 - **Projects**: `ProjectName: Variant` (e.g., `MusicMod: TheFatRat`, `Apocalypse_TNT`)
 
@@ -348,61 +268,10 @@ When documenting code, always specify the framework:
 
 ### IntelliJ MCP Tool Usage
 
-**CRITICAL**: When working with this Qingyi plugin project, ALWAYS prefer IntelliJ MCP tools over generic tools for better performance and accuracy.
+**See global `~/.claude/CLAUDE.md`** for IntelliJ tool preference hierarchy.
 
-#### Tool Preference Hierarchy
-
-**For File Operations**:
-1. ✅ **PREFER**: `mcp__intellij__create_new_file` for Java files (respects project structure, sourcesets)
-2. ⚠️ FALLBACK: `Write` tool for non-Java files (JSON, markdown, etc.)
-
-**For File Reading**:
-1. ✅ **PREFER**: `mcp__intellij__get_file_text_by_path` for large files (>1000 lines) with truncation
-2. ⚠️ FALLBACK: `Read` tool for normal files (<1000 lines)
-
-**For Code Search**:
-1. ✅ **PREFER**: `mcp__intellij__search_in_files_by_text` (semantic, 98% accuracy, 10x faster)
-2. ✅ **PREFER**: `mcp__intellij__search_in_files_by_regex` for pattern matching
-3. ✅ **PREFER**: `mcp__intellij__find_files_by_name_keyword` for file discovery
-4. ⚠️ FALLBACK: `Grep` only for cross-language searches or searches outside project
-
-**For File Discovery**:
-1. ✅ **PREFER**: `mcp__intellij__find_files_by_glob` for pattern-based file search
-2. ⚠️ FALLBACK: `Glob` only if IntelliJ tool unavailable
-
-**For Navigation**:
-1. ✅ **ALWAYS USE**: `mcp__intellij__get_symbol_info` for understanding symbols, declarations, types
-2. ✅ **ALWAYS USE**: `mcp__intellij__get_all_open_file_paths` to detect user's current workspace focus
-
-**For Refactoring**:
-1. ✅ **ALWAYS USE**: `mcp__intellij__rename_refactoring` for renaming symbols (semantic, project-wide)
-2. ❌ **NEVER USE**: Text replacement for symbol renaming
-
-**For User Experience**:
-1. ✅ **ALWAYS USE**: `mcp__intellij__open_file_in_editor` after creating/modifying files
-2. ✅ **ALWAYS USE**: `mcp__intellij__open_file_in_editor` when validation finds errors
-
-#### Context-Aware Agent Behavior
-
-**When any agent starts work**:
-```markdown
-1. Call get_all_open_file_paths() to detect user focus
-2. Analyze open files to understand current work area
-3. Tailor approach based on user's active workspace
-```
-
-**Example**:
-```
-User has ModItems.java open → Infer: Working on item registration
-User has EventHandler.java open → Infer: Working on event systems
-User has ClientMusicHandler.java open → Infer: Working on client-side rendering/audio
-```
-
-#### Agent-Specific Tool Usage
-
-**Agents with IntelliJ MCP tools** (enhanced 2025-12-17):
+**Qingyi-specific tool assignments** (updated 2025-12-17):
 - `minecraft-code-validator`: 5 IntelliJ tools (context, validation, optimization, file ops)
-- `qingyi-orchestrator`: 2 IntelliJ tools (context awareness, file opening)
 - `intellij-code-navigator`: 8 IntelliJ tools (full navigation suite)
 - `intellij-refactoring-master`: 4 IntelliJ tools (refactoring, context, file ops)
 - `intellij-project-analyzer`: 4 IntelliJ tools (project structure analysis)
@@ -411,21 +280,6 @@ User has ClientMusicHandler.java open → Infer: Working on client-side renderin
 - `events-and-lifecycle-expert`: 6 IntelliJ tools (search suite + file ops)
 - `data-and-persistence-expert`: 6 IntelliJ tools (search suite + file ops)
 - `rendering-and-client-expert`: 6 IntelliJ tools (search suite + file ops)
-
-**When working on Qingyi plugin development**:
-- Use IntelliJ tools for agent file discovery and modification
-- Use `open_file_in_editor` to show updated agents to user
-- Use `get_all_open_file_paths` to understand which agents user is editing
-
-#### Performance Benefits
-
-| Task | Generic Tool | IntelliJ MCP Tool | Performance Gain |
-|------|--------------|-------------------|------------------|
-| File search | Grep (85% accuracy) | search_in_files (98% accuracy) | **10x faster** |
-| Symbol lookup | Read + manual parsing | get_symbol_info | **Instant** with type info |
-| File creation | Write (no structure awareness) | create_new_file | **Proper packages** |
-| Large file read | Read (2000 lines, full load) | get_file_text_by_path | **20-50% token savings** |
-| Refactoring | Edit (text replacement) | rename_refactoring | **Semantic, project-wide** |
 
 ## Framework Support
 
@@ -450,7 +304,7 @@ neo_version=1.21.3
 
 ## Real Project Integration
 
-Agents contain **real code examples** from actual projects:
+The agent contains **real code examples** from actual projects:
 
 - **MusicMod** (Forge 1.20.1):
   - OpenAL audio playback with seeking
@@ -472,4 +326,4 @@ For deeper understanding, read:
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Component design and data flow
 - [docs/AGENTS.md](docs/AGENTS.md) - Comprehensive agent creation guide
 - [docs/SKILLS.md](docs/SKILLS.md) - Skill creation and best practices
-- [plugins/qingyi/agents/qingyi-orchestrator.md](plugins/qingyi/agents/qingyi-orchestrator.md) - Master orchestrator implementation
+- [plugins/qingyi/agents/minecraft-modding-expert.md](plugins/qingyi/agents/minecraft-modding-expert.md) - The comprehensive expert agent
