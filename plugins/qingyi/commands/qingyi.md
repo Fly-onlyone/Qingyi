@@ -23,4 +23,4 @@ The agent will:
 - Multi-loader projects
 - Code validation & optimization
 
-The agent has access to 18 skills covering all Minecraft modding domains and will load them as needed for your task.
+The agent uses Context7 for dynamic framework documentation covering all Minecraft modding domains.

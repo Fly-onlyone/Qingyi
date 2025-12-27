@@ -15,20 +15,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 Qingyi/                                    ← Marketplace root
 ├── .claude-plugin/
-│   └── marketplace.json                   ← Defines 3 plugins from this repo
+│   └── marketplace.json                   ← Plugin marketplace definition
 ├── plugins/
-│   ├── qingyi/                           ← Main plugin (1 agent, 2 commands, 18 skills)
-│   │   ├── agents/
-│   │   ├── commands/
-│   │   └── skills/
-│   ├── qingyi-code-review/               ← Code review plugin (1 agent, 1 command, 2 skills)
-│   │   ├── agents/
-│   │   ├── commands/
-│   │   └── skills/
-│   └── qingyi-modernizer/                ← Modernization plugin (1 agent, 4 commands, 2 skills)
+│   └── qingyi/                           ← Minecraft modding plugin (1 agent, 3 commands)
 │       ├── agents/
-│       ├── commands/
-│       └── skills/
+│       └── commands/
 ├── docs/
 │   ├── agent-supporting/                 ← Supporting docs for specific agents
 │   │   ├── brave-search-agent/
@@ -44,18 +35,20 @@ Qingyi/                                    ← Marketplace root
 └── CLAUDE.md                             ← This file
 ```
 
-**Key Design**: All 3 plugins use `"source": "./"` to copy the entire marketplace root (including `docs/`) to the plugin cache, ensuring agents can access supporting documentation.
+**Key Design**: The plugin uses `"source": "./"` to copy the entire marketplace root (including `docs/`) to the plugin cache, ensuring agents can access supporting documentation.
 
 ## Plugin Architecture
 
-The plugin uses a **Simplified Single-Agent Architecture**:
+The plugin uses a **Simplified Single-Agent Architecture with Context7 Integration**:
 
 - **Agent** (`minecraft-modding-expert`): Comprehensive expert handling all Minecraft modding domains
-- **Skills** (18 core skills): Reusable knowledge modules for frameworks, APIs, and patterns
+- **Documentation**: Uses Context7 MCP for dynamic framework documentation (NeoForge, Forge, Fabric)
 - **Commands** (`/qingyi`, `/q`): Quick access to the expert agent
 - **Framework Support**: Forge 1.19-1.20, NeoForge 1.20-1.21, Fabric/Quilt 1.19-1.21
 
-**Key Change (v2.0.0)**: Consolidated 14 specialist agents into 1 comprehensive agent for simpler usage and better auto-invocation.
+**Key Changes**:
+- **v2.0.0**: Consolidated 14 specialist agents into 1 comprehensive agent
+- **v2.1.0**: Removed 18 bundled skills in favor of Context7 dynamic documentation
 
 ## Development Workflow
 
@@ -162,16 +155,16 @@ The single comprehensive agent handles ALL modding domains:
 **Multi-Loader**: Common/platform module patterns
 **Validation**: IntelliJ inspections for error detection
 
-### Skill Auto-Loading
+### Context7 Documentation Lookup
 
-The agent has 18 skills pre-loaded and automatically uses them based on task relevance:
+The agent uses Context7 MCP for real-time framework documentation:
 
-- **Registry**: `forge-registry-api`, `neoforge-registry-api`, `fabric-registry-api`
-- **Events**: `forge-event-system`, `fabric-event-system`, `mod-lifecycle-patterns`
-- **Data**: `nbt-serialization-patterns`, `forge-capabilities`, `data-generation-guide`
-- **Client**: `rendering-patterns`, `gui-development`, `sound-system-api`
-- **Architecture**: `minecraft-architecture-patterns`, `multi-loader-project-patterns`
-- **IntelliJ**: `intellij-navigation-patterns`, `intellij-refactoring-safety`, `intellij-inspection-guide`, `minecraft-run-configuration-guide`
+- **NeoForge 1.21.1**: 7,735+ code snippets (Benchmark: 81.9)
+- **Forge**: 792+ snippets per version (1.19-1.20)
+- **Fabric**: 8,905+ snippets from official wiki
+- **Architectury**: 828 snippets for multi-loader patterns
+
+Context7 provides dynamic, up-to-date documentation without bundled skills, reducing maintenance and ensuring accuracy.
 
 ## Key Architectural Patterns
 
@@ -199,26 +192,22 @@ Detection sources:
 - **MusicMod** (Forge 1.20.1): Audio playback, advancement UI, progress tracking
 - **Apocalypse_TNT** (NeoForge): Entity spawning, boss bars, countdown logic
 
-### Pattern 2: Progressive Skill Loading
+### Pattern 2: Context7 Integration
 
-**Token Optimization Strategy**:
+**Dynamic Documentation Strategy**:
 
-1. **Main SKILL.md** (~200 lines):
-   - Overview of the domain
-   - Basic patterns and examples
-   - Links to supporting files
+The agent uses Context7 MCP to fetch framework-specific documentation on-demand:
 
-2. **Supporting Files** (loaded on-demand):
-   - Detailed guides
-   - Advanced patterns
-   - Anti-patterns and troubleshooting
+1. **Auto-detection**: Identifies framework from build files
+2. **Targeted queries**: Requests specific topics (e.g., "registry DeferredRegister")
+3. **Code mode**: Gets API references and code examples
+4. **Info mode**: Gets conceptual guides and architecture information
 
-**Example**: [plugins/qingyi/skills/forge-event-system/SKILL.md](plugins/qingyi/skills/forge-event-system/SKILL.md)
-- Main file: Event bus overview, basic handler registration
-- Supporting: Event priorities, tick handlers, common events
-
-This prevents token waste - only load what's needed for the current task.
-
+**Benefits**:
+- Always up-to-date with latest framework changes
+- Zero maintenance overhead for bundled documentation
+- Reduced token usage (fetch only what's needed)
+- Comprehensive coverage (7,735+ NeoForge snippets, 8,905+ Fabric snippets)
 
 ## Critical Conventions
 

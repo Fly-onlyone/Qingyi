@@ -111,7 +111,7 @@ Use Context7 MCP for framework documentation:
 
 ## Project Reference
 A comprehensive reference skill was generated at:
-`C:\Users\PC\Documents\Minecraft\My Project\Qingyi\plugins\qingyi\skills\repomix-reference-{project}/SKILL.md`
+`.claude/skills/repomix-reference-{project}/SKILL.md`
 
 Use this for codebase context and pattern discovery.
 ```
@@ -134,7 +134,7 @@ Use Context7 MCP for library documentation:
 
 ## Project Reference
 A comprehensive reference skill was generated at:
-`C:\Users\PC\Documents\Minecraft\My Project\Qingyi\plugins\qingyi\skills\repomix-reference-{project}/SKILL.md`
+`.claude/skills/repomix-reference-{project}/SKILL.md`
 ```
 
 **rules/conventions.md** (Minecraft):
@@ -188,8 +188,6 @@ CLAUDE.local.md
 
 **CRITICAL**: Always run `mcp__repomix__generate_skill` unless `--no-skill` is specified.
 
-**Target**: `C:\Users\PC\Documents\Minecraft\My Project\Qingyi\plugins\qingyi\skills\`
-
 ```
 mcp__repomix__generate_skill(
   directory: "<project_root>",
@@ -199,7 +197,7 @@ mcp__repomix__generate_skill(
 
 This creates:
 ```
-C:\Users\PC\Documents\Minecraft\My Project\Qingyi\plugins\qingyi\skills\repomix-reference-<project>/
+.claude/skills/repomix-reference-<project>/
 ├── SKILL.md                    # Entry point
 └── references/
     ├── summary.md              # Purpose and statistics
@@ -209,12 +207,6 @@ C:\Users\PC\Documents\Minecraft\My Project\Qingyi\plugins\qingyi\skills\repomix-
 ```
 
 **Benefit**: Provides persistent, searchable codebase context without repeated file reads.
-
-**Fallback** (if Qingyi plugin skills dir doesn't exist):
-- Push to GitHub:
-  - Create GitHub Gist or repository with skill files
-  - Use `mcp__github__push_files` or `mcp__github__create_repository`
-  - Provide URL for user to access
 
 ## Phase 6: Summary Report
 
@@ -227,7 +219,7 @@ After initialization, report:
 - `.claude/CLAUDE.md` - Project instructions ({framework} detected)
 - `.claude/rules/conventions.md` - Code conventions
 - `.claude/rules/architecture.md` - Architecture patterns
-- `C:\Users\PC\Documents\Minecraft\My Project\Qingyi\plugins\qingyi\skills\repomix-reference-{project}/` - Reference skill
+- `.claude/skills/repomix-reference-{project}/` - Reference skill
 - `CLAUDE.local.md` - Personal preferences (gitignored)
 
 ### Detected
@@ -256,7 +248,7 @@ For framework docs, use Context7:
 - Added .claude/rules/architecture.md
 
 ### Generated
-- C:\Users\PC\Documents\Minecraft\My Project\Qingyi\plugins\qingyi\skills\repomix-reference-{project}/
+- .claude/skills/repomix-reference-{project}/
 
 ### Preserved
 - Your custom sections in CLAUDE.md

@@ -6,14 +6,14 @@
     "url": ""
   },
   "metadata": {
-    "description": "Comprehensive Minecraft mod development plugin - simplified architecture",
+    "description": "Comprehensive Minecraft mod development plugin with Context7 integration",
     "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "qingyi",
       "source": "./",
-      "description": "Comprehensive Minecraft mod development plugin with single expert agent and 18 skills for all frameworks.",
+      "description": "Comprehensive Minecraft mod development plugin with expert agent using Context7 for framework documentation.",
       "version": "2.0.0",
       "author": {
         "name": "Fly"
@@ -36,79 +36,6 @@
         "./plugins/qingyi/commands/q.md",
         "./plugins/qingyi/commands/qingyi.md",
         "./plugins/qingyi/commands/project-init.md"
-      ],
-      "skills": [
-        "./plugins/qingyi/skills/forge-registry-api",
-        "./plugins/qingyi/skills/neoforge-registry-api",
-        "./plugins/qingyi/skills/fabric-registry-api",
-        "./plugins/qingyi/skills/forge-event-system",
-        "./plugins/qingyi/skills/fabric-event-system",
-        "./plugins/qingyi/skills/nbt-serialization-patterns",
-        "./plugins/qingyi/skills/rendering-patterns",
-        "./plugins/qingyi/skills/gui-development",
-        "./plugins/qingyi/skills/sound-system-api",
-        "./plugins/qingyi/skills/minecraft-architecture-patterns",
-        "./plugins/qingyi/skills/multi-loader-project-patterns",
-        "./plugins/qingyi/skills/mod-lifecycle-patterns",
-        "./plugins/qingyi/skills/forge-capabilities",
-        "./plugins/qingyi/skills/data-generation-guide",
-        "./plugins/qingyi/skills/intellij-navigation-patterns",
-        "./plugins/qingyi/skills/intellij-refactoring-safety",
-        "./plugins/qingyi/skills/intellij-inspection-guide",
-        "./plugins/qingyi/skills/minecraft-run-configuration-guide"
-      ]
-    },
-    {
-      "name": "qingyi-code-review",
-      "source": "./",
-      "description": "AI-powered code review for Java and Minecraft mods.",
-      "version": "1.0.0",
-      "author": {
-        "name": "Fly"
-      },
-      "license": "MIT",
-      "category": "quality",
-      "keywords": [
-        "code-review",
-        "minecraft",
-        "java",
-        "security"
-      ],
-      "strict": false,
-      "agents": ["./plugins/qingyi-code-review/agents/code-reviewer.md"],
-      "commands": ["./plugins/qingyi-code-review/commands/mod-review.md"],
-      "skills": [
-        "./plugins/qingyi-code-review/skills/java-security-patterns",
-        "./plugins/qingyi-code-review/skills/minecraft-code-review-patterns"
-      ]
-    },
-    {
-      "name": "qingyi-modernizer",
-      "source": "./",
-      "description": "Safe, incremental modernization for legacy codebases including Minecraft mod migrations.",
-      "version": "1.1.0",
-      "author": {
-        "name": "Fly"
-      },
-      "license": "MIT",
-      "category": "modernization",
-      "keywords": [
-        "refactoring",
-        "migration",
-        "minecraft",
-        "version-upgrade"
-      ],
-      "strict": false,
-      "agents": ["./plugins/qingyi-modernizer/agents/legacy-modernizer.md"],
-      "commands": [
-        "./plugins/qingyi-modernizer/commands/mod-refactor.md",
-        "./plugins/qingyi-modernizer/commands/refactor-clean.md",
-        "./plugins/qingyi-modernizer/commands/tech-debt.md",
-        "./plugins/qingyi-modernizer/commands/context-restore.md"
-      ],
-      "skills": [
-        "./plugins/qingyi-modernizer/skills/gradle-migration-patterns",
-        "./plugins/qingyi-modernizer/skills/mod-migration-guide"
       ]
     }
   ]
