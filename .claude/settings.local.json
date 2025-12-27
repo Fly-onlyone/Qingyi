@@ -33,13 +33,15 @@
       "WebFetch(domain:docs.claude.com)",
       "WebFetch(domain:jewelhuq.medium.com)",
       "WebFetch(domain:www.pubnub.com)",
-      "Bash(del registry-and-content-expert.md events-and-lifecycle-expert.md data-and-persistence-expert.md rendering-and-client-expert.md intellij-code-navigator.md minecraft-code-validator.md intellij-refactoring-master.md intellij-project-analyzer.md intellij-build-and-test-runner.md minecraft-docs-architect.md minecraft-tutorial-engineer.md brave-search-agent.md github-code-search-agent.md qingyi-plugin-manager.md)"
+      "Bash(del registry-and-content-expert.md events-and-lifecycle-expert.md data-and-persistence-expert.md rendering-and-client-expert.md intellij-code-navigator.md minecraft-code-validator.md intellij-refactoring-master.md intellij-project-analyzer.md intellij-build-and-test-runner.md minecraft-docs-architect.md minecraft-tutorial-engineer.md brave-search-agent.md github-code-search-agent.md qingyi-plugin-manager.md)",
+      "mcp__intellij__find_files_by_name_keyword",
+      "Bash(del \"C:\\\\Users\\\\PC\\\\Documents\\\\Minecraft\\\\My Project\\\\Qingyi\\\\.mcp.json\")"
     ],
     "deny": [],
     "ask": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "minecraft-bot"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }
