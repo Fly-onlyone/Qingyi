@@ -1,272 +1,200 @@
 ---
 name: project-init
-description: Initialize Claude Code context structure for a new project
-aliases:
-  - init
-  - setup
+description: Initialize or enhance Claude Code project configuration (CLAUDE.md + .claude/rules/). Use PROACTIVELY when starting work on a new project.
+command-type: prompt
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
 
-Initialize Claude Code context for this project: {0}
+# Project Initialization Command
 
-**Instructions for AI**:
+You are a project configuration specialist. Create or enhance Claude Code configuration files for the current project.
 
-## Phase 1: Project Detection
-
-1. **Analyze project root**:
-   - Check for `build.gradle` / `build.gradle.kts` (Gradle project)
-   - Check for `pom.xml` (Maven project)
-   - Check for `package.json` (Node.js project)
-   - Check for `pyproject.toml` / `setup.py` (Python project)
-   - Check for `mods.toml` or `fabric.mod.json` (Minecraft mod)
-
-2. **Detect Minecraft mod specifics** (if applicable):
-   - Framework: Forge (ForgeGradle), NeoForge (NeoGradle), Fabric (Loom)
-   - Version from `gradle.properties`: `minecraft_version`, `forge_version`, `neo_version`
-   - Mod ID from config files
-   - Multi-loader structure (common/forge/fabric modules)
-
-3. **Parse arguments**:
-   - `--minimal`: Skip optional sections (docs/, rules/)
-   - `--force`: Overwrite existing files
-   - `--no-skill`: Skip skill generation
-   - `--skill-name=<name>`: Custom skill name (default: `repomix-reference-<project>`)
-   - `--upgrade`: Force upgrade check even if structure looks current
-
-4. **Check for existing initialization**:
-   - `.claude/CLAUDE.md` exists?
-   - `.claude/rules/` exists?
-   - `CLAUDE.local.md` exists?
-
-## Phase 2: Upgrade Check
-
-If `.claude/CLAUDE.md` already exists, check if it needs upgrading:
-
-**Detection Logic**:
-```
-if .claude/CLAUDE.md exists:
-    if "Context7" not in CLAUDE.md → needs upgrade
-    if .claude/rules/ missing → needs upgrade
-    if no skill exists for this project → needs skill generation
-
-    if needs upgrade and not --force:
-        use MERGE strategy
-    elif --force:
-        use REPLACE strategy
-```
-
-**Upgrade Behavior (Merge Strategy)**:
-1. Read existing `.claude/CLAUDE.md`
-2. Extract user-added sections (preserve customizations)
-3. Add missing sections (Context7, framework detection, reference skill link)
-4. Replace outdated references (docs-mcp-server → Context7)
-5. Create missing `.claude/rules/` directory
-6. Generate reference skill if missing
-
-## Phase 3: Structure Creation/Update
-
-Create or update the following structure:
+## Workflow Overview
 
 ```
-project/
-├── .claude/
-│   ├── CLAUDE.md                # Project-specific instructions
-│   └── rules/
-│       ├── conventions.md       # Code style and naming conventions
-│       └── architecture.md      # Architecture patterns and decisions
-├── docs/                        # Project documentation (unless --minimal)
-│   └── api-discoveries/         # API notes Claude learns over time
-└── CLAUDE.local.md              # Personal preferences (auto-gitignored)
+STEP 1: Detect Project Type → STEP 2: Inventory Config → STEP 3: Generate/Merge → STEP 4: Report
+                                        ↓
+                              CREATE MODE (no CLAUDE.md)
+                                   or
+                              ENHANCED MODE (has CLAUDE.md → gap analysis)
 ```
 
-### File Templates
+---
 
-**CLAUDE.md** (Minecraft mod detected):
-```markdown
-# Project: {mod_name}
+## Step 1: Detect Project Type
 
-## Framework
-- **Type**: {Forge|NeoForge|Fabric|Quilt}
-- **Minecraft Version**: {version}
-- **Framework Version**: {forge/neo/fabric version}
-- **Mod ID**: {mod_id}
+Use `Glob` to find build files, then read to extract project info.
 
-## Build Commands
-- `./gradlew build` - Build the mod
-- `./gradlew runClient` - Run Minecraft client with mod
-- `./gradlew runServer` - Run dedicated server with mod
-- `./gradlew runData` - Run data generation
+**Reference**: Read `plugins/qingyi/references/project-detection.md` for build file → project type mapping.
 
-## Package Structure
-{auto-detected package layout}
+### Detection Steps
 
-## Key Patterns
-- Registry: See rules/conventions.md
-- Events: {framework}-specific patterns
-- Data: NBT serialization patterns
+1. Find build files: `package.json`, `build.gradle*`, `pom.xml`, `requirements.txt`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `composer.json`, `Gemfile`, `*.csproj`
+2. Read primary build file to extract: project name, version, dependencies, build/test commands
+3. Check for framework-specific markers (React, Spring Boot, Django, etc.)
+4. Use `ls` or tree to determine directory structure
 
-## Documentation Lookup
-Use Context7 MCP for framework documentation:
-1. `resolve-library-id("Minecraft Forge")` or `("Fabric API")`
-2. `get-library-docs(topic="registry", mode="code")`
+---
 
-## Project Reference
-A comprehensive reference skill was generated at:
-`.claude/skills/repomix-reference-{project}/SKILL.md`
+## Step 2: Inventory Existing Configuration
 
-Use this for codebase context and pattern discovery.
+Check for existing files:
+- `CLAUDE.md` (project root)
+- `.claude/rules/architecture.md`
+- `.claude/rules/commit-messages.md`
+- `.claude/rules/conventions.md`
+- `.claude/rules/documentation-style.md`
+- `.claude/rules/patterns.md`
+
+### Mode Selection
+
+- **CREATE MODE**: No `CLAUDE.md` → Generate all files from templates
+- **ENHANCED MODE**: `CLAUDE.md` exists → Run gap analysis first
+
+---
+
+## Step 2a: Gap Analysis (ENHANCED MODE)
+
+### Commit-Based Change Detection
+
+If "Last Synced Commit" exists in CLAUDE.md:
+```bash
+git diff --name-only <last_synced_commit>..HEAD
 ```
+Focus scans on changed files only. If no sync commit found, perform full scan (one-time).
 
-**CLAUDE.md** (Generic project):
-```markdown
-# Project: {project_name}
+### Gap Detection Checklist
 
-## Project Type
-- **Language**: {detected language}
-- **Build System**: {Gradle|Maven|npm|pip|etc.}
+| Category | Check | Action |
+|----------|-------|--------|
+| Dependencies | Build file vs CLAUDE.md "Key Dependencies" | Add missing deps |
+| Structure | Actual dirs vs documented structure | Update tree |
+| Rules Files | Which `.claude/rules/*.md` exist | Offer to create missing |
+| Patterns | Scan for `getInstance()`, `*Repository`, `*Factory`, `*Service` | Add to patterns.md |
 
-## Commands
-{auto-detected build/test commands}
-
-## Documentation Lookup
-Use Context7 MCP for library documentation:
-1. `resolve-library-id("<library-name>")`
-2. `get-library-docs(topic="<topic>", mode="code")`
-
-## Project Reference
-A comprehensive reference skill was generated at:
-`.claude/skills/repomix-reference-{project}/SKILL.md`
-```
-
-**rules/conventions.md** (Minecraft):
-```markdown
-# Code Conventions
-
-## Naming
-- Mod ID: lowercase, underscores (`{mod_id}`)
-- Registry names: lowercase, underscores (`custom_sword`)
-- Class names: PascalCase (`CustomSwordItem`)
-
-## Registry Pattern ({framework})
-{framework-specific DeferredRegister or Registry.register example}
-
-## Event Handlers
-{framework-specific @SubscribeEvent or callback example}
-```
-
-**rules/conventions.md** (Generic):
-```markdown
-# Code Conventions
-
-## Naming
-{project-specific naming conventions}
-
-## Code Style
-{auto-detected style preferences}
-```
-
-**rules/architecture.md**:
-```markdown
-# Architecture Patterns
-
-## Project Structure
-{description of module organization}
-
-## Key Design Decisions
-{architectural notes as they emerge}
-```
-
-## Phase 4: Gitignore Update
-
-Add to `.gitignore` if not present:
-```
-# Claude Code local files
-CLAUDE.local.md
-.claude/*.local.md
-```
-
-## Phase 5: Generate Reference Skill (ALWAYS unless --no-skill)
-
-**CRITICAL**: Always run `mcp__repomix__generate_skill` unless `--no-skill` is specified.
-
-```
-mcp__repomix__generate_skill(
-  directory: "<project_root>",
-  skillName: "repomix-reference-<project-name>"
-)
-```
-
-This creates:
-```
-.claude/skills/repomix-reference-<project>/
-├── SKILL.md                    # Entry point
-└── references/
-    ├── summary.md              # Purpose and statistics
-    ├── project-structure.md    # Directory tree
-    ├── files.md                # File contents
-    └── tech-stack.md           # Dependencies
-```
-
-**Benefit**: Provides persistent, searchable codebase context without repeated file reads.
-
-## Phase 6: Summary Report
-
-After initialization, report:
+### Report Format
 
 ```markdown
-## Initialization Complete
+## Gap Analysis Report
 
-### Created
-- `.claude/CLAUDE.md` - Project instructions ({framework} detected)
-- `.claude/rules/conventions.md` - Code conventions
-- `.claude/rules/architecture.md` - Architecture patterns
-- `.claude/skills/repomix-reference-{project}/` - Reference skill
-- `CLAUDE.local.md` - Personal preferences (gitignored)
+### Missing Dependencies (N found)
+- `package-name` - In build file, not in CLAUDE.md
 
-### Detected
-- Framework: {Forge 1.20.1 | NeoForge 1.21.3 | Fabric 1.20.4 | ...}
-- Mod ID: {mod_id}
-- Build System: {Gradle|Maven|npm|...}
+### Outdated Structure
+- New directory `src/newdir/` not documented
+
+### Undocumented Patterns (N found)
+- Singleton in `path/to/file.ext` (N occurrences)
+```
+
+### User Prompts
+
+Use `AskUserQuestion` to confirm each category:
+1. "Add missing dependencies to CLAUDE.md?"
+2. "Update project structure section?"
+3. "Add discovered patterns to patterns.md?"
+
+Apply only approved changes.
+
+---
+
+## Step 3: Generate/Merge Files
+
+### Template Loading
+
+Templates are in `plugins/qingyi/templates/`:
+- `CLAUDE.md`
+- `architecture.md`
+- `commit-messages.md`
+- `conventions.md`
+- `documentation-style.md`
+- `patterns.md`
+
+Use `Read` to load each template, then replace `{{placeholders}}` with discovered values.
+
+### Placeholder Reference
+
+| Placeholder | Source |
+|-------------|--------|
+| `{{project_name}}` | Build file or folder name |
+| `{{project_type}}` | Detected from build file |
+| `{{install_command}}` | From project-detection.md |
+| `{{build_command}}` | From project-detection.md |
+| `{{test_command}}` | From project-detection.md |
+| `{{project_root}}` | Current directory name |
+| `{{commit_hash}}` | `git rev-parse --short HEAD` |
+| `{{sync_date}}` | Current date (YYYY-MM-DD) |
+| `{{language}}` | From `{{comment_start}}`, `{{comment_end}}` |
+| `{{ext}}` | File extension for language |
+
+### Language-Specific Placeholders
+
+When filling pattern templates, use language-appropriate examples. Skip `{{singleton_example}}` etc. placeholders - generate examples based on detected language conventions.
+
+### Merge Algorithm (for existing files)
+
+1. Create backup: `filename.backup-{YYYYMMDD-HHMMSS}`
+2. Parse existing file into sections (by `##` headers)
+3. For each template section:
+   - If section exists: **KEEP existing** (preserve customizations)
+   - If section missing: **APPEND** from template
+4. Preserve any custom sections not in template
+
+---
+
+## Step 4: Report Results
+
+Output summary:
+
+```markdown
+## Configuration Summary
+
+### Files Created
+- `CLAUDE.md`
+- `.claude/rules/architecture.md`
+- `.claude/rules/commit-messages.md`
+- `.claude/rules/conventions.md`
+- `.claude/rules/documentation-style.md`
+- `.claude/rules/patterns.md`
+
+### Files Enhanced (ENHANCED MODE)
+- `CLAUDE.md` (added: N dependencies, updated structure)
+- `.claude/rules/patterns.md` (added: Singleton pattern)
+
+### Backups Created
+- `CLAUDE.md.backup-20250105-143022`
 
 ### Next Steps
-1. Edit `.claude/CLAUDE.md` to add project-specific conventions
-2. Use `/qingyi <task>` for Minecraft modding assistance
-3. Reference `@.claude/skills/repomix-reference-{project}` for codebase context
-
-### Documentation
-For framework docs, use Context7:
-- `/qingyi help with Forge registry system`
-- Claude will automatically use Context7 for documentation lookup
+1. Review generated files and customize placeholders
+2. Fill in sections marked with `<!-- TODO: ... -->`
+3. Remove sections that don't apply to your project
 ```
 
-**Upgrade Report** (if upgrading):
+### Update Sync Commit
+
+After successful sync, update CLAUDE.md:
 ```markdown
-## Upgrade Complete
-
-### Updated
-- CLAUDE.md: Added Context7 section, preserved your customizations
-- Added .claude/rules/conventions.md
-- Added .claude/rules/architecture.md
-
-### Generated
-- .claude/skills/repomix-reference-{project}/
-
-### Preserved
-- Your custom sections in CLAUDE.md
-- CLAUDE.local.md (unchanged)
+**Last Synced Commit**: `{commit_hash}` ({sync_date})
 ```
 
 ---
 
-## Usage Examples
+## Error Handling
 
-```
-/project-init
-/init
-/setup
-/project-init --minimal
-/project-init --force
-/project-init --no-skill
-/project-init --skill-name=my-mod-reference
-/project-init --upgrade
-/project-init This is a Forge 1.20.1 magic mod
-```
+| Error | Action |
+|-------|--------|
+| No build file detected | Create generic templates, note in report |
+| File read fails | Skip that file, note in report |
+| Write fails | Report error, suggest manual creation |
+| Backup fails | Abort modification of that file |
+
+---
+
+## Important Notes
+
+1. **Never delete existing content** - Only add, never remove
+2. **Preserve custom sections** - Any section not in template stays as-is
+3. **Use placeholders** - Mark unfilled sections with `<!-- TODO: ... -->`
+4. **Respect .gitignore** - Don't create files in ignored directories
+5. **Inform user** - Always report what was created/modified
+6. **Create backups** - Always backup before modifying existing files
