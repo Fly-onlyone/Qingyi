@@ -11,13 +11,23 @@
       "mcp__plugin_repomix-mcp_repomix__file_system_read_file",
       "Bash(cat:*)",
       "Bash(git rev-parse:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "mcp__repomix__file_system_read_directory",
+      "mcp__repomix__file_system_read_file",
+      "mcp__github__search_code",
+      "mcp__github__get_file_contents",
+      "mcp__intellij__get_file_text_by_path",
+      "WebFetch(domain:docs.anthropic.com)",
+      "mcp__intellij__list_directory_tree",
+      "mcp__intellij__replace_text_in_file",
+      "mcp__intellij__create_new_file",
+      "Bash(claude plugin list)",
+      "mcp__intellij__find_files_by_name_keyword",
+      "mcp__intellij__get_file_problems",
+      "mcp__intellij__reformat_file"
     ],
     "deny": [],
     "ask": []
   },
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "minecraft-bot"
-  ]
+  "enableAllProjectMcpServers": true
 }

@@ -4,27 +4,28 @@
 # Read stdin JSON for the PermissionRequest event
 $input = [Console]::In.ReadToEnd()
 
-try {
-    $data     = $input | ConvertFrom-Json
+try
+{
+    $data = $input | ConvertFrom-Json
     $toolName = $data.tool_name
 }
-catch {
+catch
+{
     $toolName = $null
 }
 
-if ($toolName) {
+if ($toolName)
+{
     $message = "Permission needed for $toolName -- check Claude Code"
 }
-else {
+else
+{
     $message = 'Permission needed -- check Claude Code'
 }
 
-# Sanitize common Unicode characters that garble on Windows
-$message = $message -replace [char]0x2014, '--' -replace [char]0x2013, '-' -replace [char]0x2018, "'" -replace [char]0x2019, "'" -replace [char]0x201C, '"' -replace [char]0x201D, '"'
-
 # Call notify.ps1 from the same directory
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-& powershell -NoProfile -ExecutionPolicy Bypass -File "$scriptDir\notify.ps1" -Title 'Claude Code' -Message $message
+& "$scriptDir\notify.ps1" -Title 'Claude Code' -Message $message
 
 # Output valid JSON and exit cleanly
 Write-Output '{}'

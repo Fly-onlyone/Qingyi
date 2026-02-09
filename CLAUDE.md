@@ -20,11 +20,11 @@ Qingyi/                                    ← Plugin root
 ├── commands/
 │   └── project-init.md                    ← /init command (~200 lines)
 ├── hooks/                                 ← Event hook scripts
-│   ├── hooks.json                         ← Hook definitions (Stop, Notification)
+│   ├── hooks.json                         ← Hook definitions (Stop, PermissionRequest)
 │   ├── notify.ps1                         ← Reusable toast notification script
 │   ├── Qingyi02.png                       ← Toast notification icon
 │   ├── on-stop.ps1                        ← Stop event handler
-│   └── on-notification.ps1                ← Notification event handler
+│   └── on-permission.ps1                  ← PermissionRequest event handler
 ├── templates/                             ← External template files
 │   ├── commands/
 │   │   └── commit.md                      ← /commit command template
@@ -167,13 +167,13 @@ The plugin includes Windows toast notification hooks that alert you when Claude 
 
 | Event | Trigger | Notification |
 |-------|---------|--------------|
-| **Stop** | Claude finishes work | "Work completed — check Claude Code" |
-| **Notification** | Permission request or user input needed | "Action required — check Claude Code" |
+| **Stop** | Claude finishes work | "Work completed -- check Claude Code" |
+| **PermissionRequest** | Permission dialog shown | "Permission needed for {tool} -- check Claude Code" |
 
 ### How It Works
 
-1. **`hooks.json`** — Registers `Stop` and `Notification` event handlers
-2. **`on-stop.ps1`** / **`on-notification.ps1`** — Read stdin JSON from Claude, extract event data
+1. **`hooks.json`** — Registers `Stop` and `PermissionRequest` event handlers
+2. **`on-stop.ps1`** / **`on-permission.ps1`** — Read stdin JSON from Claude, extract event data
 3. **`notify.ps1`** — Reusable script that displays a Windows toast using the WinRT `ToastNotificationManager` API
 
 ### Requirements
