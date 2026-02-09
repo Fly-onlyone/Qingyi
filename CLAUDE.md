@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Qingyi** is a Claude Code plugin (v2.1.0) that provides an enhanced `/init` command for project configuration. It creates CLAUDE.md and `.claude/rules/` files with intelligent gap analysis for existing projects.
+**Qingyi** is a Claude Code plugin (v2.2.0) that provides an enhanced `/init` command for project configuration. It creates CLAUDE.md and `.claude/rules/` files with intelligent gap analysis for existing projects.
 
 **This is NOT a traditional software project** - there are no build/test commands. This is a plugin configuration project with a markdown-based command that Claude Code loads to assist with project setup.
 
@@ -13,22 +13,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Structure
 
 ```
-Qingyi/                                    ← Marketplace root
+Qingyi/                                    ← Plugin root
 ├── .claude-plugin/
-│   └── marketplace.json                   ← Plugin marketplace definition
-├── plugins/
-│   └── qingyi/
-│       ├── commands/
-│       │   └── project-init.md            ← /init command (~200 lines)
-│       ├── templates/                     ← External template files
-│       │   ├── CLAUDE.md
-│       │   ├── architecture.md
-│       │   ├── commit-messages.md
-│       │   ├── conventions.md
-│       │   ├── documentation-style.md
-│       │   └── patterns.md
-│       └── references/
-│           └── project-detection.md       ← Build file → project type mapping
+│   ├── marketplace.json                   ← Plugin marketplace definition
+│   └── plugin.json                        ← Plugin manifest (commands, hooks)
+├── commands/
+│   └── project-init.md                    ← /init command (~200 lines)
+├── hooks/                                 ← Event hook scripts
+│   ├── hooks.json                         ← Hook definitions (Stop, Notification)
+│   ├── notify.ps1                         ← Reusable toast notification script
+│   ├── Qingyi02.png                       ← Toast notification icon
+│   ├── on-stop.ps1                        ← Stop event handler
+│   └── on-notification.ps1                ← Notification event handler
+├── templates/                             ← External template files
+│   ├── commands/
+│   │   └── commit.md                      ← /commit command template
+│   ├── CLAUDE.md
+│   ├── architecture.md
+│   ├── code-guide.md
+│   └── documentation-style.md
+├── references/
+│   └── project-detection.md               ← Build file → project type mapping
 ├── scripts/
 │   ├── install.bat                        ← Windows installation script
 │   ├── install.sh                         ← Linux/macOS installation script
@@ -44,16 +49,15 @@ The `/init` command creates or enhances project configuration files:
 
 1. **CLAUDE.md** - Project overview, build commands, dependencies, structure
 2. **.claude/rules/architecture.md** - System design, data flow, components
-3. **.claude/rules/commit-messages.md** - Git commit format and conventions
-4. **.claude/rules/conventions.md** - Naming, code style, best practices
-5. **.claude/rules/documentation-style.md** - Comment standards, doc patterns
-6. **.claude/rules/patterns.md** - Reusable code patterns (singleton, factory, etc.)
+3. **.claude/rules/code-guide.md** - Naming, patterns, code style, best practices
+4. **.claude/rules/documentation-style.md** - Comment standards, doc patterns
+5. **.claude/commands/commit.md** - `/commit` command for conventional commits + push
 
 ### Two Modes
 
 | Mode | Trigger | Behavior |
 |------|---------|----------|
-| **CREATE** | No CLAUDE.md exists | Generate all 6 files from templates |
+| **CREATE** | No CLAUDE.md exists | Generate all 5 files from templates |
 | **ENHANCED** | CLAUDE.md exists | Run gap analysis, prompt before adding |
 
 ### Gap Analysis (ENHANCED Mode)
@@ -136,26 +140,54 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 
 ### Testing Changes
 
-1. Edit `plugins/qingyi/commands/project-init.md`
+1. Edit `commands/project-init.md`
 2. Re-run installation script to update plugin cache
 3. Restart Claude Code
 4. Test with `/init` in a project directory
 
 ## Template Reference
 
-Templates are stored in `plugins/qingyi/templates/` and loaded at runtime:
+Templates are stored in `templates/` and loaded at runtime using `${CLAUDE_PLUGIN_ROOT}`:
 
 | Template | Purpose |
 |----------|---------|
 | `CLAUDE.md` | Project overview with placeholders |
 | `architecture.md` | System design template |
-| `commit-messages.md` | Git conventions |
-| `conventions.md` | Code style rules |
+| `code-guide.md` | Naming, patterns, code style |
 | `documentation-style.md` | Comment standards |
-| `patterns.md` | Code patterns guide |
+| `commands/commit.md` | Conventional commit command |
 
-Build file → project type mapping is in `plugins/qingyi/references/project-detection.md`.
+Build file → project type mapping is in `references/project-detection.md`.
+
+## Windows Toast Notifications
+
+The plugin includes Windows toast notification hooks that alert you when Claude Code needs attention.
+
+### Supported Events
+
+| Event | Trigger | Notification |
+|-------|---------|--------------|
+| **Stop** | Claude finishes work | "Work completed — check Claude Code" |
+| **Notification** | Permission request or user input needed | "Action required — check Claude Code" |
+
+### How It Works
+
+1. **`hooks.json`** — Registers `Stop` and `Notification` event handlers
+2. **`on-stop.ps1`** / **`on-notification.ps1`** — Read stdin JSON from Claude, extract event data
+3. **`notify.ps1`** — Reusable script that displays a Windows toast using the WinRT `ToastNotificationManager` API
+
+### Requirements
+
+- Windows 10 or 11
+- PowerShell 5.1+ (built-in)
+- No external modules or dependencies needed
+
+### Testing Manually
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "hooks/notify.ps1" -Title "Test" -Message "Hello from Qingyi"
+```
 
 ## Quick Reference
 
-**Last Synced Commit**: `77951c5` (2025-01-05)
+**Last Synced Commit**: `5ebe3f5` (2025-01-12)

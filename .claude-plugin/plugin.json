@@ -1,0 +1,13 @@
+{
+  "name": "qingyi",
+  "version": "2.2.0",
+  "description": "Enhanced /init command that creates CLAUDE.md and .claude/rules/ with gap analysis for existing projects.",
+  "author": {
+    "name": "Fly"
+  },
+  "license": "MIT",
+  "commands": [
+    "./commands/project-init.md"
+  ],
+  "hooks": "./hooks/hooks.json"
+}

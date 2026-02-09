@@ -25,7 +25,7 @@ STEP 1: Detect Project Type → STEP 2: Inventory Config → STEP 3: Generate/Me
 
 Use `Glob` to find build files, then read to extract project info.
 
-**Reference**: Read `plugins/qingyi/references/project-detection.md` for build file → project type mapping.
+**Reference**: Read `${CLAUDE_PLUGIN_ROOT}/references/project-detection.md` for build file → project type mapping.
 
 ### Detection Steps
 
@@ -41,10 +41,9 @@ Use `Glob` to find build files, then read to extract project info.
 Check for existing files:
 - `CLAUDE.md` (project root)
 - `.claude/rules/architecture.md`
-- `.claude/rules/commit-messages.md`
-- `.claude/rules/conventions.md`
+- `.claude/rules/code-guide.md`
 - `.claude/rules/documentation-style.md`
-- `.claude/rules/patterns.md`
+- `.claude/commands/commit.md`
 
 ### Mode Selection
 
@@ -70,7 +69,7 @@ Focus scans on changed files only. If no sync commit found, perform full scan (o
 | Dependencies | Build file vs CLAUDE.md "Key Dependencies" | Add missing deps |
 | Structure | Actual dirs vs documented structure | Update tree |
 | Rules Files | Which `.claude/rules/*.md` exist | Offer to create missing |
-| Patterns | Scan for `getInstance()`, `*Repository`, `*Factory`, `*Service` | Add to patterns.md |
+| Patterns | Scan for `getInstance()`, `*Repository`, `*Factory`, `*Service` | Add to code-guide.md |
 
 ### Report Format
 
@@ -92,7 +91,7 @@ Focus scans on changed files only. If no sync commit found, perform full scan (o
 Use `AskUserQuestion` to confirm each category:
 1. "Add missing dependencies to CLAUDE.md?"
 2. "Update project structure section?"
-3. "Add discovered patterns to patterns.md?"
+3. "Add discovered patterns to code-guide.md?"
 
 Apply only approved changes.
 
@@ -102,13 +101,16 @@ Apply only approved changes.
 
 ### Template Loading
 
-Templates are in `plugins/qingyi/templates/`:
+Templates are located in the plugin directory. Use `${CLAUDE_PLUGIN_ROOT}` to resolve paths:
+
+**Template files** (`${CLAUDE_PLUGIN_ROOT}/templates/`):
 - `CLAUDE.md`
 - `architecture.md`
-- `commit-messages.md`
-- `conventions.md`
+- `code-guide.md`
 - `documentation-style.md`
-- `patterns.md`
+
+**Command files** (`${CLAUDE_PLUGIN_ROOT}/templates/commands/`):
+- `commit.md`
 
 Use `Read` to load each template, then replace `{{placeholders}}` with discovered values.
 
@@ -118,18 +120,14 @@ Use `Read` to load each template, then replace `{{placeholders}}` with discovere
 |-------------|--------|
 | `{{project_name}}` | Build file or folder name |
 | `{{project_type}}` | Detected from build file |
-| `{{install_command}}` | From project-detection.md |
-| `{{build_command}}` | From project-detection.md |
-| `{{test_command}}` | From project-detection.md |
+| `{{install_command}}` | From `${CLAUDE_PLUGIN_ROOT}/references/project-detection.md` |
+| `{{build_command}}` | From `${CLAUDE_PLUGIN_ROOT}/references/project-detection.md` |
+| `{{test_command}}` | From `${CLAUDE_PLUGIN_ROOT}/references/project-detection.md` |
 | `{{project_root}}` | Current directory name |
 | `{{commit_hash}}` | `git rev-parse --short HEAD` |
 | `{{sync_date}}` | Current date (YYYY-MM-DD) |
 | `{{language}}` | From `{{comment_start}}`, `{{comment_end}}` |
 | `{{ext}}` | File extension for language |
-
-### Language-Specific Placeholders
-
-When filling pattern templates, use language-appropriate examples. Skip `{{singleton_example}}` etc. placeholders - generate examples based on detected language conventions.
 
 ### Merge Algorithm (for existing files)
 
@@ -152,14 +150,13 @@ Output summary:
 ### Files Created
 - `CLAUDE.md`
 - `.claude/rules/architecture.md`
-- `.claude/rules/commit-messages.md`
-- `.claude/rules/conventions.md`
+- `.claude/rules/code-guide.md`
 - `.claude/rules/documentation-style.md`
-- `.claude/rules/patterns.md`
+- `.claude/commands/commit.md`
 
 ### Files Enhanced (ENHANCED MODE)
 - `CLAUDE.md` (added: N dependencies, updated structure)
-- `.claude/rules/patterns.md` (added: Singleton pattern)
+- `.claude/rules/code-guide.md` (added: N patterns)
 
 ### Backups Created
 - `CLAUDE.md.backup-20250105-143022`
@@ -192,9 +189,9 @@ After successful sync, update CLAUDE.md:
 
 ## Important Notes
 
-1. **Never delete existing content** - Only add, never remove
+1. **Optimize existing content** - Find optimize opportunities for better workflow and token efficiency, then let user decide.
 2. **Preserve custom sections** - Any section not in template stays as-is
 3. **Use placeholders** - Mark unfilled sections with `<!-- TODO: ... -->`
 4. **Respect .gitignore** - Don't create files in ignored directories
 5. **Inform user** - Always report what was created/modified
-6. **Create backups** - Always backup before modifying existing files
+

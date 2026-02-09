@@ -26,24 +26,16 @@ This file provides guidance to Claude Code when working with this project.
 |---------|---------|
 | `{{dep_name}}` | {{dep_purpose}} |
 
-## Project Structure
-
-```
-{{project_root}}/
-├── src/                    # Source code
-├── tests/                  # Test files
-├── docs/                   # Documentation
-└── ...
-```
-
 ## Project Rules
 
 See `.claude/rules/` for detailed conventions:
+- [Code Guide](/.claude/rules/code-guide.md) - Naming, patterns, package structure, code style
 - [Architecture](/.claude/rules/architecture.md) - System design and data flow
-- [Commit Messages](/.claude/rules/commit-messages.md) - Git commit format
-- [Conventions](/.claude/rules/conventions.md) - Naming and code style
 - [Documentation](/.claude/rules/documentation-style.md) - Comment standards
-- [Patterns](/.claude/rules/patterns.md) - Reusable code patterns
+
+## Commands
+
+- [Commit](/.claude/commands/commit.md) - Use `/commit` for conventional commits + push
 
 ## Quick Reference
 
