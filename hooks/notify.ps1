@@ -30,22 +30,36 @@ try
 
     $RegPath = "HKCU:\SOFTWARE\Classes\AppUserModelId\$AppId"
 
-    # Always update AUMID registration to ensure DisplayName and IconUri are current
+    # Register AUMID only if the key is missing or values are stale
+    $needsUpdate = $false
     if (-not (Test-Path $RegPath))
     {
         New-Item -Path "HKCU:\SOFTWARE\Classes\AppUserModelId" -Name $AppId -Force | Out-Null
-    }
-    New-ItemProperty -Path $RegPath -Name 'DisplayName'       -Value $AppName  -PropertyType String       -Force | Out-Null
-    New-ItemProperty -Path $RegPath -Name 'ShowInSettings'     -Value 0         -PropertyType DWord        -Force | Out-Null
-
-    # Set or clear IconUri based on icon file existence
-    if ($iconExists)
-    {
-        New-ItemProperty -Path $RegPath -Name 'IconUri' -Value $IconPath -PropertyType ExpandString -Force | Out-Null
+        $needsUpdate = $true
     }
     else
     {
-        Remove-ItemProperty -Path $RegPath -Name 'IconUri' -ErrorAction SilentlyContinue
+        $reg = Get-ItemProperty -Path $RegPath -ErrorAction SilentlyContinue
+        $expectedIcon = if ($iconExists) { $IconPath } else { $null }
+        if ($reg.DisplayName -ne $AppName -or $reg.IconUri -ne $expectedIcon)
+        {
+            $needsUpdate = $true
+        }
+    }
+
+    if ($needsUpdate)
+    {
+        New-ItemProperty -Path $RegPath -Name 'DisplayName'   -Value $AppName -PropertyType String -Force | Out-Null
+        New-ItemProperty -Path $RegPath -Name 'ShowInSettings' -Value 0        -PropertyType DWord  -Force | Out-Null
+
+        if ($iconExists)
+        {
+            New-ItemProperty -Path $RegPath -Name 'IconUri' -Value $IconPath -PropertyType ExpandString -Force | Out-Null
+        }
+        else
+        {
+            Remove-ItemProperty -Path $RegPath -Name 'IconUri' -ErrorAction SilentlyContinue
+        }
     }
 
     # Load WinRT toast notification API
