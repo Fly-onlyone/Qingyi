@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Qingyi** is a Claude Code plugin (v2.2.0) that provides an enhanced `/init` command for project configuration. It creates CLAUDE.md and `.claude/rules/` files with intelligent gap analysis for existing projects.
+**Qingyi** is a Claude Code plugin (v2.3.0) that provides an enhanced `/init` command for project configuration, reusable skills, and Windows toast notifications. It creates CLAUDE.md and `.claude/rules/` files with intelligent gap analysis for existing projects.
 
 **This is NOT a traditional software project** - there are no build/test commands. This is a plugin configuration project with a markdown-based command that Claude Code loads to assist with project setup.
 
@@ -32,8 +32,12 @@ Qingyi/                                    ← Plugin root
 │   ├── architecture.md
 │   ├── code-guide.md
 │   └── documentation-style.md
-├── references/
-│   └── project-detection.md               ← Build file → project type mapping
+├── skills/                                ← Auto-discovered skills
+│   ├── debug-code/SKILL.md               ← Debugging workflow
+│   ├── excel-edit/SKILL.md               ← Excel write/format/style
+│   ├── excel-read/SKILL.md               ← Excel read/analyze/extract
+│   ├── sentry-deploy/SKILL.md            ← Sentry deployment
+│   └── trim-project-instructions/SKILL.md ← Instruction file audit
 ├── scripts/
 │   ├── install.bat                        ← Windows installation script
 │   ├── install.sh                         ← Linux/macOS installation script
@@ -157,7 +161,7 @@ Templates are stored in `templates/` and loaded at runtime using `${CLAUDE_PLUGI
 | `documentation-style.md` | Comment standards |
 | `commands/commit.md` | Conventional commit command |
 
-Build file → project type mapping is in `references/project-detection.md`.
+Build file → project type mapping relies on Claude's built-in knowledge (no external reference needed).
 
 ## Windows Toast Notifications
 

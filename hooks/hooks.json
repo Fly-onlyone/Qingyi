@@ -8,7 +8,8 @@
           {
             "type": "command",
             "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/on-stop.ps1\"",
-            "timeout": 10
+            "timeout": 10,
+            "statusMessage": "Sending notification..."
           }
         ]
       }
@@ -20,7 +21,8 @@
           {
             "type": "command",
             "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/on-permission.ps1\"",
-            "timeout": 10
+            "timeout": 10,
+            "statusMessage": "Sending notification..."
           }
         ]
       }

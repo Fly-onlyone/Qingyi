@@ -27,6 +27,6 @@ else
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 & "$scriptDir\notify.ps1" -Title 'Claude Code' -Message $message
 
-# Output valid JSON and exit cleanly
+# Output empty decision — notify only, does not auto-allow or auto-deny
 Write-Output '{}'
 exit 0

@@ -1,13 +1,14 @@
 {
   "name": "qingyi",
-  "version": "2.2.0",
-  "description": "Enhanced /init command that creates CLAUDE.md and .claude/rules/ with gap analysis for existing projects.",
+  "version": "2.3.0",
+  "description": "Enhanced /init command, reusable skills (debug, Excel, Sentry, trim), and Windows toast notifications.",
   "author": {
     "name": "Fly"
   },
   "license": "MIT",
   "commands": [
-    "./commands/project-init.md"
+    "./commands/project-init.md",
+    "./commands/commit.md"
   ],
   "hooks": "./hooks/hooks.json"
 }

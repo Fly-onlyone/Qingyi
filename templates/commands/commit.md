@@ -1,7 +1,7 @@
 ---
 name: commit
 description: Create a conventional commit and push to GitHub
-command-type: prompt
+disable-model-invocation: true
 allowed-tools: Bash, Grep, AskUserQuestion
 ---
 
@@ -15,7 +15,7 @@ Create a conventional commit and optionally push to GitHub.
 
 Run `git status --porcelain` to detect changes.
 
-**If no changes**: Report "No changes to commit. Working tree is clean." and exit.
+**If no changes**: Report "No changes to commit. Working tree is clean." and stop.
 
 **If changes exist**: Categorize into:
 - Staged (A/M in first column)
@@ -25,22 +25,28 @@ Run `git status --porcelain` to detect changes.
 ### Step 2: Stage Changes
 
 If nothing staged but changes exist, use `AskUserQuestion` with options:
-- **All** - Stage all changes (`git add -A`)
-- **Modified only** - Stage only modified tracked files (`git add -u`)
-- **Select files** - Let user specify which files
+- **All** -- Stage all changes (`git add -A`)
+- **Modified only** -- Stage only modified tracked files (`git add -u`)
+- **Select files** -- Let user specify which files
 
 Run the appropriate `git add` command.
 
-### Step 3: Review Context
+### Step 3: Analyze and Propose
 
-Run `git log --oneline -5` to show recent commit style for consistency.
-Run `git diff --cached --stat` to show what will be committed.
+Run these in parallel:
+- `git log --oneline -5` -- recent commit style for consistency
+- `git diff --cached --stat` -- what will be committed
+- `git diff --cached` -- full diff for analysis
 
-### Step 4: Build Commit Message
+Analyze the diff and propose a complete commit message following conventional commits format:
 
-Use `AskUserQuestion` for each component:
+```
+<type>(<scope>): <description>
 
-**4a. Commit Type** (required)
+<body>
+```
+
+**Commit types:**
 
 | Type | When to Use |
 |------|-------------|
@@ -53,29 +59,20 @@ Use `AskUserQuestion` for each component:
 | `test` | Adding or updating tests |
 | `chore` | Build process, dependencies |
 
-**4b. Scope** (optional)
-Component or module name. Leave empty if not applicable.
+**Rules:**
+1. Subject line under 72 characters (target under 50)
+2. Use imperative mood ("add" not "added")
+3. No period at end of subject
+4. Body explains what and why, not how
 
-**4c. Description** (required)
-Short description in imperative mood ("add" not "added"). Keep under 50 characters.
+### Step 4: Confirm with User
 
-**4d. Body** (optional)
-Longer explanation of what and why (not how). Wrap at 72 characters.
-
-**4e. Breaking Change** (optional)
-If yes, add `BREAKING CHANGE:` footer with description.
+Present the proposed commit message using `AskUserQuestion`:
+- **Accept** -- Use as-is
+- **Edit** -- Let user modify the message
+- **Cancel** -- Abort commit
 
 ### Step 5: Create Commit
-
-Build message format:
-```
-<type>(<scope>): <description>
-
-<body>
-
-<footer>
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
 
 Execute using heredoc for proper formatting:
 ```bash
@@ -110,11 +107,3 @@ Report final status with commit hash.
 | Push rejected | "Push rejected. Pull latest changes: `git pull --rebase`" |
 | No upstream | Suggest `git push -u origin <branch>` |
 | No remote | "No remote configured. Commit created locally." |
-
-## Validation Rules
-
-1. Type must be: feat, fix, docs, style, refactor, perf, test, chore
-2. Subject line under 72 characters (warn if over 50)
-3. Use imperative mood ("add" not "added")
-4. No period at end of subject
-5. Always include Co-Authored-By line

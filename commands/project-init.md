@@ -1,8 +1,6 @@
 ---
-name: project-init
 description: Initialize or enhance Claude Code project configuration (CLAUDE.md + .claude/rules/). Use PROACTIVELY when starting work on a new project.
-command-type: prompt
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
+allowed-tools: Read, Write, Edit, Bash(git:*, ls:*, tree:*), Glob, Grep, AskUserQuestion
 ---
 
 # Project Initialization Command
@@ -25,14 +23,12 @@ STEP 1: Detect Project Type → STEP 2: Inventory Config → STEP 3: Generate/Me
 
 Use `Glob` to find build files, then read to extract project info.
 
-**Reference**: Read `${CLAUDE_PLUGIN_ROOT}/references/project-detection.md` for build file → project type mapping.
-
 ### Detection Steps
 
 1. Find build files: `package.json`, `build.gradle*`, `pom.xml`, `requirements.txt`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `composer.json`, `Gemfile`, `*.csproj`
 2. Read primary build file to extract: project name, version, dependencies, build/test commands
 3. Check for framework-specific markers (React, Spring Boot, Django, etc.)
-4. Use `ls` or tree to determine directory structure
+4. Use `Glob` to discover directory structure
 
 ---
 
@@ -43,8 +39,6 @@ Check for existing files:
 - `.claude/rules/architecture.md`
 - `.claude/rules/code-guide.md`
 - `.claude/rules/documentation-style.md`
-- `.claude/commands/commit.md`
-
 ### Mode Selection
 
 - **CREATE MODE**: No `CLAUDE.md` → Generate all files from templates
@@ -109,9 +103,6 @@ Templates are located in the plugin directory. Use `${CLAUDE_PLUGIN_ROOT}` to re
 - `code-guide.md`
 - `documentation-style.md`
 
-**Command files** (`${CLAUDE_PLUGIN_ROOT}/templates/commands/`):
-- `commit.md`
-
 Use `Read` to load each template, then replace `{{placeholders}}` with discovered values.
 
 ### Placeholder Reference
@@ -120,13 +111,13 @@ Use `Read` to load each template, then replace `{{placeholders}}` with discovere
 |-------------|--------|
 | `{{project_name}}` | Build file or folder name |
 | `{{project_type}}` | Detected from build file |
-| `{{install_command}}` | From `${CLAUDE_PLUGIN_ROOT}/references/project-detection.md` |
-| `{{build_command}}` | From `${CLAUDE_PLUGIN_ROOT}/references/project-detection.md` |
-| `{{test_command}}` | From `${CLAUDE_PLUGIN_ROOT}/references/project-detection.md` |
+| `{{install_command}}` | Standard command for detected project type |
+| `{{build_command}}` | Standard command for detected project type |
+| `{{test_command}}` | Standard command for detected project type |
 | `{{project_root}}` | Current directory name |
 | `{{commit_hash}}` | `git rev-parse --short HEAD` |
 | `{{sync_date}}` | Current date (YYYY-MM-DD) |
-| `{{language}}` | From `{{comment_start}}`, `{{comment_end}}` |
+| `{{language}}` | Detected from project type (Step 1) |
 | `{{ext}}` | File extension for language |
 
 ### Merge Algorithm (for existing files)
@@ -152,8 +143,6 @@ Output summary:
 - `.claude/rules/architecture.md`
 - `.claude/rules/code-guide.md`
 - `.claude/rules/documentation-style.md`
-- `.claude/commands/commit.md`
-
 ### Files Enhanced (ENHANCED MODE)
 - `CLAUDE.md` (added: N dependencies, updated structure)
 - `.claude/rules/code-guide.md` (added: N patterns)

@@ -35,6 +35,6 @@ switch ($reason)
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 & "$scriptDir\notify.ps1" -Title 'Claude Code' -Message $message
 
-# Output valid JSON and exit cleanly
-Write-Output '{}'
+# Explicitly approve stopping (notify-only, never blocks)
+Write-Output '{"decision":"approve"}'
 exit 0
