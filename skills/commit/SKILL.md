@@ -1,17 +1,26 @@
 ---
 name: commit
-description: Create a conventional commit and push to GitHub
-disable-model-invocation: true
+description: >-
+  This skill should be used when the user wants to commit code changes to git and optionally push to a remote.
+
+  ACTION TRIGGERS:
+  - "commit", "git commit", "commit and push", "push changes"
+  - "save changes", "commit my work", "commit this"
+  - "conventional commit", "create a commit"
+
+  NATURAL LANGUAGE PATTERNS:
+  - "commit" + code/changes context
+  - "push" + to remote/GitHub/origin
+  - "save my changes" / "commit what I have"
+  - "done, commit" / "looks good, commit"
 allowed-tools: Bash, Grep, AskUserQuestion
 ---
 
-# Commit Command
+# Commit Workflow
 
 Create a conventional commit and optionally push to GitHub.
 
-## Workflow
-
-### Step 1: Check Git Status
+## Step 1: Check Git Status
 
 Run `git status --porcelain` to detect changes.
 
@@ -22,7 +31,7 @@ Run `git status --porcelain` to detect changes.
 - Modified (M in second column)
 - Untracked (??)
 
-### Step 2: Stage Changes
+## Step 2: Stage Changes
 
 If nothing staged but changes exist, use `AskUserQuestion` with options:
 - **All** -- Stage all changes (`git add -A`)
@@ -31,7 +40,7 @@ If nothing staged but changes exist, use `AskUserQuestion` with options:
 
 Run the appropriate `git add` command.
 
-### Step 3: Analyze and Propose
+## Step 3: Analyze and Propose
 
 Run these in parallel:
 - `git log --oneline -5` -- recent commit style for consistency
@@ -65,14 +74,14 @@ Analyze the diff and propose a complete commit message following conventional co
 3. No period at end of subject
 4. Body explains what and why, not how
 
-### Step 4: Confirm with User
+## Step 4: Confirm with User
 
 Present the proposed commit message using `AskUserQuestion`:
 - **Accept** -- Use as-is
 - **Edit** -- Let user modify the message
 - **Cancel** -- Abort commit
 
-### Step 5: Create Commit
+## Step 5: Create Commit
 
 Execute using heredoc for proper formatting:
 ```bash
@@ -84,7 +93,7 @@ EOF
 
 Verify with `git log -1 --oneline`.
 
-### Step 6: Push to Remote
+## Step 6: Push to Remote
 
 Check remote: `git remote -v`
 

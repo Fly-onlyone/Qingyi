@@ -8,16 +8,14 @@ description: >-
   - "the excel file", "this excel" + modification context
 
   ACTION TRIGGERS:
-  - EDIT: "edit excel", "modify spreadsheet", "update cells", "change values",
-    "fix the excel", "correct the spreadsheet", "update the data"
+  - EDIT: "edit excel", "modify spreadsheet", "update cells", "change values"
   - CREATE: "create excel", "new spreadsheet", "make xlsx", "build a table"
-  - FORMAT: "format excel", "style cells", "make it look better", "eye-catching",
-    "add colors", "professional formatting", "beautify spreadsheet"
-  - DESIGN: "create dashboard", "professional design", "modern look"
+  - FORMAT: "format excel", "style cells", "add colors", "professional formatting",
+    "beautify spreadsheet", "eye-catching", "modern look"
   - STRUCTURE: "add worksheet", "merge cells", "add chart", "pivot table",
     "add rows", "delete columns", "insert data", "freeze panes"
   - ORGANIZE: "reorganize excel", "restructure spreadsheet", "clean up excel",
-    "organize the data", "sort the spreadsheet", "rearrange columns"
+    "sort spreadsheet", "rearrange columns"
 
   NATURAL LANGUAGE PATTERNS:
   - "make the excel" + improvement verb

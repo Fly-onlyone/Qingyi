@@ -7,8 +7,7 @@
   },
   "license": "MIT",
   "commands": [
-    "./commands/project-init.md",
-    "./commands/commit.md"
+    "./commands/project-init.md"
   ],
   "hooks": "./hooks/hooks.json"
 }

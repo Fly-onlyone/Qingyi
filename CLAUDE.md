@@ -26,13 +26,12 @@ Qingyi/                                    ← Plugin root
 │   ├── on-stop.ps1                        ← Stop event handler
 │   └── on-permission.ps1                  ← PermissionRequest event handler
 ├── templates/                             ← External template files
-│   ├── commands/
-│   │   └── commit.md                      ← /commit command template
 │   ├── CLAUDE.md
 │   ├── architecture.md
 │   ├── code-guide.md
 │   └── documentation-style.md
 ├── skills/                                ← Auto-discovered skills
+│   ├── commit/SKILL.md                   ← Conventional commit + push
 │   ├── debug-code/SKILL.md               ← Debugging workflow
 │   ├── excel-edit/SKILL.md               ← Excel write/format/style
 │   ├── excel-read/SKILL.md               ← Excel read/analyze/extract
@@ -55,7 +54,7 @@ The `/init` command creates or enhances project configuration files:
 2. **.claude/rules/architecture.md** - System design, data flow, components
 3. **.claude/rules/code-guide.md** - Naming, patterns, code style, best practices
 4. **.claude/rules/documentation-style.md** - Comment standards, doc patterns
-5. **.claude/commands/commit.md** - `/commit` command for conventional commits + push
+5. **Commit skill** - Conventional commits + push (auto-triggered, not a slash command)
 
 ### Two Modes
 
@@ -159,7 +158,6 @@ Templates are stored in `templates/` and loaded at runtime using `${CLAUDE_PLUGI
 | `architecture.md` | System design template |
 | `code-guide.md` | Naming, patterns, code style |
 | `documentation-style.md` | Comment standards |
-| `commands/commit.md` | Conventional commit command |
 
 Build file → project type mapping relies on Claude's built-in knowledge (no external reference needed).
 
