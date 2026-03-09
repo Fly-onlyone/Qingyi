@@ -28,16 +28,19 @@ Read, analyze, and extract data from Excel files using Python openpyxl.
 
 ## Environment
 
-The conda "Excel" environment has openpyxl 3.1.5 installed:
+**Before running any script**, determine the Python runner (checked in order, first match wins):
 
-```bash
-conda run -n Excel python <script_path>
-```
+1. **Global**: Read `~/.claude/qingyi.local.md`, parse YAML frontmatter for `excel_runner`
+2. **Project-level**: Read `.claude/qingyi.local.md` from the project root, parse YAML frontmatter for `excel_runner` (
+   overrides global)
+3. **Default**: `conda run -n Excel python`
+
+Run command: `<excel_runner> <script_path>`
 
 ## Workflow
 
 1. **Create Python script** at `scripts/excel/` from project root
-2. **Execute with conda**: `conda run -n Excel python scripts/excel/<script_name>.py`
+2. **Execute script**: `<excel_runner> scripts/excel/<script_name>.py`
 3. **Keep scripts** for reference and reusability
 
 ## Output Formatting
@@ -66,8 +69,8 @@ from pathlib import Path
 
 ```python
 wb = load_workbook(path, data_only=True)  # data_only=True for formula results
-ws = wb.active                             # Active sheet
-ws = wb['SheetName']                       # Named sheet
+ws = wb.active  # Active sheet
+ws = wb['SheetName']  # Named sheet
 ```
 
 ### Read Single Cell
@@ -96,8 +99,8 @@ data = [[cell.value for cell in row]
 ### Read Column/Row
 
 ```python
-col_values = [cell.value for cell in ws['A']]    # Column A
-row_values = [cell.value for cell in ws[1]]       # Row 1
+col_values = [cell.value for cell in ws['A']]  # Column A
+row_values = [cell.value for cell in ws[1]]  # Row 1
 ```
 
 ### Iterate Rows with Values Only
@@ -157,6 +160,7 @@ print(f"Columns: {len(headers)}, Data rows: {ws.max_row - 1}, Headers: {headers}
 from openpyxl import load_workbook
 from pathlib import Path
 
+
 def main():
     path = Path(r"C:\path\to\file.xlsx")
     wb = load_workbook(path, data_only=True)
@@ -173,6 +177,7 @@ def main():
                 print("...")
                 break
             print(row)
+
 
 if __name__ == "__main__":
     main()

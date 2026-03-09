@@ -29,16 +29,19 @@ Write, format, style, and design professional Excel files using Python openpyxl.
 
 ## Environment
 
-The conda "Excel" environment has openpyxl 3.1.5 installed:
+**Before running any script**, determine the Python runner (checked in order, first match wins):
 
-```bash
-conda run -n Excel python <script_path>
-```
+1. **Global**: Read `~/.claude/qingyi.local.md`, parse YAML frontmatter for `excel_runner`
+2. **Project-level**: Read `.claude/qingyi.local.md` from the project root, parse YAML frontmatter for `excel_runner` (
+   overrides global)
+3. **Default**: `conda run -n Excel python`
+
+Run command: `<excel_runner> <script_path>`
 
 ## Workflow
 
 1. **Create Python script** at `scripts/excel/` from project root
-2. **Execute with conda**: `conda run -n Excel python scripts/excel/<script_name>.py`
+2. **Execute script**: `<excel_runner> scripts/excel/<script_name>.py`
 3. **Keep scripts** for reference and reusability
 
 ## Common Imports
@@ -50,14 +53,15 @@ from openpyxl.utils import get_column_letter
 from pathlib import Path
 ```
 
-Import additional modules as needed: `NamedStyle`, `DataValidation`, `ColorScaleRule`, `FormulaRule`, `DifferentialStyle`, `Rule`.
+Import additional modules as needed: `NamedStyle`, `DataValidation`, `ColorScaleRule`, `FormulaRule`,
+`DifferentialStyle`, `Rule`.
 
 ## Writing Operations
 
 ```python
-ws['A1'] = 'Header'                          # Single cell
-ws.append(['Col1', 'Col2', 'Col3'])          # Append row
-wb.save(path)                                 # Save
+ws['A1'] = 'Header'  # Single cell
+ws.append(['Col1', 'Col2', 'Col3'])  # Append row
+wb.save(path)  # Save
 ```
 
 ## Column & Row Sizing
@@ -84,15 +88,15 @@ for i, width in enumerate([5, 12, 35, 10], 1):
 
 ```python
 # Primary (headers, accents)
-BLUE_PRIMARY = "2B579A"       # Headers, titles
-GREEN_PRIMARY = "217346"      # Positive/success
-ORANGE_PRIMARY = "D24726"     # Warnings/highlights
+BLUE_PRIMARY = "2B579A"  # Headers, titles
+GREEN_PRIMARY = "217346"  # Positive/success
+ORANGE_PRIMARY = "D24726"  # Warnings/highlights
 
 # Neutral (backgrounds, borders)
-WHITE = "FFFFFF"              # Cell backgrounds
-LIGHT_GRAY = "F5F5F5"         # Alternate row shading
-MEDIUM_GRAY = "E0E0E0"        # Borders, dividers
-DARK_GRAY = "333333"          # Primary text
+WHITE = "FFFFFF"  # Cell backgrounds
+LIGHT_GRAY = "F5F5F5"  # Alternate row shading
+MEDIUM_GRAY = "E0E0E0"  # Borders, dividers
+DARK_GRAY = "333333"  # Primary text
 
 # Status (semantic)
 SUCCESS_BG, SUCCESS_TEXT = "E8F5E9", "1B5E20"
@@ -104,15 +108,16 @@ INFO_BG, INFO_TEXT = "E3F2FD", "0D47A1"
 ## Font Sizes
 
 ```python
-FONT_TITLE = 16    # Main title
-FONT_HEADER = 11   # Column headers (bold)
-FONT_DATA = 10     # Regular data cells
-FONT_SMALL = 9     # Notes, footnotes
+FONT_TITLE = 16  # Main title
+FONT_HEADER = 11  # Column headers (bold)
+FONT_DATA = 10  # Regular data cells
+FONT_SMALL = 9  # Notes, footnotes
 ```
 
 ## Reference Files
 
 For detailed API patterns, see:
+
 - [styling.md](references/styling.md) -- Headers, borders, alternating rows, named styles, status colors
 - [formatting.md](references/formatting.md) -- Conditional formatting, color scales, data validation
 - [operations.md](references/operations.md) -- Merge, freeze, worksheets, hyperlinks, tabs, dashboard patterns
