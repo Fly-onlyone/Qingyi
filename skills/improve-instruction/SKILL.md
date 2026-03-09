@@ -1,15 +1,15 @@
 ---
-name: trim-project-instructions
+name: improve-instruction
 description: >-
-  This skill should be used when the user asks to "trim project instructions", "reduce CLAUDE.md tokens",
-  "audit instruction files", "clean up project instructions", "review and fix CLAUDE.md",
-  "remove outdated sections from instructions", "optimize context files", "reduce context size",
-  or "fix inaccuracies in instructions". Provides a structured workflow for auditing, correcting,
-  and pruning Claude Code instruction files to reduce per-conversation token cost without losing
-  actionable content.
+  This skill should be used when the user asks to "improve instructions", "trim project instructions",
+  "reduce CLAUDE.md tokens", "audit instruction files", "clean up project instructions",
+  "review and fix CLAUDE.md", "remove outdated sections from instructions", "optimize context files",
+  "reduce context size", "fix inaccuracies in instructions", or "improve CLAUDE.md".
+  Provides a structured workflow for auditing, correcting, and pruning Claude Code instruction files
+  to reduce per-conversation token cost without losing actionable content.
 ---
 
-# Trim Project Instructions
+# Improve Instructions
 
 Instruction files (CLAUDE.md, `.claude/rules/*.md`, MEMORY.md) are loaded into every conversation. Bloated or inaccurate instructions waste tokens and mislead. This skill provides a structured workflow to audit, fix, and prune them.
 
