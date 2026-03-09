@@ -4,9 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Qingyi** is a Claude Code plugin (v2.4.0) that provides an enhanced `/init` command for project configuration, reusable skills, and Windows toast notifications. It creates CLAUDE.md and `.claude/rules/` files with intelligent gap analysis for existing projects.
+**Qingyi** is a Claude Code plugin (v2.5.0) that provides an enhanced `/init` command for project configuration,
+reusable skills, and Windows toast notifications. It creates CLAUDE.md and `.claude/rules/` files with intelligent gap
+analysis for existing projects.
 
-**This is NOT a traditional software project** - there are no build/test commands. This is a plugin configuration project with a markdown-based command that Claude Code loads to assist with project setup.
+**This is NOT a traditional software project** - there are no build/test commands. This is a plugin configuration
+project with a markdown-based command that Claude Code loads to assist with project setup.
 
 **Plugin Marketplace**: [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
 
@@ -29,7 +32,8 @@ Qingyi/                                    ← Plugin root
 │   ├── CLAUDE.md
 │   ├── architecture.md
 │   ├── code-guide.md
-│   └── documentation-style.md
+│   ├── documentation-style.md
+│   └── qingyi.local.md                   ← Plugin settings template
 ├── skills/                                ← Auto-discovered skills
 │   ├── commit/SKILL.md                   ← Conventional commit (ask before push)
 │   ├── commit-push/SKILL.md              ← Auto commit + push (no prompts)
@@ -37,6 +41,7 @@ Qingyi/                                    ← Plugin root
 │   ├── excel-edit/SKILL.md               ← Excel write/format/style
 │   ├── excel-read/SKILL.md               ← Excel read/analyze/extract
 │   ├── improve-instruction/SKILL.md      ← Instruction file audit
+│   ├── rewrite-history/SKILL.md          ← Git commit message rewriter
 │   └── sentry-deploy/SKILL.md            ← Sentry deployment
 ├── scripts/
 │   ├── install.bat                        ← Windows installation script
@@ -59,10 +64,10 @@ The `/init` command creates or enhances project configuration files:
 
 ### Two Modes
 
-| Mode | Trigger | Behavior |
-|------|---------|----------|
-| **CREATE** | No CLAUDE.md exists | Generate all 5 files from templates |
-| **ENHANCED** | CLAUDE.md exists | Run gap analysis, prompt before adding |
+| Mode         | Trigger             | Behavior                               |
+|--------------|---------------------|----------------------------------------|
+| **CREATE**   | No CLAUDE.md exists | Generate all 5 files from templates    |
+| **ENHANCED** | CLAUDE.md exists    | Run gap analysis, prompt before adding |
 
 ### Gap Analysis (ENHANCED Mode)
 
@@ -78,27 +83,29 @@ When existing config files are found, the command:
 
 Automatically detects project type from build files:
 
-| Build File | Project Type |
-|------------|--------------|
-| `package.json` | JavaScript/TypeScript |
-| `build.gradle` | Java/Kotlin |
-| `pom.xml` | Java (Maven) |
-| `requirements.txt` / `pyproject.toml` | Python |
-| `Cargo.toml` | Rust |
-| `go.mod` | Go |
-| `composer.json` | PHP |
-| `Gemfile` | Ruby |
-| `*.csproj` / `*.sln` | C# / .NET |
+| Build File                            | Project Type          |
+|---------------------------------------|-----------------------|
+| `package.json`                        | JavaScript/TypeScript |
+| `build.gradle`                        | Java/Kotlin           |
+| `pom.xml`                             | Java (Maven)          |
+| `requirements.txt` / `pyproject.toml` | Python                |
+| `Cargo.toml`                          | Rust                  |
+| `go.mod`                              | Go                    |
+| `composer.json`                       | PHP                   |
+| `Gemfile`                             | Ruby                  |
+| `*.csproj` / `*.sln`                  | C# / .NET             |
 
 ## Installation
 
 ### Windows
+
 ```batch
 cd path\to\Qingyi
 scripts\install.bat
 ```
 
 ### Linux/macOS
+
 ```bash
 cd path/to/Qingyi
 chmod +x scripts/install.sh
@@ -106,6 +113,7 @@ chmod +x scripts/install.sh
 ```
 
 ### Manual
+
 ```bash
 claude plugin marketplace add ./
 claude plugin install qingyi@qingyi
@@ -120,6 +128,7 @@ After installation, restart Claude Code and use:
 ```
 
 The command will:
+
 1. Detect your project type
 2. Check for existing configuration
 3. Create or enhance files as needed
@@ -153,14 +162,27 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 
 Templates are stored in `templates/` and loaded at runtime using `${CLAUDE_PLUGIN_ROOT}`:
 
-| Template | Purpose |
-|----------|---------|
-| `CLAUDE.md` | Project overview with placeholders |
-| `architecture.md` | System design template |
-| `code-guide.md` | Naming, patterns, code style |
-| `documentation-style.md` | Comment standards |
+| Template                 | Purpose                            |
+|--------------------------|------------------------------------|
+| `CLAUDE.md`              | Project overview with placeholders |
+| `architecture.md`        | System design template             |
+| `code-guide.md`          | Naming, patterns, code style       |
+| `documentation-style.md` | Comment standards                  |
 
 Build file → project type mapping relies on Claude's built-in knowledge (no external reference needed).
+
+## Plugin Settings
+
+Settings are stored in `qingyi.local.md` (YAML frontmatter) at two levels:
+
+1. **Global**: `~/.claude/qingyi.local.md` — applies to all projects
+2. **Project-level**: `<project>/.claude/qingyi.local.md` — overrides global for that project
+
+| Setting        | Default                     | Purpose                                |
+|----------------|-----------------------------|----------------------------------------|
+| `excel_runner` | `conda run -n Excel python` | Python command prefix for Excel skills |
+
+See `templates/qingyi.local.md` for the template with all supported values.
 
 ## Windows Toast Notifications
 
@@ -168,9 +190,9 @@ The plugin includes Windows toast notification hooks that alert you when Claude 
 
 ### Supported Events
 
-| Event | Trigger | Notification |
-|-------|---------|--------------|
-| **Stop** | Claude finishes work | "Work completed -- check Claude Code" |
+| Event                 | Trigger                 | Notification                                        |
+|-----------------------|-------------------------|-----------------------------------------------------|
+| **Stop**              | Claude finishes work    | "Work completed -- check Claude Code"               |
 | **PermissionRequest** | Permission dialog shown | "Permission needed for {tool} -- check Claude Code" |
 
 ### How It Works

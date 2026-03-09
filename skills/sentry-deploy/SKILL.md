@@ -57,7 +57,7 @@ Before writing any code, identify the project's language and framework, then loo
 2. **Look up SDK via Context7:**
    - `mcp__context7__resolve-library-id` → search "sentry \<framework\>" (e.g., "sentry fastapi", "sentry react", "sentry nextjs")
    - `mcp__context7__query-docs` → query install command, `init()` signature, and integration options
-3. **Fallback** — if Context7 lacks coverage, use `brave-search-skills:web-search` for official Sentry docs.
+3. **Fallback** — if Context7 lacks coverage, use `brave-web-search` skill for official Sentry docs.
 
 Use the exact install command, import paths, and `init()` parameters from the research output — do **not** rely on memorised snippets.
 
@@ -65,12 +65,12 @@ Use the exact install command, import paths, and `init()` parameters from the re
 
 ## Phase 3 — Install & Configure
 
-Apply the patterns found in Phase 2. Enable all four features or pick selectively:
+Apply the patterns found in Phase 2. Enable the core features and ask the user about optional ones:
 
 - **Error tracing** — framework auto-integration or manual SDK setup to capture unhandled exceptions.
 - **Performance tracing** — configure `traces_sample_rate` (backend) or browser tracing integration (frontend).
-- **Profiling** — configure `profiles_sample_rate` (backend) or browser profiling integration (frontend).
-- **Logging** — attach logging integration so log events at ERROR+ level become Sentry events; INFO+ become breadcrumbs.
+- **Profiling** *(optional)* — **ask the user** whether they want profiling enabled. If yes, configure `profiles_sample_rate` (backend) or browser profiling integration (frontend). Skip if declined.
+- **Logging** *(backend)* — attach logging integration so log events at ERROR+ level become Sentry events; INFO+ become breadcrumbs. Frontend SDKs typically use `console` breadcrumbs instead.
 
 **Conditional init** — always gate `sentry.init()` / `Sentry.init()` on the DSN env var being present. Never initialise unconditionally.
 
@@ -81,10 +81,13 @@ Apply the patterns found in Phase 2. Enable all four features or pick selectivel
 Use these standard names. Frontend frameworks often require a prefix (e.g., `VITE_`, `NEXT_PUBLIC_`).
 
 ```
+# Required
 SENTRY_DSN=https://...@oXXXX.ingest.sentry.io/XXXX
 SENTRY_ENVIRONMENT=development
 SENTRY_RELEASE=my-app@0.1.0
 SENTRY_TRACES_SAMPLE_RATE=0.1
+
+# Optional (only if user wants profiling)
 SENTRY_PROFILES_SAMPLE_RATE=0.1
 ```
 
@@ -101,5 +104,5 @@ VITE_SENTRY_TRACES_SAMPLE_RATE=0.1
 
 - [ ] **Bug trace** — Throw a test error; confirm it appears in Sentry Issues.
 - [ ] **Performance trace** — Trigger a request/navigation; confirm transaction in Performance tab.
-- [ ] **Profiling** — Generate load; confirm flame graphs in Profiling tab.
+- [ ] **Profiling** *(optional)* — Generate load; confirm flame graphs in Profiling tab.
 - [ ] **Logging** — Emit an ERROR-level log; confirm the event appears in Issues.

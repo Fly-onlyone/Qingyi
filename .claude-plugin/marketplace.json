@@ -7,14 +7,14 @@
   },
   "metadata": {
     "description": "Project configuration, conventional commits, reusable skills, and Windows toast notifications",
-    "version": "2.4.0"
+    "version": "2.5.0"
   },
   "plugins": [
     {
       "name": "qingyi",
       "source": "./",
-      "description": "Enhanced /init command, reusable skills (commit, commit-push, debug, Excel, Sentry, improve-instruction), and Windows toast notifications.",
-      "version": "2.4.0",
+      "description": "Enhanced /init command, reusable skills (commit, commit-push, debug, Excel, Sentry, improve-instruction, rewrite-history), and Windows toast notifications.",
+      "version": "2.5.0",
       "author": {
         "name": "Fly"
       },
@@ -34,6 +34,8 @@
         "excel",
         "sentry",
         "improve-instruction",
+        "rewrite-history",
+        "git-filter-repo",
         "skills"
       ],
       "strict": false

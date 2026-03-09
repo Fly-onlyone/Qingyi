@@ -1,6 +1,15 @@
 {
   "permissions": {
     "allow": [
+      "mcp__intellij__find_files_by_glob",
+      "mcp__intellij__search_in_files_by_text",
+      "mcp__intellij__get_file_text_by_path",
+      "mcp__intellij__list_directory_tree",
+      "mcp__intellij__get_file_problems",
+      "mcp__intellij__reformat_file",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
