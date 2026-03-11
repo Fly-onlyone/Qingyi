@@ -64,7 +64,7 @@ Error monitoring provides richer context than local logs: stack traces with sour
 
 ### Development Scope
 
-Check local project logs:
+Check logs from the **project root** only:
 - Read log files in `logs/` directory, terminal output, browser console
 - Check the application's log UI if available (e.g., Admin > Logs)
 - `Grep` for error patterns in project-relative log files
@@ -72,12 +72,20 @@ Check local project logs:
 
 ### Production Scope
 
-Check installed/deployed location logs:
-- Read source files in `node_modules/` or installed package paths to understand library behavior
-- Check log files at the installed location (e.g., `node_modules/<package>/logs/`, package-level `debug.log`, `npm-debug.log`, `yarn-error.log`)
-- Check deployed server logs (remote log files, cloud logging services)
-- Examine package install paths for configuration issues
-- Cross-reference with Sentry findings from Step 2
+**First, load configured log paths** from Qingyi plugin settings:
+
+1. Check **project-level** settings: `<project>/.claude/qingyi.local.md` — read YAML frontmatter for `log_paths`
+2. If not found, check **global** settings: `~/.claude/qingyi.local.md` — read YAML frontmatter for `log_paths`
+
+`log_paths` is a YAML list of directories or file paths pointing to the **production application's installed location**. These are absolute paths or paths relative to project root.
+
+Check logs in this order:
+1. **Configured `log_paths`** (if set) — read/grep these first as the primary log source
+2. Read source files in `node_modules/` or installed package paths to understand library behavior
+3. Check log files at the installed location (e.g., `node_modules/<package>/logs/`, package-level `debug.log`, `npm-debug.log`, `yarn-error.log`)
+4. Check deployed server logs (remote log files, cloud logging services)
+5. Examine package install paths for configuration issues
+6. Cross-reference with Sentry findings from Step 2
 
 Local project logs may still be useful as supplementary context in production scope.
 

@@ -86,11 +86,16 @@ Re-read each edited file to confirm:
 
 ### High-Value Removals (remove without hesitation)
 
-- **ASCII box diagrams** -- decorative, typically >300 tokens, duplicated by package trees
 - **"Key Components" tables** -- duplicated by `code-guide.md` package structure
 - **Seed script docs** -- remove when no seed files exist and `init_db()` calls no seeds
 - **Historical MEMORY entries** -- past cleanup logs, dated entries with no future utility
 - **Stack info in MEMORY** -- if CLAUDE.md already has a Project Overview section
+
+### Ask Before Removing
+
+These items are often removable but may be intentional. Use `AskUserQuestion` before touching them:
+
+- **ASCII box diagrams** -- often decorative (>300 tokens), but some users prefer them for visual clarity
 
 ### Condense (reduce, don't delete)
 

@@ -1,8 +1,19 @@
 ---
 excel_runner: conda run -n Excel python
+log_paths: []
 ---
 
 # Qingyi Plugin Settings
+
+## Log Paths
+
+Production application log locations. The debug-code skill checks these automatically during **production scope** debugging — no need to mention them in your prompt. Development scope always checks logs from the project root.
+
+Examples:
+
+- `["C:/Server/logs"]` — Absolute path to production server logs
+- `["C:/Server/logs", "C:/Server/plugins/MyPlugin/logs"]` — Multiple production paths
+- `["/var/log/myapp/", "/opt/myapp/logs/"]` — Linux server paths
 
 ## Excel Runner
 
