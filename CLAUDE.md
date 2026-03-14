@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Qingyi** is a Claude Code plugin (v2.5.0) that provides an enhanced `/init` command for project configuration,
+**Qingyi** is a Claude Code plugin (v2.6.0) that provides an enhanced `/init` command for project configuration,
 reusable skills, and Windows toast notifications. It creates CLAUDE.md and `.claude/rules/` files with intelligent gap
 analysis for existing projects.
 
@@ -42,7 +42,8 @@ Qingyi/                                    ← Plugin root
 │   ├── excel-read/SKILL.md               ← Excel read/analyze/extract
 │   ├── improve-instruction/SKILL.md      ← Instruction file audit
 │   ├── rewrite-history/SKILL.md          ← Git commit message rewriter
-│   └── sentry-deploy/SKILL.md            ← Sentry deployment
+│   ├── sentry-deploy/SKILL.md            ← Sentry deployment
+│   └── setup-permission/SKILL.md         ← Permission rules generator
 ├── scripts/
 │   ├── install.bat                        ← Windows installation script
 │   ├── install.sh                         ← Linux/macOS installation script

@@ -1,7 +1,7 @@
 {
   "name": "qingyi",
-  "version": "2.5.0",
-  "description": "Enhanced /init command, reusable skills (commit, commit-push, debug, Excel, Sentry, improve-instruction, rewrite-history), and Windows toast notifications.",
+  "version": "2.6.0",
+  "description": "Enhanced /init command, reusable skills (commit, commit-push, debug, Excel, Sentry, improve-instruction, rewrite-history, setup-permission), and Windows toast notifications.",
   "author": {
     "name": "Fly"
   },
