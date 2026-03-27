@@ -8,13 +8,13 @@ description: >-
   "list tasks", "what tasks are in progress", "pull tasks from notion", "check notion board",
   "rewrite task descriptions", "plan tasks", "plan implementation", "what needs to be done",
   or mentions task status from Notion.
-version: 0.1.0
+version: 0.2.0
 ---
 
 # Fetch Notion Tasks
 
 Fetch tasks from a Notion task database, verify their status and description quality,
-optionally rewrite empty descriptions with codebase-informed content, and plan implementation.
+validate understanding with the user, rewrite inaccurate descriptions, and plan implementation.
 
 ---
 
@@ -58,10 +58,13 @@ tasks. Always run multiple queries.
 2. Read the actual `Status` property from the fetched page — do NOT trust search result ordering
    or highlights for status filtering.
 3. Filter by requested status (default: `"In progress"`).
-4. Assess description quality for each task:
+4. Assess description quality for each task. Three levels:
    - **Empty**: Description property is `""` AND page body contains default template text
      (e.g., `"Provide an overview"`, empty sub-tasks `- [ ]` with no text)
    - **Detailed**: Has meaningful description and filled-in sub-tasks
+   - **Suspect**: Has a description but it may be outdated, wrong, or mismatched with the task
+     title. Flag if: description references completed work, uses vague language, or the scope
+     seems misaligned with the title.
 
 ## Phase 3: Report & Triage
 
@@ -72,16 +75,51 @@ Present results as a markdown table:
 |---|------|-----------|--------|-------------|------|
 ```
 
-- Description column: "Empty" or "Detailed"
-- Highlight empty tasks explicitly
+- Description column: "Empty", "Detailed", or "Suspect"
+- Highlight empty and suspect tasks explicitly
 
 Then use `AskUserQuestion` to ask what to do next:
-- **Rewrite empty descriptions** — proceed to Phase 4
-- **Plan implementation of all tasks** — proceed to Phase 5
+- **Verify & rewrite descriptions** — proceed to Phase 4
+- **Plan implementation of all tasks** — proceed to Phase 4 (verify step) then Phase 6
 - **Start implementing a specific task** — exit skill, begin implementation
 - **Something else** — follow user's direction
 
-## Phase 4: Clarify & Rewrite Empty Descriptions
+## Phase 4: Verify Understanding Per Task
+
+**Critical lesson: A detailed description can still be wrong.** Before planning or implementing,
+walk through each task with the user to confirm the description matches their actual intent.
+
+For each task (prioritize suspect and empty tasks, but verify ALL if planning implementation):
+
+### Step 1 — Present Your Understanding
+Summarize what you think the task means in 2-3 sentences. Include:
+- What will change (user-visible behavior)
+- Which part of the app is affected
+- Key technical approach
+
+### Step 2 — Ask for Confirmation
+Use `AskUserQuestion`: "Does this match what you want for [task name]?"
+- Options: "Yes", "No, let me explain", "Partially right"
+
+### Step 3 — Handle Corrections
+If the user corrects your understanding:
+1. Ask follow-up questions to nail down the actual intent
+2. For UI tasks: ask about layout, placement, design direction (offer 2-4 options with previews)
+3. For behavior changes: ask about the exact flow (what triggers it, what it does, what output)
+4. **Update the Notion description immediately** — don't wait until the end
+
+### Step 4 — Update Notion (if description changed)
+Use two `notion-update-page` calls:
+
+**Call 1** — `command: "update_properties"`, `properties: {...}`:
+- Update `Description` to match the corrected understanding
+
+**Call 2** — `command: "replace_content"`, `new_str: "..."`:
+- Rewrite the full page body with the corrected task description (see template in Phase 5)
+
+This ensures the Notion task is always the source of truth, not conversation context.
+
+## Phase 5: Write Descriptions for Empty Tasks
 
 For each task with an empty description, follow this workflow **per task**:
 
@@ -102,10 +140,19 @@ interpretations** based on codebase context. Example:
 > - [Interpretation D]
 
 ### Step 3 — Clarify Design Decisions
-Use `AskUserQuestion` for layout and technical approach. Example:
+Use `AskUserQuestion` for layout and technical approach.
 
-> "Should this appear as a separate section or a tabbed view?"
-> "Should data refresh via polling or real-time push?"
+**For UI tasks**, propose 2-4 design directions with ASCII previews using AskUserQuestion's
+`preview` field. Let the user pick visually. Example areas to decide:
+- Layout: card vs tab vs section vs page
+- Placement: above existing content, sidebar, new route
+- Style: minimal vs rich, data-first vs visual-first
+- Interaction: polling vs WebSocket, autocomplete vs dropdown
+
+**For backend tasks**, clarify:
+- Data flow: what triggers the action, what it produces
+- Integration: which existing services/APIs to reuse
+- Persistence: where to store results
 
 Only ask questions where the answer meaningfully changes the implementation.
 
@@ -156,9 +203,9 @@ Update the Notion page via two separate `notion-update-page` calls:
 Repeat Steps 1-5 for each empty task. Use parallel Explore agents when rewriting
 multiple tasks to speed up codebase exploration.
 
-## Phase 5: Plan Implementation
+## Phase 6: Plan Implementation
 
-After all tasks are well-described, plan how to implement them:
+After all tasks are verified and well-described, plan how to implement them:
 
 ### Step 1 — Explore All Task Areas
 Launch **parallel Agent tools with `subagent_type: Explore`** (one per task or feature area) to gather:
