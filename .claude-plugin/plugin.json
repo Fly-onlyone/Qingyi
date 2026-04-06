@@ -1,10 +1,9 @@
 {
   "name": "qingyi",
   "version": "2.6.0",
-  "description": "Enhanced /init command, reusable skills (commit, commit-push, debug, Excel, Sentry, improve-instruction, rewrite-history, setup-permission), and Windows toast notifications.",
+  "description": "Enhanced /init command, reusable skills (commit, commit-push, debug, Excel, Sentry, improve-instruction, merge-worktree, rewrite-history, setup-permission), and Windows toast notifications.",
   "author": {
     "name": "Fly"
   },
-  "license": "MIT",
-  "hooks": "./hooks/hooks.json"
+  "license": "MIT"
 }
