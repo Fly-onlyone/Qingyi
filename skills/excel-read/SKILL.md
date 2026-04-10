@@ -33,7 +33,7 @@ Read, analyze, and extract data from Excel files using Python openpyxl.
 1. **Global**: Read `~/.claude/qingyi.local.md`, parse YAML frontmatter for `excel_runner`
 2. **Project-level**: Read `.claude/qingyi.local.md` from the project root, parse YAML frontmatter for `excel_runner` (
    overrides global)
-3. **Default**: `conda run -n Excel python`
+3. **Default**: `python`
 
 Run command: `<excel_runner> <script_path>`
 

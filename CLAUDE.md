@@ -181,7 +181,7 @@ Settings are stored in `qingyi.local.md` (YAML frontmatter) at two levels:
 
 | Setting        | Default                     | Purpose                                |
 |----------------|-----------------------------|----------------------------------------|
-| `excel_runner` | `conda run -n Excel python` | Python command prefix for Excel skills |
+| `excel_runner` | `python`                    | Python command prefix for Excel skills |
 
 See `templates/qingyi.local.md` for the template with all supported values.
 

@@ -1,5 +1,5 @@
 ---
-excel_runner: conda run -n Excel python
+excel_runner: python
 log_paths: []
 ---
 
