@@ -41,6 +41,8 @@ Qingyi/                                    ← Plugin root
 │   ├── excel-edit/SKILL.md               ← Excel write/format/style
 │   ├── excel-read/SKILL.md               ← Excel read/analyze/extract
 │   ├── improve-instruction/SKILL.md      ← Instruction file audit
+│   ├── merge-worktree/SKILL.md           ← Merge worktrees (auto-commits dirty WIP)
+│   ├── merge-worktree-no-commit/SKILL.md ← Merge worktrees without committing WIP (stash-based)
 │   ├── rewrite-history/SKILL.md          ← Git commit message rewriter
 │   ├── sentry-deploy/SKILL.md            ← Sentry deployment
 │   └── setup-permission/SKILL.md         ← Permission rules generator
