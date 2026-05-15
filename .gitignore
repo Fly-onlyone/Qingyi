@@ -1,2 +1,5 @@
 .idea/
 nul
+.claude/settings.local.json
+.mcp.json
+plugins/qingyi/.mcp.json
