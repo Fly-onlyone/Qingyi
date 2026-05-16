@@ -40,9 +40,12 @@ Qingyi/                                    ← Plugin root
 │   ├── debug-code/SKILL.md               ← Debugging workflow
 │   ├── excel-edit/SKILL.md               ← Excel write/format/style
 │   ├── excel-read/SKILL.md               ← Excel read/analyze/extract
+│   ├── fetch-notion-tasks/SKILL.md       ← Notion task fetcher + parallel worktree executor
 │   ├── improve-instruction/SKILL.md      ← Instruction file audit
 │   ├── merge-worktree/SKILL.md           ← Merge worktrees (auto-commits dirty WIP)
 │   ├── merge-worktree-no-commit/SKILL.md ← Merge worktrees without committing WIP (stash-based)
+│   ├── obsidian-init/SKILL.md            ← Scaffold Obsidian vault from a codebase
+│   ├── remove-deadcode/SKILL.md          ← Systematic dead-code detection & removal
 │   ├── rewrite-history/SKILL.md          ← Git commit message rewriter
 │   ├── sentry-deploy/SKILL.md            ← Sentry deployment
 │   └── setup-permission/SKILL.md         ← Permission rules generator

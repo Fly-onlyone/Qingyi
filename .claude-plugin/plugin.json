@@ -1,7 +1,7 @@
 {
   "name": "qingyi",
-  "version": "2.7.0",
-  "description": "Enhanced /init command, reusable skills (commit, commit-push, debug, Excel, Sentry, improve-instruction, merge-worktree, merge-worktree-no-commit, rewrite-history, setup-permission), and Windows toast notifications.",
+  "version": "2.8.0",
+  "description": "Enhanced /init command, reusable skills (commit, commit-push, debug, Excel, Sentry, improve-instruction, merge-worktree, merge-worktree-no-commit, fetch-notion-tasks, obsidian-init, remove-deadcode, rewrite-history, setup-permission), and Windows toast notifications.",
   "author": {
     "name": "Fly"
   },

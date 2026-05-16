@@ -2,13 +2,15 @@
 name: fetch-notion-tasks
 description: >-
   Fetches tasks from a Notion database using multi-query search to work around
-  Notion MCP's semantic search limitations, then optionally rewrites empty
-  descriptions and plans parallel implementation waves. This skill should be used
-  when the user asks to "fetch tasks", "get notion tasks", "check tasks", "show tasks",
-  "list tasks", "what tasks are in progress", "pull tasks from notion", "check notion board",
-  "rewrite task descriptions", "plan tasks", "plan implementation", "what needs to be done",
-  or mentions task status from Notion.
-version: 0.2.0
+  Notion MCP's semantic search limitations, optionally rewrites empty descriptions,
+  and executes all verified tasks concurrently — each in its own git worktree under
+  `.claude/worktrees/` — before handing off to `merge-worktree` to land the changes.
+  This skill should be used when the user asks to "fetch tasks", "get notion tasks",
+  "check tasks", "show tasks", "list tasks", "what tasks are in progress",
+  "pull tasks from notion", "check notion board", "rewrite task descriptions",
+  "plan tasks", "plan implementation", "implement notion tasks",
+  "what needs to be done", or mentions task status from Notion.
+version: 0.3.0
 ---
 
 # Fetch Notion Tasks
@@ -203,53 +205,101 @@ Update the Notion page via two separate `notion-update-page` calls:
 Repeat Steps 1-5 for each empty task. Use parallel Explore agents when rewriting
 multiple tasks to speed up codebase exploration.
 
-## Phase 6: Plan Implementation
+## Phase 6: Execute Implementation in Parallel Worktrees
 
-After all tasks are verified and well-described, plan how to implement them:
+After all tasks are verified and well-described, run every task **concurrently**, each in an
+isolated git worktree, then hand off to `merge-worktree` to land the changes. File overlap
+no longer gates execution — worktrees isolate the working tree, so conflicts only surface at
+merge time.
 
-### Step 1 — Explore All Task Areas
-Launch **parallel Agent tools with `subagent_type: Explore`** (one per task or feature area) to gather:
-- Exact files to modify/create for each task
-- Existing utilities, components, patterns to reuse
-- Complexity estimate
+### Step 1 — Explore All Task Areas (parallel)
 
-### Step 2 — File Overlap Analysis
-Map which files each task touches. Build a conflict matrix.
-Tasks that modify the same files **cannot** run in the same parallel wave.
+Launch **one `Agent` per task** with `subagent_type: Explore`, all in a **single message**
+with multiple tool calls. Each agent must return:
+- Exact files to modify/create
+- Reusable utilities, components, and patterns to call into
+- A concise step-by-step implementation outline
+- Complexity estimate (S / M / L)
 
-### Step 3 — Ask User for Ordering
-Use `AskUserQuestion`:
-- Priority order: quick wins first? feature area grouping? custom?
-- Execution mode: parallel waves? sequential?
+### Step 2 — Merge-Conflict Prediction (not an execution gate)
 
-### Step 4 — Wave Grouping
-Group tasks into parallel waves:
-- Tasks in the same wave must have **zero overlapping files**
-- Quick wins (trivial changes) go in Wave 1
-- Tasks conflicting with Wave 1 tasks go in Wave 2+
-- Each wave completes and merges before the next starts
+Build a file-overlap matrix from Step 1 results. Two tasks "overlap" if they modify the
+same file path.
 
-### Step 5 — Write Execution Plan
-For each task, document:
-- Branch name (e.g., `feat/task-short-name`)
-- Step-by-step implementation (files to modify, what to change, what to create)
-- Estimate
+Overlap **no longer prevents parallel execution** — each agent has its own working tree.
+Use the matrix only to predict **merge-time** conflicts and recommend a **merge order**:
+land lowest-overlap branches first; flag pairs that will definitely conflict.
 
-### Step 6 — Wave Summary
-Present the execution timeline:
+### Step 3 — Confirm With User
+
+Present a single concise summary, then ask before launching:
+
 ```
-WAVE 1 (N parallel agents)
-├── Agent A: Task X    ~estimate
-├── Agent B: Task Y    ~estimate
-└── Agent C: Task Z    ~estimate
-
-── Merge + verify ──
-
-WAVE 2 (N parallel agents)
-├── Agent D: Task W    ~estimate
-└── Agent E: Task V    ~estimate
-
-── Merge + final verify ──
+Ready to launch N tasks in parallel.
+Worktrees will be created at:
+  .claude/worktrees/<branch-1>/
+  .claude/worktrees/<branch-2>/
+  ...
+Predicted merge conflicts (files touched by 2+ tasks):
+  - path/to/file.ts        (tasks A, C)
+  - path/to/other.tsx      (tasks B, D)
+Recommended merge order: A → B → D → C
 ```
 
-Include verification steps between waves: lint, type check, tests, dev server smoke test.
+Use `AskUserQuestion` with options: **Launch all**, **Launch a subset**, **Cancel**.
+
+### Step 4 — Create Worktrees (parallel `git worktree add`)
+
+For each task, derive a branch name (`feat/<task-slug>`, `fix/<task-slug>`, etc.) and
+create a worktree off the current main branch:
+
+```bash
+git worktree add .claude/worktrees/<branch> -b <branch>
+```
+
+Issue every `git worktree add` **in parallel** (one Bash call per worktree, all in the same
+message). Git serializes internally — that's fine. Pre-checks:
+- If `<branch>` already exists, append `-2`, `-3`, …
+- If `.claude/worktrees/<branch>/` already exists, ask the user before reusing
+- Worktrees MUST live under `.claude/worktrees/` (per project convention)
+
+### Step 5 — Dispatch Agents in Parallel (single message, N tool calls)
+
+Send **one message with N `Agent` tool calls** — one per task, fired in parallel. Each
+agent prompt MUST include:
+
+1. **Working directory**: absolute path to its worktree (`.claude/worktrees/<branch>/`)
+2. **Task brief**: the full verified Notion description from Phase 4
+3. **Step 1 findings**: files to modify, patterns to reuse, implementation outline
+4. **Branch name**: for commit-message context
+5. **Completion contract**:
+   - Implement the task end-to-end inside the worktree
+   - Run project lint/format after edits (per global CLAUDE.md)
+   - Commit work with a conventional-commit message before returning (preferred), OR
+     leave WIP uncommitted (`merge-worktree` will auto-commit it)
+   - **NEVER** run `git worktree remove` — cleanup is the merge skill's job
+
+Default `subagent_type: general-purpose`. Use a specialized agent (e.g.
+`code-refactoring:legacy-modernizer`) only when the task description clearly matches.
+
+### Step 6 — Aggregate Results
+
+When all agents return, summarize per task:
+- Branch + worktree path
+- Files actually changed (use `git -C <worktree> diff --stat <main>..HEAD`)
+- Whether the agent committed or left WIP
+- Any escapes/blockers the agent reported
+
+If any agent failed or refused, surface it and ask the user how to proceed **before**
+suggesting merge.
+
+### Step 7 — Hand Off to `merge-worktree`
+
+Do **not** merge, push, or delete worktrees from this skill. Tell the user:
+
+> All N agents finished. Recommended next step: run `/merge-worktree` (or
+> `/merge-worktree-no-commit` if any worktree should stay uncommitted) in this merge
+> order: `<order from Step 2>`.
+
+Per project convention, worktrees are never auto-removed by anything other than the
+dedicated merge skill or the user.

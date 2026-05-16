@@ -2,7 +2,7 @@
 
 > Claude Code plugin for project initialization, reusable skills, and Windows toast notifications.
 
-![version](https://img.shields.io/badge/version-2.6.0-blue)
+![version](https://img.shields.io/badge/version-2.8.0-blue)
 ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 
 ## Features
@@ -17,8 +17,10 @@
   - `debug-code` — Guided debugging workflow
   - `excel-read` / `excel-edit` — Read, analyze, write, and style `.xlsx` files
   - `improve-instruction` — Audit and trim `CLAUDE.md` / rule files
-  - `merge-worktree` — Merge and clean up git worktrees
-  - `fetch-notion-tasks` — Reliable Notion task retrieval with multi-query search
+  - `merge-worktree` — Merge and clean up git worktrees (auto-commits dirty WIP)
+  - `merge-worktree-no-commit` — Land worktree changes via stash, leaving WIP uncommitted
+  - `fetch-notion-tasks` — Notion task retrieval, description rewriting, and parallel execution across one worktree per task
+  - `obsidian-init` — Scaffold an Obsidian vault that documents a codebase as atomic, graph-linked notes
   - `remove-deadcode` — Systematic dead-code detection
   - `rewrite-history` — Edit old commit messages via `git-filter-repo`
   - `sentry-deploy` — Deploy and configure Sentry error tracking
