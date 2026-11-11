@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Qingyi** is a Claude Code plugin (v2.6.0) that provides an enhanced `/init` command for project configuration,
-reusable skills, and Windows toast notifications. It creates CLAUDE.md and `.claude/rules/` files with intelligent gap
+**Qingyi** is a Claude Code plugin (v3.0.0) that provides an enhanced `/init` command for project configuration
+and reusable skills. It creates CLAUDE.md and `.claude/rules/` files with intelligent gap
 analysis for existing projects.
 
 **This is NOT a traditional software project** - there are no build/test commands. This is a plugin configuration
@@ -19,15 +19,9 @@ project with a markdown-based command that Claude Code loads to assist with proj
 Qingyi/                                    ← Plugin root
 ├── .claude-plugin/
 │   ├── marketplace.json                   ← Plugin marketplace definition
-│   └── plugin.json                        ← Plugin manifest (commands, hooks)
+│   └── plugin.json                        ← Plugin manifest (name, version, metadata)
 ├── commands/
 │   └── project-init.md                    ← /init command (~200 lines)
-├── hooks/                                 ← Event hook scripts
-│   ├── hooks.json                         ← Hook definitions (Stop, PermissionRequest)
-│   ├── notify.ps1                         ← Reusable toast notification script
-│   ├── Qingyi02.png                       ← Toast notification icon
-│   ├── on-stop.ps1                        ← Stop event handler
-│   └── on-permission.ps1                  ← PermissionRequest event handler
 ├── templates/                             ← External template files
 │   ├── CLAUDE.md
 │   ├── architecture.md
@@ -41,7 +35,6 @@ Qingyi/                                    ← Plugin root
 │   ├── excel-edit/SKILL.md               ← Excel write/format/style
 │   ├── excel-read/SKILL.md               ← Excel read/analyze/extract
 │   ├── fetch-notion-tasks/SKILL.md       ← Notion task fetcher + parallel worktree executor
-│   ├── improve-instruction/SKILL.md      ← Instruction file audit
 │   ├── merge-worktree/SKILL.md           ← Merge worktrees (auto-commits dirty WIP)
 │   ├── merge-worktree-no-commit/SKILL.md ← Merge worktrees without committing WIP (stash-based)
 │   ├── obsidian-init/SKILL.md            ← Scaffold Obsidian vault from a codebase
@@ -189,35 +182,6 @@ Settings are stored in `qingyi.local.md` (YAML frontmatter) at two levels:
 | `excel_runner` | `python`                    | Python command prefix for Excel skills |
 
 See `templates/qingyi.local.md` for the template with all supported values.
-
-## Windows Toast Notifications
-
-The plugin includes Windows toast notification hooks that alert you when Claude Code needs attention.
-
-### Supported Events
-
-| Event                 | Trigger                 | Notification                                        |
-|-----------------------|-------------------------|-----------------------------------------------------|
-| **Stop**              | Claude finishes work    | "Work completed -- check Claude Code"               |
-| **PermissionRequest** | Permission dialog shown | "Permission needed for {tool} -- check Claude Code" |
-
-### How It Works
-
-1. **`hooks.json`** — Registers `Stop` and `PermissionRequest` event handlers
-2. **`on-stop.ps1`** / **`on-permission.ps1`** — Read stdin JSON from Claude, extract event data
-3. **`notify.ps1`** — Reusable script that displays a Windows toast using the WinRT `ToastNotificationManager` API
-
-### Requirements
-
-- Windows 10 or 11
-- PowerShell 5.1+ (built-in)
-- No external modules or dependencies needed
-
-### Testing Manually
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "hooks/notify.ps1" -Title "Test" -Message "Hello from Qingyi"
-```
 
 ## Quick Reference
 
