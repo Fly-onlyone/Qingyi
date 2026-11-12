@@ -29,12 +29,12 @@ Write, format, style, and design professional Excel files using Python openpyxl.
 
 ## Environment
 
-**Before running any script**, determine the Python runner (checked in order, first match wins):
+**Before running any script**, determine the Python runner (`excel_runner`). It comes from the plugin's
+`excel_runner` option:
 
-1. **Global**: Read `~/.claude/qingyi.local.md`, parse YAML frontmatter for `excel_runner`
-2. **Project-level**: Read `.claude/qingyi.local.md` from the project root, parse YAML frontmatter for `excel_runner` (
-   overrides global)
-3. **Default**: `python`
+`excel_runner` = `${user_config.excel_runner}`
+
+If that value is empty or still starts with `${` (the option is not set), use `python`.
 
 Run command: `<excel_runner> <script_path>`
 

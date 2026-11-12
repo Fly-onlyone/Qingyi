@@ -7,14 +7,14 @@
   },
   "metadata": {
     "description": "Project configuration, conventional commits, and reusable skills",
-    "version": "3.0.0"
+    "version": "4.0.0"
   },
   "plugins": [
     {
       "name": "qingyi",
       "source": "./",
-      "description": "Enhanced /init command, reusable skills (commit, commit-push, debug, Excel, Sentry, merge-worktree, merge-worktree-no-commit, fetch-notion-tasks, obsidian-init, remove-deadcode, rewrite-history, setup-permission).",
-      "version": "3.0.0",
+      "description": "Enhanced /qingyi:project-init command, reusable skills (commit, commit-push, debug, Excel, Sentry, merge-worktree, merge-worktree-no-commit, fetch-notion-tasks, obsidian-init, remove-deadcode, rewrite-history, setup-permission).",
+      "version": "4.0.0",
       "author": {
         "name": "Fly"
       },

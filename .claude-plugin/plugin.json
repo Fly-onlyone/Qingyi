@@ -1,9 +1,24 @@
 {
   "name": "qingyi",
-  "version": "3.0.0",
-  "description": "Enhanced /init command, reusable skills (commit, commit-push, debug, Excel, Sentry, merge-worktree, merge-worktree-no-commit, fetch-notion-tasks, obsidian-init, remove-deadcode, rewrite-history, setup-permission).",
+  "version": "4.0.0",
+  "description": "Enhanced /qingyi:project-init command, reusable skills (commit, commit-push, debug, Excel, Sentry, merge-worktree, merge-worktree-no-commit, fetch-notion-tasks, obsidian-init, remove-deadcode, rewrite-history, setup-permission).",
   "author": {
     "name": "Fly"
   },
-  "license": "GPL-3.0"
+  "license": "GPL-3.0",
+  "userConfig": {
+    "excel_runner": {
+      "type": "string",
+      "title": "Excel runner",
+      "description": "Command prefix for running Python scripts in the Excel skills, e.g. python, uv run python, conda run -n Excel python. openpyxl must be installed in that environment.",
+      "default": "python"
+    },
+    "log_paths": {
+      "type": "string",
+      "title": "Production log paths",
+      "description": "Production log directories or files that the debug-code skill checks during production-scope debugging. Absolute paths or paths relative to the project root.",
+      "multiple": true,
+      "default": []
+    }
+  }
 }

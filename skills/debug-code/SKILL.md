@@ -86,13 +86,13 @@ before proceeding.
 
 ### Production Scope
 
-**First, load configured log paths** from Qingyi plugin settings:
+**First, load configured log paths** from the plugin's `log_paths` option:
 
-1. Check **project-level** settings: `<project>/.claude/qingyi.local.md` — read YAML frontmatter for `log_paths`
-2. If not found, check **global** settings: `~/.claude/qingyi.local.md` — read YAML frontmatter for `log_paths`
+`log_paths` = `${user_config.log_paths}`
 
-`log_paths` is a YAML list of directories or file paths pointing to the **production application's installed location**.
-These are absolute paths or paths relative to project root.
+The value is a comma-separated list of directories or file paths pointing to the **production application's installed
+location**. These are absolute paths or paths relative to project root. If the value is empty or still starts with `${`
+(the option is not set), no log paths are configured.
 
 Check logs in this order:
 

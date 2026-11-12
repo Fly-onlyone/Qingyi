@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Qingyi** is a Claude Code plugin (v3.0.0) that provides an enhanced `/init` command for project configuration
+**Qingyi** is a Claude Code plugin (v4.0.0) that provides an enhanced `/qingyi:project-init` command for project configuration
 and reusable skills. It creates CLAUDE.md and `.claude/rules/` files with intelligent gap
 analysis for existing projects.
 
@@ -21,13 +21,12 @@ Qingyi/                                    ← Plugin root
 │   ├── marketplace.json                   ← Plugin marketplace definition
 │   └── plugin.json                        ← Plugin manifest (name, version, metadata)
 ├── commands/
-│   └── project-init.md                    ← /init command (~200 lines)
+│   └── project-init.md                    ← /qingyi:project-init command (~200 lines)
 ├── templates/                             ← External template files
 │   ├── CLAUDE.md
 │   ├── architecture.md
 │   ├── code-guide.md
-│   ├── documentation-style.md
-│   └── qingyi.local.md                   ← Plugin settings template
+│   └── documentation-style.md
 ├── skills/                                ← Auto-discovered skills
 │   ├── commit/SKILL.md                   ← Conventional commit (ask before push)
 │   ├── commit-push/SKILL.md              ← Auto commit + push (no prompts)
@@ -49,11 +48,11 @@ Qingyi/                                    ← Plugin root
 └── CLAUDE.md                              ← This file
 ```
 
-## The `/init` Command
+## The `/qingyi:project-init` Command
 
 ### What It Does
 
-The `/init` command creates or enhances project configuration files:
+The `/qingyi:project-init` command creates or enhances project configuration files:
 
 1. **CLAUDE.md** - Project overview, build commands, dependencies, structure
 2. **.claude/rules/architecture.md** - System design, data flow, components
@@ -96,35 +95,32 @@ Automatically detects project type from build files:
 
 ## Installation
 
-### Windows
-
-```batch
-cd path\to\Qingyi
-scripts\install.bat
-```
-
-### Linux/macOS
+From GitHub (no clone needed):
 
 ```bash
-cd path/to/Qingyi
-chmod +x scripts/install.sh
-./scripts/install.sh
+claude plugin marketplace add Fly-onlyone/Qingyi
+claude plugin install qingyi@qingyi
 ```
 
-### Manual
+From a local clone, run `scripts/install.sh` (Linux/macOS) or `scripts\install.bat` (Windows) from the repo root,
+or run the same commands manually:
 
 ```bash
 claude plugin marketplace add ./
 claude plugin install qingyi@qingyi
 ```
 
+See [README.md](README.md#installation) for in-session install, updating, and uninstalling.
+
 ## Usage
 
-After installation, restart Claude Code and use:
+After installation, start a new Claude Code session (or run `/reload-plugins` in an open one) and use:
 
 ```
-/init
+/qingyi:project-init
 ```
+
+Plugin commands are namespaced under the plugin name, so the command is `/qingyi:project-init`, not `/init`.
 
 The command will:
 
@@ -137,14 +133,13 @@ The command will:
 
 ### Command File Structure
 
-Commands use markdown with YAML frontmatter:
+Commands use markdown with YAML frontmatter. The command name comes from the file name
+(`commands/project-init.md` → `/qingyi:project-init`):
 
 ```yaml
 ---
-name: init
-description: Initialize or enhance Claude Code project configuration
-command-type: prompt
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
+description: Initialize or enhance Claude Code project configuration (CLAUDE.md + .claude/rules/). Use PROACTIVELY when starting work on a new project.
+allowed-tools: Read, Write, Edit, Bash(git:*, ls:*, tree:*), Glob, Grep, AskUserQuestion
 ---
 
 # Command content and instructions...
@@ -153,9 +148,11 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ### Testing Changes
 
 1. Edit `commands/project-init.md`
-2. Re-run installation script to update plugin cache
-3. Restart Claude Code
-4. Test with `/init` in a project directory
+2. In a project directory, start Claude Code with `claude --plugin-dir <path-to-Qingyi>` to load the working copy for one session
+3. Test with `/qingyi:project-init`
+
+To test the installed copy instead, run `claude plugin marketplace update qingyi` and
+`claude plugin update qingyi@qingyi`, then start a new session.
 
 ## Template Reference
 
@@ -172,16 +169,23 @@ Build file → project type mapping relies on Claude's built-in knowledge (no ex
 
 ## Plugin Settings
 
-Settings are stored in `qingyi.local.md` (YAML frontmatter) at two levels:
+Settings are Claude Code plugin options, declared under `userConfig` in `.claude-plugin/plugin.json`. Users set them via
+`/plugin` → Installed → qingyi → Configure options, `claude plugin install --config KEY=VALUE`, or
+`pluginConfigs["qingyi@qingyi"].options` in `~/.claude/settings.json`. Project-level settings files are ignored for
+plugin options, so there is no per-project override.
 
-1. **Global**: `~/.claude/qingyi.local.md` — applies to all projects
-2. **Project-level**: `<project>/.claude/qingyi.local.md` — overrides global for that project
+| Option         | Type                       | Default  | Purpose                                                          |
+|----------------|----------------------------|----------|------------------------------------------------------------------|
+| `excel_runner` | string                     | `python` | Python command prefix for Excel skills                           |
+| `log_paths`    | string, `multiple: true`   | `[]`     | Production log paths checked by `debug-code` in production scope |
 
-| Setting        | Default                     | Purpose                                |
-|----------------|-----------------------------|----------------------------------------|
-| `excel_runner` | `python`                    | Python command prefix for Excel skills |
+Skills read a value with `${user_config.KEY}`, which Claude Code substitutes into the skill content:
 
-See `templates/qingyi.local.md` for the template with all supported values.
+- A list option is substituted as a comma-separated string (`/a,/b`).
+- An unset option stays as the literal `${user_config.KEY}` text, even when the manifest declares a `default`. Each
+  skill therefore falls back to its default when the value is empty or still starts with `${`.
+
+When adding an option, declare it in `plugin.json`, reference it in the skill, and add the same fallback.
 
 ## Quick Reference
 

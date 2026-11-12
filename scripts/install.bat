@@ -51,8 +51,8 @@ echo.
 echo Qingyi plugin installed successfully!
 echo.
 echo Available command:
-echo   /init - Initialize project configuration (CLAUDE.md + .claude/rules/)
+echo   /qingyi:project-init - Initialize project configuration (CLAUDE.md + .claude/rules/)
 echo.
-echo Restart Claude Code to use the plugin.
+echo Start a new Claude Code session, or run /reload-plugins in an open one, to use the plugin.
 echo.
 pause
