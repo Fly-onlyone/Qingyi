@@ -24,6 +24,7 @@
   - `rewrite-history` — Edit old commit messages via `git-filter-repo`
   - `sentry-deploy` — Deploy and configure Sentry error tracking
   - `setup-permission` — Generate Claude Code permission rules
+  - `temp-style-editor` — Throwaway in-app controls to choose a style by eye, then bake it in and remove every trace
 
 ## Requirements
 
@@ -47,6 +48,7 @@ Install only what the skills you use need.
 | `sentry-deploy`                           | Sentry MCP server; Context7 MCP (SDK docs lookup)                                                    |
 | `debug-code`                              | Optional: Sentry MCP (production errors), Context7 MCP (library docs)                               |
 | `remove-deadcode`                         | Optional per language: `vulture` (Python), `knip` (TypeScript/JS)                                    |
+| `temp-style-editor`                       | None; uses the project's own UI stack                                                                |
 | `commit`, `commit-push`, `merge-worktree`, `merge-worktree-no-commit`, `setup-permission` | Git only                                                     |
 
 ## Installation

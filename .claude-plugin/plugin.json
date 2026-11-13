@@ -1,7 +1,7 @@
 {
   "name": "qingyi",
   "version": "4.0.0",
-  "description": "Enhanced /qingyi:project-init command, reusable skills (commit, commit-push, debug, Excel, Sentry, merge-worktree, merge-worktree-no-commit, fetch-notion-tasks, obsidian-init, remove-deadcode, rewrite-history, setup-permission).",
+  "description": "Enhanced /qingyi:project-init command, reusable skills (commit, commit-push, debug, Excel, Sentry, merge-worktree, merge-worktree-no-commit, fetch-notion-tasks, obsidian-init, remove-deadcode, rewrite-history, setup-permission, temp-style-editor).",
   "author": {
     "name": "Fly"
   },

@@ -40,7 +40,8 @@ Qingyi/                                    ← Plugin root
 │   ├── remove-deadcode/SKILL.md          ← Systematic dead-code detection & removal
 │   ├── rewrite-history/SKILL.md          ← Git commit message rewriter
 │   ├── sentry-deploy/SKILL.md            ← Sentry deployment
-│   └── setup-permission/SKILL.md         ← Permission rules generator
+│   ├── setup-permission/SKILL.md         ← Permission rules generator
+│   └── temp-style-editor/SKILL.md        ← Temporary in-app style editor; bake in and clean up
 ├── scripts/
 │   ├── install.bat                        ← Windows installation script
 │   ├── install.sh                         ← Linux/macOS installation script
