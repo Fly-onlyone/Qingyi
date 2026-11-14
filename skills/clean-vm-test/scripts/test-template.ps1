@@ -7,8 +7,9 @@
 #   pwsh scripts\vm\test-myapp.ps1
 #
 # Every run starts from the VM's "clean" checkpoint (see provision.ps1).
-# Results go to report\vm-test-<date>\: screenshots\, recording\session.mp4,
-# logs\results.json, logs\facts-*.json and logs\run.log, a transcript of
+# Results go to report\vm-test-<date>\: screenshots\, recording\session.mp4
+# with session.start.txt (when the film began; each result in results.json has
+# a started time), logs\results.json, logs\facts-*.json and logs\run.log, a transcript of
 # everything the run prints. The script decides only what a program can decide
 # (exit codes, files, processes). Whether a page was drawn correctly is for
 # whoever reads the screenshots.
@@ -106,9 +107,13 @@ function Add-Result {
         [ValidateSet("pass", "fail", "note", "error")][string]$Status,
         [string]$Observed, [string[]]$Shots = @(), [string]$Output = ""
     )
+    # When the case began, so the report can jump the recording to it
+    # (recording\session.start.txt holds when the film began).
+    $started = if ($script:caseStarted) { $script:caseStarted } else { Get-Date }
     $results.Add([pscustomobject]@{
             id = $Id; title = $Title; expect = $Expect; status = $Status
             observed = $Observed; screenshots = $Shots; output = $Output
+            started = $started.ToString("o")
         })
     "{0,-5} {1,-4} {2}" -f $Status, $Id, $Observed
     $results | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $logs "results.json")
@@ -117,12 +122,15 @@ function Add-Result {
 # Run one case; a thrown error becomes an "error" result and the run goes on.
 function Test-Case {
     param([string]$Id, [string]$Title, [string]$Expect, [scriptblock]$Body)
+    $script:caseStarted = Get-Date
     try {
         & $Body
     } catch {
         $shot = try { Shot "$Id-error" } catch { $null }
         Add-Result -Id $Id -Title $Title -Expect $Expect -Status error `
             -Observed "the harness failed: $($_.Exception.Message)" -Shots @($shot | Where-Object { $_ })
+    } finally {
+        $script:caseStarted = $null
     }
 }
 

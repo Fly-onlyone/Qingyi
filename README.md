@@ -12,7 +12,7 @@
   - **ENHANCED mode** compares dependencies, structure, and patterns against existing docs and prompts before adding gaps.
   - Auto-detects project type from build files (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, etc.).
 - **Reusable skills** (auto-discovered by Claude Code):
-  - `clean-vm-test` — Install a Windows package into a clean Hyper-V guest, drive it by keyboard and mouse, keep screenshots and a recording
+  - `clean-vm-test` — Install a Windows package into a clean Hyper-V guest, drive it by keyboard and mouse, keep screenshots and a recording, and publish the report as a Claude Artifact
   - `commit` — Conventional commits (asks before push)
   - `commit-push` — Autonomous commit + push
   - `excel-read` / `excel-edit` — Read, analyze, write, and style `.xlsx` files

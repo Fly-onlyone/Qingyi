@@ -62,7 +62,36 @@ Get-VMSnapshot -VMName * | Select-Object VMName, Name
    app draws with Direct3D: they are two different user machines.
 5. **Read every screenshot** the run saved. The script judges exit codes, files and
    processes. Only a reader can tell that a page is blank.
-6. **Write the report**, summary first, as `references/report-template.md` lays out.
+6. **Write the report as a Claude Artifact**, summary first, as
+   `references/report-template.md` lays out. It is required, not offered: a test run
+   ends with a published report.
+   - Before writing the page, take the steps the `Artifact` tool asks for a new page
+     (its quickstart, the design guidance it loads).
+   - Write the page to `report.html` in the report folder. Embed the screenshots that
+     illustrate each case and the recording, with a button per case that plays the
+     recording from where the case began.
+   - Publish it with `Artifact`: `file_path` the page, `root` the report folder, and
+     `files` mapping `screenshots/NN-<case>.png` and `recording/session.mp4` to
+     themselves. Check the size limits in the template first.
+   - Write the link file `report\vm-test-<date>.html` (the run folder's name), in the
+     `report` folder at the project root. It sends the browser to the published URL:
+
+     ```html
+     <!doctype html>
+     <meta charset="utf-8">
+     <meta http-equiv="refresh" content="0; url=<artifact URL>">
+     <title>VM test report <date></title>
+     <a href="<artifact URL>">VM test report <date>: <verdict in a few words></a>
+     ```
+
+   - A later run into the same folder updates the same Artifact: read the URL from the
+     link file and publish with `url`, so the link file stays valid.
+   - When the `Artifact` tool is missing or refuses, write the report as `report.md`
+     in the report folder instead, as the template's "Without an Artifact" section
+     says. Write no `report.html` and no link file, and tell the user why nothing was
+     published.
+
+   Give the user the link at the end. The Artifact is private until they share it.
 7. **Shut the guest down** (`Stop-Guest`) and leave the VM and its checkpoint in place.
 
 ## Cases to cover
@@ -170,7 +199,8 @@ it for housekeeping.
   and beside each what that page does not say: rights, the two places to run code in
   the guest, typing, screenshot format, unattended install, memory, the graphics card,
   and what to do without Hyper-V.
-- **`references/report-template.md`**: report layout, verdicts, severities.
+- **`references/report-template.md`**: report layout, verdicts, severities, embedding
+  screenshots and the recording, and the Artifact size limits.
 - **`scripts/`**: `Vm.ps1`, `record.ps1`, `provision.ps1`, `provision-gpu.ps1`,
   `autounattend.xml`, `guest/update-windows.ps1`, `test-template.ps1`. Run them with
   `pwsh`, never by bare path.

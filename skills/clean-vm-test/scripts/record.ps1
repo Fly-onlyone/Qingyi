@@ -52,6 +52,9 @@ $pipe = $encoder.StandardInput.BaseStream
 
 $interval = [int](1000 / $Fps)
 $frame = [byte[]]::new($width * $height * 2)
+# ffmpeg starts the film at the first picture. Write down when that is, so a
+# moment of the run maps to a position in the film (session.start.txt).
+Set-Content -Path ([IO.Path]::ChangeExtension($Path, ".start.txt")) -Value (Get-Date).ToString("o")
 try {
     while (-not (Test-Path $StopFile) -and (Get-Date) -lt $deadline -and -not $encoder.HasExited) {
         $started = [System.Diagnostics.Stopwatch]::StartNew()

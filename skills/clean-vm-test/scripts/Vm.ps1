@@ -831,7 +831,7 @@ function Start-Recording {
     }
     New-Item -ItemType Directory -Force (Split-Path -Parent $Path) | Out-Null
     $stop = "$Path.stop"
-    Remove-Item $stop, $Path -Force -ErrorAction SilentlyContinue
+    Remove-Item $stop, $Path, ([IO.Path]::ChangeExtension($Path, ".start.txt")) -Force -ErrorAction SilentlyContinue
     $arguments = "-NoProfile", "-File", (Join-Path $PSScriptRoot "record.ps1"),
         "-VmName", $script:Vm.Name, "-Path", $Path, "-StopFile", $stop, "-Fps", $Fps, "-Width", $Width, "-Ffmpeg", $ffmpeg
     $process = Start-Process -FilePath (Get-Process -Id $PID).Path -ArgumentList ($arguments | ForEach-Object { if ("$_" -match '\s') { "`"$_`"" } else { "$_" } }) `
