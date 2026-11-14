@@ -83,7 +83,7 @@ run autonomously from a one-line request.
 
 Before scaffolding, do one read pass to map what exists. Use direct `Glob` + `Read` for
 known paths; for broader exploration, dispatch an `Agent` call with
-`subagent_type: general-purpose` and instructions to return only a structural map (no
+`subagent_type: general-purpose`, `model: sonnet`, and instructions to return only a structural map (no
 deep reads):
 
 - **Project root manifests** — `package.json`, `pyproject.toml`, `Cargo.toml`, etc. to
@@ -331,7 +331,7 @@ produce ~300 atomic notes in ~6 minutes.
 response/tool-call block**. The Claude Code harness runs them concurrently. Do NOT
 chain them sequentially across turns. Cap at 8 concurrent calls.
 
-Use `Agent` with `subagent_type: general-purpose`. Each brief must include:
+Use `Agent` with `subagent_type: general-purpose` and `model: sonnet`. Each brief must include:
 
 1. **Exact output directory** (absolute path).
 2. **Complete file list** (every note name to create, plus `_index.md`).
