@@ -77,6 +77,12 @@ When asked to add or modify IDE run configurations, ALWAYS call `get_run_configu
 
 ---
 
+## System Power State
+
+- **NEVER** shut down, restart, sleep, hibernate, or log off the user's computer unless the user **explicitly** asks for it. This covers commands such as `shutdown`, `Stop-Computer`, `Restart-Computer`, `rundll32 powrprof.dll,SetSuspendState`, `logoff`, `systemctl poweroff/reboot/suspend`, and `pmset sleepnow`, including inside scripts you write or run.
+
+---
+
 ## Post-Feature Documentation Update
 
 After completing a major feature implementation (a new user-facing capability, or new modules/files that change the project's structure or patterns), **ask the user** whether they want to update project documentation:
