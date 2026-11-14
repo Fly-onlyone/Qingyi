@@ -108,8 +108,9 @@ Tell the user, briefly:
 - to report the values they settle on from the values block, or to say which variant wins.
 
 Then **wait**. Never bake values in or remove the editor without an explicit confirmation.
-Do not commit while the editor is in the tree. If the user asks for a commit, warn first or
-leave the editor's files out. If the user asks for another control, extend the editor.
+Do not commit while the editor is in the tree. If the user asks for a commit, say that the
+editor is still in the tree and offer to bake in or remove it first. Never stage the editor
+module or a marked hook. If the user asks for another control, extend the editor.
 
 ## Phase 4: Bake and clean
 
