@@ -7,14 +7,14 @@
   },
   "metadata": {
     "description": "Project configuration, conventional commits, and reusable skills",
-    "version": "4.0.0"
+    "version": "5.0.0"
   },
   "plugins": [
     {
       "name": "qingyi",
       "source": "./",
-      "description": "Enhanced /qingyi:project-init command, reusable skills (commit, commit-push, debug, Excel, Sentry, merge-worktree, merge-worktree-no-commit, fetch-notion-tasks, obsidian-init, remove-deadcode, rewrite-history, setup-permission, temp-style-editor).",
-      "version": "4.0.0",
+      "description": "Enhanced /qingyi:project-init command, reusable skills (clean-vm-test, commit, commit-push, Excel, Sentry, merge-worktree, merge-worktree-no-commit, fetch-notion-tasks, obsidian-init, remove-deadcode, rewrite-history, setup-permission, temp-style-editor).",
+      "version": "5.0.0",
       "author": {
         "name": "Fly"
       },
@@ -26,10 +26,12 @@
         "claude-md",
         "rules",
         "configuration",
+        "clean-vm-test",
+        "hyper-v",
+        "installer-test",
         "commit",
         "commit-push",
         "conventional-commits",
-        "debug",
         "excel",
         "sentry",
         "merge-worktree",

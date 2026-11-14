@@ -2,7 +2,7 @@
 
 > Claude Code plugin for project initialization and reusable skills.
 
-![version](https://img.shields.io/badge/version-4.0.0-blue)
+![version](https://img.shields.io/badge/version-5.0.0-blue)
 ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 
 ## Features
@@ -12,9 +12,9 @@
   - **ENHANCED mode** compares dependencies, structure, and patterns against existing docs and prompts before adding gaps.
   - Auto-detects project type from build files (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, etc.).
 - **Reusable skills** (auto-discovered by Claude Code):
+  - `clean-vm-test` — Install a Windows package into a clean Hyper-V guest, drive it by keyboard and mouse, keep screenshots and a recording
   - `commit` — Conventional commits (asks before push)
   - `commit-push` — Autonomous commit + push
-  - `debug-code` — Guided debugging workflow
   - `excel-read` / `excel-edit` — Read, analyze, write, and style `.xlsx` files
   - `merge-worktree` — Merge and clean up git worktrees (auto-commits dirty WIP)
   - `merge-worktree-no-commit` — Land worktree changes via stash, leaving WIP uncommitted
@@ -46,9 +46,9 @@ Install only what the skills you use need.
 | `rewrite-history`                         | `git-filter-repo` (`pip install git-filter-repo`)                                                    |
 | `fetch-notion-tasks`                      | Notion MCP server                                                                                    |
 | `sentry-deploy`                           | Sentry MCP server; Context7 MCP (SDK docs lookup)                                                    |
-| `debug-code`                              | Optional: Sentry MCP (production errors), Context7 MCP (library docs)                               |
 | `remove-deadcode`                         | Optional per language: `vulture` (Python), `knip` (TypeScript/JS)                                    |
 | `temp-style-editor`                       | None; uses the project's own UI stack                                                                |
+| `clean-vm-test`                           | Windows host with Hyper-V; account in "Hyper-V Administrators"; Windows ADK (`oscdimg`); optional `ffmpeg` |
 | `commit`, `commit-push`, `merge-worktree`, `merge-worktree-no-commit`, `setup-permission` | Git only                                                     |
 
 ## Installation
@@ -128,7 +128,6 @@ Qingyi declares its settings as Claude Code [plugin options](https://code.claude
 | Option         | Type             | Default  | Used by                    | Purpose                                                                     |
 |----------------|------------------|----------|----------------------------|-----------------------------------------------------------------------------|
 | `excel_runner` | string           | `python` | `excel-read`, `excel-edit` | Command prefix for running Python scripts (e.g. `uv run python`)            |
-| `log_paths`    | list of strings  | empty    | `debug-code`               | Production log directories or files, checked in production-scope debugging |
 
 ### Set the options
 
@@ -148,8 +147,7 @@ Any of these works:
     "pluginConfigs": {
       "qingyi@qingyi": {
         "options": {
-          "excel_runner": "uv run python",
-          "log_paths": ["/var/log/myapp/"]
+          "excel_runner": "uv run python"
         }
       }
     }
@@ -162,7 +160,7 @@ Options apply to every project. Claude Code reads them from user settings, a `--
 
 ## Documentation
 
-- [`CLAUDE.md`](CLAUDE.md) — Full plugin architecture, command internals, template reference, and development guide.
+- [`CLAUDE.md`](CLAUDE.md) — Development and testing notes, and plugin-option gotchas.
 - [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) — Plugin manifest.
 - [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) — Marketplace definition.
 
