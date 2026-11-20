@@ -2,7 +2,7 @@
 
 > Claude Code plugin for project initialization and reusable skills.
 
-![version](https://img.shields.io/badge/version-5.0.0-blue)
+![version](https://img.shields.io/badge/version-5.1.0-blue)
 ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 
 ## Features
@@ -18,12 +18,14 @@
   - `excel-read` / `excel-edit` — Read, analyze, write, and style `.xlsx` files
   - `merge-worktree` — Merge and clean up git worktrees (auto-commits dirty WIP)
   - `merge-worktree-no-commit` — Land worktree changes via stash, leaving WIP uncommitted
+  - `watch-merge-worktree` — Watch the other Claude Code sessions working in worktrees, relay what they need from you, and run `merge-worktree` once all are done
   - `fetch-notion-tasks` — Notion task retrieval, description rewriting, and parallel execution across one worktree per task
   - `obsidian-init` — Scaffold an Obsidian vault that documents a codebase as atomic, graph-linked notes
   - `remove-deadcode` — Systematic dead-code detection
   - `rewrite-history` — Edit old commit messages via `git-filter-repo`
   - `sentry-deploy` — Deploy and configure Sentry error tracking with privacy-first defaults (no end-user PII unless opted in)
   - `setup-permission` — Generate Claude Code permission rules
+  - `ship-release` — Land every worktree, bump the version, test the package (in a clean Windows guest when the project has one), publish and check the release, update the docs, and optionally shut down, sleep or hibernate at the end
   - `temp-style-editor` — Throwaway in-app controls to choose a style by eye, then bake it in and remove every trace
 
 ## Requirements
@@ -48,6 +50,8 @@ Install only what the skills you use need.
 | `sentry-deploy`                           | Sentry MCP server; Context7 MCP (SDK docs lookup)                                                    |
 | `remove-deadcode`                         | Optional per language: `vulture` (Python), `knip` (TypeScript/JS)                                    |
 | `temp-style-editor`                       | None; uses the project's own UI stack                                                                |
+| `watch-merge-worktree`                    | Git; PowerShell 7 (`pwsh`) and bash for its scripts (Git Bash on Windows)                            |
+| `ship-release`                            | Git; GitHub CLI (`gh`); PowerShell 7 (`pwsh`); the `watch-merge-worktree` scripts' needs; for a guest test, the `clean-vm-test` needs; the power action is Windows only |
 | `clean-vm-test`                           | Windows host with Hyper-V; account in "Hyper-V Administrators"; Windows ADK (`oscdimg`); optional `ffmpeg` |
 | `commit`, `commit-push`, `merge-worktree`, `merge-worktree-no-commit`, `setup-permission` | Git only                                                     |
 
