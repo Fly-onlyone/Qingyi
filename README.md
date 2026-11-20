@@ -22,7 +22,7 @@
   - `obsidian-init` — Scaffold an Obsidian vault that documents a codebase as atomic, graph-linked notes
   - `remove-deadcode` — Systematic dead-code detection
   - `rewrite-history` — Edit old commit messages via `git-filter-repo`
-  - `sentry-deploy` — Deploy and configure Sentry error tracking
+  - `sentry-deploy` — Deploy and configure Sentry error tracking with privacy-first defaults (no end-user PII unless opted in)
   - `setup-permission` — Generate Claude Code permission rules
   - `temp-style-editor` — Throwaway in-app controls to choose a style by eye, then bake it in and remove every trace
 
