@@ -3,11 +3,12 @@ name: clean-vm-test
 description: >-
   This skill should be used when the user asks to "test the installer in a VM", "test
   in a virtual machine", "test the release build on a clean Windows", "try the package
-  on a fresh machine", "test in Hyper-V" or "does it run without the dev tools
-  installed", or wants screenshots or a screen recording of a Windows app running in a
-  guest. Also use when a Windows app works on the development
-  machine and nothing proves it installs and starts where the compiler, runtime
-  libraries, git and a graphics card are missing. Windows host with Hyper-V.
+  on a fresh machine", "test in Hyper-V", "does it run without the dev tools
+  installed", "does it still work after sleep" or "what breaks after the computer
+  sleeps", or wants screenshots or a screen recording of a Windows app running in a
+  guest. Also use when a Windows app works on the development machine and nothing
+  proves it installs and starts where the compiler, runtime libraries, git and a
+  graphics card are missing. Windows host with Hyper-V.
 ---
 
 # Clean VM Test
@@ -107,10 +108,50 @@ Get-VMSnapshot -VMName * | Select-Object VMName, Name
 | Pages | each main page draws (screenshot each) |
 | Keyboard, mouse | shortcuts and clicks do what the docs say |
 | Restart | after a Windows restart nothing starts by itself and the app starts again |
+| Sleep and wake | after the guest sleeps and wakes, the app draws, answers input, reaches its background processes and the network, and its timed work runs again |
 | Uninstall | processes, files, `PATH` entry and shortcuts are gone; list what stays |
 | Event log | no crash of the app was logged |
 
-A case with no documented expected result is recorded, not passed. Run the restart, uninstall and event-log cases even when the docs are silent about them; drop a group only when it cannot apply (no command-line program, no shortcut).
+A case with no documented expected result is recorded, not passed. Run the restart, sleep, uninstall and event-log cases even when the docs are silent about them; drop a group only when it cannot apply (no command-line program, no shortcut, no program
+that keeps running).
+
+### Sleep and wake
+
+What breaks after a sleep shows only after one: a window that stays black because the graphics
+device was lost, a connection to a background process or a server that never comes back, timed
+work (an update check, a refresh) that never runs again or runs many times at once, a tray icon
+that is gone, a login that expired.
+
+A Hyper-V guest usually has no standby. `powercfg /a` in the guest lists the states it has. Put
+it to sleep from the host in one of two ways:
+
+| Way | How | What the app sees |
+|---|---|---|
+| Hibernate inside the guest | elevated in the guest (`Invoke-InGuest`): `powercfg /hibernate on`, then `Start-Process shutdown.exe -ArgumentList '/h'`, which returns before Windows goes down. On the host: `Wait-VmState -State Off`, wait, `Start-Guest`, `Wait-Guest` | what a sleeping laptop sends: the suspend and resume notices (`WM_POWERBROADCAST`), devices started again, a jump of the clock |
+| Save the VM | `Save-VM -Name <vm>`, `Wait-VmState -State Saved`, wait, `Start-Guest`, `Wait-Guest` | no notice at all: the clock jumps and network connections may be gone; devices are untouched |
+
+Run the hibernation way. Add the saved VM for an app that holds network connections open. Neither
+shows Modern Standby, where a laptop keeps running at low power; say so in the report.
+
+1. Before the sleep, turn off sign-in on wake in the guest, or the lock screen may cover the app
+   in every screenshot after it: `powercfg /setacvalueindex scheme_current sub_none consolelock 0`,
+   the same with `/setdcvalueindex`, then `powercfg /setactive scheme_current`.
+2. Leave the app as a user would: a page open, its background processes running, in the tray if
+   it has one. Take a screenshot; note the IDs of its processes.
+3. Sleep the guest for a few minutes, longer than the app's longest timer or login when its docs
+   name one.
+4. After `Wait-Guest`, wait a minute with no input: a click would hide a window that redraws only
+   on input. Take a screenshot.
+5. Check: the same process IDs still run, unless the docs say the app restarts them; the window
+   draws; keys and clicks work; the background process answers; one action that needs the network
+   works; timed work runs at its next time and not many times at once; the tray icon is there; the
+   event log and the app's log show no new crash or repeated error.
+
+The recording goes on across the sleep: `record.ps1` repeats the last picture while the guest is
+off. With the graphics card attached, Hyper-V may refuse to save or hibernate the guest, as it
+refuses a checkpoint; then run the case in the pass without the card and say so in the report.
+This case has not yet run on a real guest. After its first run, write what happened into
+`references/hyperv-notes.md`.
 
 ## Helpers in `Vm.ps1`
 
