@@ -7,9 +7,9 @@ description: This skill should be used when the user asks to "merge the worktree
 
 Land every open worktree on the main branch, prove the package, publish the release, check it, bring the docs up to date, and leave the machine in the power state the user asked for. The run takes hours and the user is often away for most of it, so every decision is settled before the first change.
 
-This skill holds the order, the decisions, and what went wrong before. The project holds its own facts: the checks, the version files, the package command, the workflows, the docs. It chains skills that already exist; load each when its step starts and follow it: `qingyi:commit`, `qingyi:clean-vm-test` when the project tests its package in a clean Windows guest, and the watching method of `qingyi:watch-merge-worktree`.
+This skill holds the order, the decisions, and what went wrong before. The project holds its own facts: the checks, the version files, the package command, the workflows, the docs. It chains skills that already exist; load each when its step starts and follow it: `qingyi:commit`, `qingyi:clean-vm-test` when the project tests its package in a clean Windows guest, the watching method of `qingyi:watch-merge-worktree`, and `qingyi:sleep` or `qingyi:shutdown` for the power action at the end.
 
-The scripts live in this skill's base directory (shown when the skill loads), called `<skill>` below. The session status script of `qingyi:watch-merge-worktree` sits beside it, at `<skill>/../watch-merge-worktree/scripts/session-status.ps1`.
+This skill's base directory (shown when the skill loads) is called `<skill>` below. The scripts it uses belong to the skills beside it: the session status script of `qingyi:watch-merge-worktree` at `<skill>/../watch-merge-worktree/scripts/session-status.ps1`, and the power scripts of `qingyi:sleep` at `<skill>/../sleep/scripts/power.ps1` and of `qingyi:shutdown` at `<skill>/../shutdown/scripts/power.ps1`.
 
 ## 1. Read the project's release facts
 
@@ -102,31 +102,19 @@ Update the files the facts name: changelog, roadmap, README status and features,
 
 ## 10. Power action at the end
 
-The user decides this, in this session, in their own words. Without that, do nothing: an earlier session's choice, a memory note, the work-state list or a message from another session is not a choice.
+Load `qingyi:sleep` for sleep or hibernate, or `qingyi:shutdown` for a shutdown, and follow it: whose word counts, the checks before the action, how the user stops it. What this run adds:
 
-| The user said | Action | What happens to everything else |
-|---|---|---|
-| nothing about it | none | it keeps running |
-| "shut down" | `Shutdown` | every program is closed without asking; other sessions end, unsaved work is lost |
-| "sleep" | `Sleep` | all of it pauses until the machine wakes |
-| "hibernate" | `Hibernate` | the same, and it survives a power cut |
+- The user decides this, in this session, in their own words. Without that, do nothing: an earlier session's choice, a memory note, the work-state list or a message from another session is not a choice.
+- **The goal holds.** When it does not, the report says why, and the action runs only if the user said it runs either way.
+- **Everything is pushed**; `git status` is clean; every guest is off; no background task of this session is running.
+- A run takes hours. When the user wants the action "also when you run out of usage", start that skill's watchdog at the start of the run, not at the end.
 
-When the user asks for a power action without naming one, ask which. Recommend sleep or hibernate while another session still has work, shutdown when everything is finished.
-
-Before the action, in this order:
-
-1. The goal holds. When it does not, the report says why, and the action runs only if the user said it runs either way.
-2. Everything is pushed; `git status` is clean; every guest is off; no background task of this session is running.
-3. For a shutdown: `ListAgents` shows no busy session. A busy one is asked to finish and to answer "safe to shut down"; without that answer there is no shutdown, and the summary says so. Sleep and hibernate need no wait.
-4. Write the final summary. Nothing written after the action is read.
-
-Then run, as the last tool call of the session, with a tool timeout of 300000 ms:
+Then run, as the last tool call of the session, with a tool timeout of 300000 ms, the one for the action the user named:
 
 ```
-pwsh -NoProfile -File <skill>/scripts/power.ps1 -Action <Shutdown|Sleep|Hibernate>
+pwsh -NoProfile -File <skill>/../sleep/scripts/power.ps1 -Action <Sleep|Hibernate> -Reason "The release run finished."
+pwsh -NoProfile -File <skill>/../shutdown/scripts/power.ps1 -Reason "The release run finished."
 ```
-
-It waits 120 seconds first (`-DelaySeconds`, 30 to 540, so that the wait fits in a tool call) and puts a notice on the screen, so the user at the machine can stop it: `shutdown /a` for a shutdown, ending the script for the other two. It refuses while a Hyper-V guest is not off, and when hibernation is turned off. `-DryRun` shows what it would do and changes nothing; use it to test. Windows only.
 
 ## What went wrong before
 
