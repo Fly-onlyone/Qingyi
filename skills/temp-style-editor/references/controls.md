@@ -46,8 +46,9 @@ For comparing the current look with a candidate.
 
 ## Reset and hide
 
-- **Reset to shipped:** one button per variant puts every value back to its default.
-  Nothing persists, so without it only a restart resets.
+- **Reset to shipped:** one button per variant puts every value back to its default, and
+  the auto save stores that. The save keeps values across restarts, so this button is the
+  only way back.
 - **Hide panel:** a toggle (and a key, where the stack has a keymap) that hides the panel
   without resetting anything. The user judges the look without the panel in the way, and
   Phase 2 compares screenshots with it hidden.
@@ -91,7 +92,8 @@ ratio      = (L_lighter + 0.05) / (L_darker + 0.05)
 
 ## Values block
 
-End the panel with every current value, one per line, in a form the user can paste back:
+End the panel with every current value, one per line, in a form the user can paste back,
+and where the auto save keeps them:
 
 ```
 variant: Vivid
@@ -99,7 +101,11 @@ page.tint   = Primary 20%
 quote.fill  = Primary 14%
 quote.bar   = Primary
 weakest text on page: 6.4:1
+saved to: D:\app\temp_style_editor.json (14:32:05)
 ```
+
+The last line shows the save's location and the time of the last write, or the error when
+a write failed. A failed write must be visible: the user relies on the save.
 
 When comparing, show both variants' values, or the active one plus a note that the other
 keeps its own.

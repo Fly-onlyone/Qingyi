@@ -7,9 +7,10 @@ description: >-
   or "compare with the current look", or, for an editor this skill built, "keep these
   values", "bake in the values", "remove the temporary editor" or "remove every
   temporary editor". Builds throwaway in-app controls (color cycles, -/value/+ steppers,
-  an A/B switch, contrast readouts) behind one marker, TEMP-STYLE-EDITOR, lets the user
-  choose by eye, then bakes the confirmed values into the shipped code and removes every
-  trace. Works with any stack: web, desktop, mobile, games (including Minecraft mods), TUI.
+  an A/B switch, contrast readouts) behind one marker, TEMP-STYLE-EDITOR, auto-saves every
+  change so a restart keeps it, lets the user choose by eye, then bakes the confirmed values
+  into the shipped code and removes every trace, the save included. Works with any stack:
+  web, desktop, mobile, games (including Minecraft mods), TUI.
 ---
 
 # Temporary Style Editor
@@ -18,9 +19,9 @@ Give the user throwaway controls inside the running app to choose colors, sizes,
 strengths or variants by eye. Once the user confirms a choice, write the chosen values
 where the shipped values live and delete the editor completely.
 
-The editor is scaffolding: it never ships, never persists anything, and leaves the tuned
-surfaces exactly as they were until the user touches a control. One name and one marker
-make every piece of it findable.
+The editor is scaffolding: it never ships, saves only to its own `temp_style_editor` save,
+and leaves the tuned surfaces exactly as they were until the user touches a control. One
+name and one marker make every piece of it findable.
 
 ## Phase 0: Scope
 
@@ -62,14 +63,35 @@ make every piece of it findable.
 
 - Hold the values in a runtime-mutable store the UI reads while rendering. The recipe per
   stack is in `references/stack-recipes.md`.
-- **Defaults equal the shipped values**, so the tuned surfaces render exactly as before
-  until a control moves.
-- **Never persist**: no settings file, local storage, preference or save file.
+- **Defaults equal the shipped values**, so with no save present the tuned surfaces render
+  exactly as before until a control moves.
 - **One value set per variant** when comparing. The switch starts on the current variant.
   Seed the candidate from the user's proposal, or from a copy of the current values. The
   controls edit the active variant, so the switch keeps comparing after tuning.
 - Gate the editor to development builds where the stack allows. A gated getter needs a
   release fallback that returns the shipped value.
+
+### Auto save
+
+Build an auto save into every editor. The user's tuning survives an app restart or a crash,
+and the agent reads the chosen values from the save instead of asking the user to copy them.
+
+- **Save on every change**: one write per press or cycle, and for a continuous slider one
+  write about 300 ms after it stops. "Reset to shipped" and the A/B switch save too.
+- **One save, named `temp_style_editor`**: `temp_style_editor.json` in the project root on
+  desktop, games and TUI; the `localStorage` key `temp_style_editor` on web; the app's own
+  files directory on mobile. Where and how per stack is in `references/stack-recipes.md`.
+- **What it holds**: every variant's values, the active variant, the shipped defaults and the
+  time of the last change. The shipped defaults let the bake step show what changed.
+- **Write it atomically**: write `temp_style_editor.json.tmp`, then rename it over the
+  save, so a crash in the middle leaves the last good save.
+- **Load it on start**: take known keys whose values are in range; fall back to the
+  defaults for the rest. When values came from the save, the panel title says "restored".
+- **Behind the same gate** as the editor: a release build never reads or writes it.
+- **Nothing else persists**: no app settings, preferences, engine assets or the app's own
+  save files.
+- **Name the save in the module header comment**, with its full location, so a cold start
+  finds it.
 
 ### Panel
 
@@ -89,43 +111,55 @@ their last frame unless told otherwise. The stack recipes name the call.
 ## Phase 2: Verify
 
 1. Run the project's build, linter, formatter and tests.
-2. Run the app and capture a screenshot **without taking focus**. Methods are in
+2. **Start without a save.** When the user already has one (the editor is being extended),
+   rename it to `temp_style_editor.user.json` (web: copy the key's value to
+   `temp_style_editor.user`) and put it back in step 7. Never delete or overwrite a save the
+   user made.
+3. Run the app and capture a screenshot **without taking focus**. Methods are in
    `references/stack-recipes.md`. With the panel hidden and no control moved, the tuned
    surfaces must match the baseline.
-3. **Drive the controls programmatically**: post a click or key to the window, or call the
+4. **Drive the controls programmatically**: post a click or key to the window, or call the
    store from a debug hook, then capture again. Check that the look, the values block and
    the readouts all changed.
-4. **Check that the panel fits.** Library minimum widths can squeeze a row of controls
+5. **Check the auto save.** The save exists and holds the new value. Restart the app: the
+   value comes back and the panel title says "restored".
+6. **Check that the panel fits.** Library minimum widths can squeeze a row of controls
    unevenly (see `references/controls.md`).
-5. Stop every process the check started, and only those.
+7. Delete the save the check made, and put back the user's save if step 2 moved one aside.
+   Stop every process the check started, and only those.
 
 ## Phase 3: Hand over
 
 Tell the user, briefly:
 
 - where the controls are and what each one changes;
-- that nothing is saved, so a restart returns to the shipped look;
-- to report the values they settle on from the values block, or to say which variant wins.
+- that every change is saved at once to the save (name its location), so a restart or a
+  crash keeps the tuned look, and "Reset to shipped" goes back;
+- to say "keep these" or which variant wins when done; the agent reads the values from the
+  save, so nothing needs copying.
 
 Then **wait**. Never bake values in or remove the editor without an explicit confirmation.
 Do not commit while the editor is in the tree. If the user asks for a commit, say that the
 editor is still in the tree and offer to bake in or remove it first. Never stage the editor
-module or a marked hook. If the user asks for another control, extend the editor.
+module, a marked hook or the save. If the user asks for another control, extend the editor.
 
 ## Phase 4: Bake and clean
 
 Run this only after confirmation. The full checklist is in `references/cleanup.md`.
 
 0. **Starting cold** (a new session, or "remove" with no values given): search for the
-   marker and the name, read the module header for what it tunes and which unmarked
-   entries it added, and ask for the final values or the winning variant. "Remove" alone
-   means revert to the shipped values, unless the user names values.
+   marker and the name, read the module header for what it tunes, which unmarked entries
+   it added and where the save is. Read the save, show the user its values, and ask them to
+   confirm those values or name the winning variant. "Remove" alone means revert to the
+   shipped values, unless the user names values.
 1. **Write the confirmed values** where the shipped values live, following the project's
-   structure and naming.
+   structure and naming. The save is the source; the values block is the fallback when no
+   save can be read.
 2. **If a variant won**, delete the losing branch, the switch and the variant type.
 3. **Delete the editor**: the module, every marked hook, every entry listed in its header,
-   the panel mount, and any dependency added only for it.
-4. **Prove it is gone** with searches that include untracked files. Nothing may match.
+   the panel mount, any dependency added only for it, and the save.
+4. **Prove it is gone** with searches that include untracked and ignored files, by content
+   and by file name. Nothing may match.
 5. **Add tests** for the constraints the readouts showed (for example text contrast at AA)
    where the project tests style.
 6. **Run the full checks**, capture a final screenshot, and compare it with the look the
@@ -136,9 +170,9 @@ Run this only after confirmation. The full checklist is in `references/cleanup.m
 ## Rules
 
 - One name (`temp_style_editor`), one marker (`TEMP-STYLE-EDITOR`).
-- An untouched editor changes nothing on the tuned surfaces.
-- No persistence of any kind.
-- Never ship the editor, and never commit it.
+- An untouched editor with no save changes nothing on the tuned surfaces.
+- Auto save every change to the one `temp_style_editor` save; nothing else persists.
+- Never ship the editor or its save, and never commit either.
 - Never bake or remove without the user's confirmation.
 - Verify APIs for the project's pinned framework versions. The recipes name long-stable
   primitives, but versions differ.
@@ -148,8 +182,8 @@ Run this only after confirmation. The full checklist is in `references/cleanup.m
 ### Reference Files
 
 - **`references/stack-recipes.md`**: the value store, redraw call, panel host, dev-only
-  gate, screenshot without focus, and removal notes per stack (web, desktop, mobile,
-  games, TUI).
+  gate, auto save location and calls, screenshot without focus, and removal notes per
+  stack (web, desktop, mobile, games, TUI).
 - **`references/controls.md`**: control patterns, step rounding, contrast formula and
   thresholds, layout rules, reset and hide controls, and the values block.
 - **`references/cleanup.md`**: the bake-in checklist, the searches that prove removal, and

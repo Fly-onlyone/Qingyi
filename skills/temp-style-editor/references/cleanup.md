@@ -7,13 +7,19 @@ Run this only after the user confirms the values or the winning variant.
 When cleanup is requested in a new session, or as "remove" with no values given:
 
 1. Find the editor (see the searches in step 4).
-2. Read the module's header comment. It names the values the editor tunes and every
-   unmarked entry it added (language keys, manifest entries, engine project entries).
-3. Ask the user for the final values or the winning variant. The panel's values block shows
-   them while the app runs.
+2. Read the module's header comment. It names the values the editor tunes, every unmarked
+   entry it added (language keys, manifest entries, engine project entries) and where the
+   save is.
+3. Read the save (`references/stack-recipes.md`, "Auto save", says how per stack). Show the
+   user its values and active variant, and ask them to confirm those values or name the
+   winning variant. Without a readable save, ask for the values from the panel's values
+   block.
 4. "Remove" with no values means **revert**: keep the shipped values and delete the editor.
 
 ## 1. Write the values where shipped values live
+
+Take the values from the save, for the variant the user confirmed. Its `shipped` block
+shows what each value replaces.
 
 | Value type | Where it goes |
 |---|---|
@@ -50,6 +56,10 @@ Code that existed only to support the comparison goes too.
   entries, `options.txt` lines and the like).
 - The panel mount and any provider or wrapper added for it.
 - Any dependency added only for the editor (package manifests and lock files).
+- The save: the `temp_style_editor` file with any `.tmp` and `temp_style_editor.user.json`
+  beside it, or the storage key. Where the agent cannot reach it (a browser's
+  `localStorage` without automation, a device that is not connected), tell the user the
+  exact command or key to clear.
 - Scratch files the checks left behind: screenshots, scratch settings directories, scripts.
 
 ## 4. Prove it is gone
@@ -61,12 +71,17 @@ projects outside git:
 ```
 git grep --untracked -n "TEMP-STYLE-EDITOR"
 git grep --untracked -n -i -E "temp[_-]?style[_-]?editor"
-git status --short
+git status --short --ignored
 git diff --stat
 ```
 
-- The first two searches must print nothing.
-- `git status` must show no untracked editor files.
+`git grep` matches file contents, not file names, and a save in an ignored folder
+(`Saved/`, `run/`) is not untracked but ignored. So also search by name with the Glob
+tool, `**/temp_style_editor*`, and look at the save's location from the module header
+when it lies outside the project (`user://`, an app container, a device).
+
+- The two `git grep` searches and the name search must find nothing.
+- `git status --short --ignored` must show no editor file and no save.
 - `git diff --stat` must show only the baked values, the removed hooks, and tests.
 
 ## 5. Pin the result with tests

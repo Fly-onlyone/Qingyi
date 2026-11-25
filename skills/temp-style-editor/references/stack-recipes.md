@@ -5,6 +5,7 @@ For each stack, this file gives:
 - how a change reaches the screen;
 - where to mount the panel;
 - how to keep it out of release builds;
+- where the auto save lives and how to write it (section "Auto save");
 - how to capture the result without taking the user's focus;
 - what to remove afterwards.
 
@@ -14,6 +15,43 @@ version the project pins before using it. Frameworks rename and deprecate.
 General rule for every stack: when the project already routes style through variables
 (CSS custom properties, theme tokens, resource dictionaries), tune those variables. The
 framework then redraws on its own, and the hooks shrink to almost nothing.
+
+## Auto save
+
+Every editor saves each change to one save named `temp_style_editor` and loads it on start
+(the rules are in SKILL.md, "Auto save"). For every stack:
+
+- **Contents**: `{ "variant": "<active>", "variants": { "<name>": { "<key>": <value> } },
+  "shipped": { "<key>": <value> }, "changed": "<ISO time>" }`. Store whole units (percent,
+  pixels, token names) as the controls do.
+- **Path**: a file save goes in the project root unless the table says otherwise. Resolve it
+  at compile time where the stack can (the table names how), or else write it as an
+  absolute path constant in the editor module. The module is temporary, so a
+  machine-specific path is fine.
+- **Atomic write**: write `<save>.tmp`, then rename it over the save. Where the rename does
+  not replace an existing file, delete the old save first, then rename.
+- **No new dependency** when the stack can do without one. Without built-in JSON, write
+  `key=value` lines to `temp_style_editor.txt`. A dependency added only for the save goes at
+  cleanup, like any other.
+- **Removal**: every stack's removal also deletes the save, and any `.tmp` or
+  `temp_style_editor.user.json` beside it.
+
+| Stack | Where the save lives | Write and read | Read back and delete |
+|---|---|---|---|
+| Web, Electron and Tauri renderers, webviews | `localStorage` key `temp_style_editor` (atomic already) | `localStorage.setItem('temp_style_editor', JSON.stringify(state))`; `JSON.parse(localStorage.getItem('temp_style_editor'))` | In the app's origin, through browser automation: `localStorage.getItem(...)`, then `localStorage.removeItem('temp_style_editor')`. Without automation, ask the user to run them in the dev tools console |
+| Rust (GPUI, egui, ratatui) | `concat!(env!("CARGO_MANIFEST_DIR"), "/temp_style_editor.json")` | `serde_json` if the project has it, else `key=value` lines; `std::fs::write` the `.tmp`, then `std::fs::rename` (replaces on Windows too) | Read and delete the file |
+| Qt | An absolute path constant | `QJsonDocument`; `QSaveFile` writes atomically on `commit()` | As Rust |
+| WPF, WinUI 3 (.NET) | Project root, found by walking up from the module's `[CallerFilePath]` | `System.Text.Json`; `File.Move(tmp, save, overwrite: true)` on .NET Core 3.0 and later; on .NET Framework, `File.Replace(tmp, save, null)` once the save exists | As Rust. UWP is sandboxed: use `ApplicationData.Current.LocalFolder`, and log the path at start |
+| SwiftUI, AppKit (macOS) | Project root from `#filePath`; a sandboxed app writes in its container's Application Support instead, and logs the path at start | `JSONEncoder` / `JSONDecoder`; `data.write(to: url, options: .atomic)` | As Rust |
+| Flutter | Desktop: the project root, as an absolute constant. Mobile: `getApplicationDocumentsDirectory()` if the project already has `path_provider` | `jsonEncode` / `jsonDecode`; write the `.tmp`, then `File.rename` | Android: `adb shell run-as <package> cat app_flutter/temp_style_editor.json`, `... rm ...` |
+| Jetpack Compose | `File(context.filesDir, "temp_style_editor.json")` | `org.json.JSONObject` (built in); write the `.tmp`, then `renameTo` | `adb shell run-as <package> cat files/temp_style_editor.json`, `... rm ...` (debug builds only) |
+| SwiftUI (iOS) | The Documents directory | As macOS | `xcrun simctl get_app_container booted <bundle-id> data`, then `Documents/temp_style_editor.json` |
+| React Native | `AsyncStorage` or `MMKV` if the project has one, key `temp_style_editor`; else add one for the editor only | `JSON.stringify` / `JSON.parse` | From a debug hook or the values block; clear the key at cleanup |
+| Unity | Editor: `Path.Combine(Application.dataPath, "..", "temp_style_editor.json")`, outside `Assets` so nothing is imported. Device builds: `Application.persistentDataPath` | `JsonUtility.ToJson` / `FromJson` on a `[Serializable]` class (no dictionaries: use arrays of key and value); `File.Replace(tmp, save, null)` once the save exists, `File.Move` the first time | As Rust |
+| Godot 4 | `user://temp_style_editor.json`; print `ProjectSettings.globalize_path("user://temp_style_editor.json")` at start | `FileAccess.open(path, FileAccess.WRITE)` + `store_string(JSON.stringify(state))`; `JSON.parse_string(FileAccess.get_file_as_string(path))`; `DirAccess.rename_absolute` | Read and delete at the printed path |
+| Unreal | `FPaths::ProjectSavedDir() / TEXT("temp_style_editor.json")` (usually ignored by git) | `FFileHelper::SaveStringToFile` / `LoadFileToString`; JSON through the `Json` module if the project uses it, else `key=value` lines; `IFileManager::Get().Move(Dest, Src, true)` | Read and delete in `Saved/` |
+| Minecraft mods | Fabric: `FabricLoader.getInstance().getGameDir().resolve("temp_style_editor.json")`; NeoForge and Forge: `FMLPaths.GAMEDIR.get().resolve(...)`. In development that is the `run` folder | Gson (ships with Minecraft); `Files.writeString` the `.tmp`, then `Files.move(tmp, save, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)` | Read and delete in `run/` |
+| Terminal UI | The project root (an absolute constant, since the working directory varies) | Python `json` + `os.replace`; Go `encoding/json` + `os.Rename`; Node `JSON` + `fs.renameSync`; Rust as above | As Rust |
 
 ## Web
 
