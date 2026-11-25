@@ -2,7 +2,7 @@
 
 > Claude Code plugin for project initialization and reusable skills.
 
-![version](https://img.shields.io/badge/version-5.1.0-blue)
+![version](https://img.shields.io/badge/version-5.2.0-blue)
 ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 
 ## Features
@@ -25,8 +25,10 @@
   - `rewrite-history` — Edit old commit messages via `git-filter-repo`
   - `sentry-deploy` — Deploy and configure Sentry error tracking with privacy-first defaults (no end-user PII unless opted in)
   - `setup-permission` — Generate Claude Code permission rules
+  - `shutdown` — Shut down the computer when the work is over, only once the other sessions are idle, with a Windows countdown first, and a watchdog that acts when the session stops at a usage limit
+  - `sleep` — Sleep or hibernate the computer when the work is over, with a notice and a wait first, and a watchdog that acts when the session stops at a usage limit
   - `ship-release` — Land every worktree, bump the version, test the package (in a clean Windows guest when the project has one), publish and check the release, update the docs, and optionally shut down, sleep or hibernate at the end
-  - `temp-style-editor` — Throwaway in-app controls to choose a style by eye, then bake it in and remove every trace
+  - `temp-style-editor` — Throwaway in-app controls to choose a style by eye, auto-saved so a restart keeps the tuning, then bake it in and remove every trace
 
 ## Requirements
 
@@ -35,7 +37,7 @@
 - **Claude Code** (CLI, desktop app, or IDE extension)
 - **Git** — used by the commit, worktree, and history skills
 
-All features are platform-agnostic.
+All features are platform-agnostic, except the skills whose row below names Windows.
 
 ### Per-Skill Dependencies
 
@@ -51,7 +53,8 @@ Install only what the skills you use need.
 | `remove-deadcode`                         | Optional per language: `vulture` (Python), `knip` (TypeScript/JS)                                    |
 | `temp-style-editor`                       | None; uses the project's own UI stack                                                                |
 | `watch-merge-worktree`                    | Git; PowerShell 7 (`pwsh`) and bash for its scripts (Git Bash on Windows)                            |
-| `ship-release`                            | Git; GitHub CLI (`gh`); PowerShell 7 (`pwsh`); the `watch-merge-worktree` scripts' needs; for a guest test, the `clean-vm-test` needs; the power action is Windows only |
+| `ship-release`                            | Git; GitHub CLI (`gh`); PowerShell 7 (`pwsh`); the `watch-merge-worktree` scripts' needs; for a guest test, the `clean-vm-test` needs; for the power action, the `sleep` or `shutdown` needs |
+| `sleep`, `shutdown`                       | Windows; PowerShell 7 (`pwsh`)                                                                       |
 | `clean-vm-test`                           | Windows host with Hyper-V; account in "Hyper-V Administrators"; Windows ADK (`oscdimg`); optional `ffmpeg` |
 | `commit`, `commit-push`, `merge-worktree`, `merge-worktree-no-commit`, `setup-permission` | Git only                                                     |
 
