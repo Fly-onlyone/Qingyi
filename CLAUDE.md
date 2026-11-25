@@ -48,6 +48,18 @@ Skills read a value with `${user_config.KEY}`, which Claude Code substitutes int
 
 When adding an option, declare it in `plugin.json`, reference it in the skill, and add the same fallback.
 
+## Skill Conventions
+
+- A skill that uses another skill's script reaches it from its own base directory: `<skill>/../<other-skill>/scripts/…`
+  (ship-release uses the scripts of `watch-merge-worktree`, `sleep` and `shutdown` this way).
+- `sleep` and `shutdown` each own a `power.ps1` and a `watchdog.ps1`. Parts of them are twins and must stay identical:
+  `Assert-NoGuest` in both `power.ps1`, and the state file, log and helper functions in both `watchdog.ps1`. The shared
+  state file `qingyi-power-watchdog.json` keeps one watchdog running across both skills. Edit both copies together.
+- A new skill goes in the skill lists of `plugin.json`, `marketplace.json` (description and keywords) and the README
+  (features list and the Per-Skill Dependencies table).
+- `global-instructions/CLAUDE.md` is the target of the `~/.claude/CLAUDE.md` symlink, so an edit there applies to every
+  session on this machine at once.
+
 ## Quick Reference
 
 **Last Synced Commit**: `5ebe3f5` (2025-01-12)
