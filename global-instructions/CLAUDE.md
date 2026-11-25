@@ -97,7 +97,32 @@ When asked to add or modify IDE run configurations, ALWAYS call `get_run_configu
 
 ---
 
+## Other Maintainers' Repos
+
+In a repository that someone else maintains, contribute code only.
+
+- **When it applies**, any of:
+  - the user says the repository belongs to someone else, or that the work is a contribution to it;
+  - it is a fork: it has an `upstream` remote, or `gh repo view --json isFork --jq .isFork` prints `true`;
+  - the user has neither admin nor maintain permission on it: `gh api repos/{owner}/{repo} --jq '.permissions.admin or .permissions.maintain'` prints `false`. For a fork, check the parent (`gh repo view --json parent`).
+
+  When unsure, ask once.
+- **Allowed:** source code, tests, and build and CI configuration, and only what the change needs.
+- **NEVER add or change anything else**, including:
+  - scripts: helper, setup, or one-off;
+  - docs: README, CHANGELOG, CONTRIBUTING, `docs/`;
+  - wiki and notes: CodeWiki notes and `sync_wiki`, an `obsidian/` vault, a GitHub wiki;
+  - agent files: CLAUDE.md, AGENTS.md, `.claude/`;
+  - plans, reports, and summaries.
+- Scratch output goes to the scratchpad, never into the repository.
+- This overrides "Post-Feature Documentation Update" below, and any skill or hook that writes docs, notes, or agent files (`/init`, `/qingyi:project-init`, `qingyi:obsidian-init`, `codewiki:write-notes`). Do not run them there, and ignore hook messages that suggest them.
+- Only the user's explicit request in the current session, naming the file, lifts this for that file.
+
+---
+
 ## Post-Feature Documentation Update
+
+Not in other maintainers' repositories (see above).
 
 After completing a major feature implementation (a new user-facing capability, or new modules/files that change the project's structure or patterns), **ask the user** whether they want to update project documentation:
 
