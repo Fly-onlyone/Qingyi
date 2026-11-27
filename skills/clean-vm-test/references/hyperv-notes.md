@@ -166,6 +166,100 @@ the guest. `Get-GuestProcessorLoad` averages it over all of the VM's processors.
 it worked without elevation for an account in both "Hyper-V Administrators" and
 "Performance Log Users"; which of the two it needs was not tested.
 
+## What a run costs
+
+Measured on one project's rig, before any speed work: a full pass took 95 to 102 minutes.
+Nothing here is a Microsoft figure, and another rig will differ; time yours first.
+
+| Cost | Measured |
+|---|---|
+| Fixed sleeps | about 42 minutes of the pass. 17 of them were a fixed 12 to 25 s wait after each of about 64 app starts; the pages were drawn in under a second |
+| One guest command, no sleep at all | 3 to 4 s: a new PowerShell Direct session, a scheduled task registered so the script runs on the desktop, Windows PowerShell 5.1 starting, a 500 ms poll for the output. About 500 commands per pass: 20 to 30 minutes |
+| Helpers that compile C# with `Add-Type` | the same code compiled again on every call |
+| Graphics driver copy at every `-Gpu` run | 3.5 to 8 minutes: the host's 2 GB driver copied in and the guest restarted, because the checkpoint held an older driver. Retaking the checkpoint once took 6 minutes |
+| A release day with five passes | 5 to 7 minutes of setup repeated by each |
+| Durations | none recorded: a start time per case and no end, no total; slow spots were found by watching the film |
+
+A screenshot costs 0.06 s at 960x540 (see "Screenshots and film"), so the host can watch
+the screen cheaply, even when the guest is too busy to answer a command.
+
+### After the speed work
+
+Measured on the same project's rig, after waits on conditions, the guest helper, the
+shared session, one-time compiles and a current checkpoint, with unchanged results (each
+case judged as before). One pass, without the cases that need a login or the real
+third-party servers:
+
+| | Before | After |
+|---|---|---|
+| Full pass, first step to end | 95.4 min | 41.2 min |
+| Setup before the film starts | 6.1 min | 1.2 min |
+
+- **One guest call**, by path: a script as its own scheduled task about 2 s (3 to 4 s in
+  the earlier measurement, with a 500 ms poll); a script through the helper about 1 s; a
+  rig instrument in the helper's own process, median 0.11 s; a call in the shared session
+  with nothing to start, about 1 s on average (a mean over 251 calls that includes copies
+  and log reads). Starting the helper took 14 s over its three starts in the pass.
+- **What was left in the pass of 41 minutes**: 119 deliberate holds (276 s together), 301
+  waits (505 s together), two of which reached their deadline (70 s and 135 s). The rest
+  is the cases' own work.
+- A guest too busy to answer stalls a call for its timeout plus 60 s; that shows in
+  `logs\timing.md` as a wait of that length.
+- The pass has no fixed sleep left. A pause stays only where it is the test: a watch after
+  a restart that nothing starts by itself, an app started and left alone, a pointer resting
+  on a button before the press.
+
+### The guest helper
+
+One helper process replaces a scheduled task per command. It is `guest\agent.ps1`, started
+once per guest start as the scheduled task `vmtest-agent`, with no logon trigger: nothing
+may start by itself at boot, or a case that watches for that would see it.
+
+- **Transport.** One persistent PowerShell Direct session carries a script into a file
+  queue in the guest. The helper runs in the logged-in desktop session (session 1),
+  started once. It picks a queued script up, runs it, and writes its output and exit code
+  to a file the host reads over the same session.
+- **Two ways a script runs.**
+  - *Fresh process*, the default: each script is its own process with a fresh
+    environment, as the scheduled task gave. The `PATH` an install changed is visible to a
+    new process only, and cases test exactly that. The helper starts the script's
+    `powershell.exe` with the user's environment block as Windows builds it for a new logon,
+    in a job object. The script's child processes die when it has to be stopped (a
+    timeout), as `Stop-ScheduledTask` made them. A script that ends by itself leaves its
+    children alone, as a finished task does: an uninstaller can return at once and go on
+    deleting its folder from a copy of itself, and a job that killed the copy left the
+    uninstaller's file behind.
+  - *In process*: rig instruments that read and start nothing (window position, log reads,
+    process waits) run in a new runspace of the helper (`Invoke-GuestScript -InProcess`).
+    They see the helper's environment, not a fresh one. Do not run a case's own code this
+    way. A runspace that will not stop ends the helper; the host starts a new one.
+- **Fallback.** The script goes through the scheduled-task path
+  (`Invoke-GuestScriptByTask`), and the fallback is logged, when the helper cannot be
+  started (that is remembered for a minute), when it is quiet for 5 s and never took the
+  request (the host cancels it by renaming its file), or when it reports that it could not
+  start the script. Never run a script twice: a request the helper took is not sent again,
+  and a call that is made again after a broken session finds its request files and does
+  not write them a second time. A helper that took a request and then went silent for 15 s
+  is dropped and the call returns as failed, not run again. A switch (`-NoGuestAgent`)
+  forces the old path. It is the A/B baseline and tells a rig failure from an app failure.
+- **Compile once.** The C# of the window functions is compiled a single time, in memory,
+  when the helper starts; a fresh process on the fallback path compiles it once per call.
+  It is never written to disk as a DLL.
+- **No exclusions.** Add no Defender or other security exclusion for the helper: the guest
+  stays as Windows ships it.
+- **Logs.** Log when each command ended and how long it took, never the script text, which
+  can hold a token.
+- **Not through the helper.** `-Background` scripts (they are children of the PowerShell
+  Direct session and need its fresh environment), `Start-GuestExe` (the app must not live
+  in the helper's job) and anything that asks UI Automation.
+
+### Setup that repeats
+
+A checkpoint that needs the same fix-up at the start of every run (a driver copy, an
+update, an install) costs it every time. Retake the checkpoint once, and keep the old one
+under a dated name until the user says it can go. Send what the run needs as one archive
+at setup, not a file per case.
+
 ## Graphics card in the guest
 
 A guest made by `provision.ps1` has one display adapter, "Microsoft Hyper-V Video". It

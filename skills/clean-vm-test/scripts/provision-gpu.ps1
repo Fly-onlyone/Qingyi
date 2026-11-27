@@ -86,8 +86,14 @@ Checkpoint-VM -Name $VmName -SnapshotName $Snapshot
 Enable-GuestGpu
 Start-Guest
 Wait-Guest -TimeoutSec 900
-Start-Sleep -Seconds 30
-$adapters = @(Get-GuestDisplayAdapters)
+# Windows starts the card a little after the desktop is up: ask until an adapter
+# other than "Microsoft Hyper-V Video" reports problem code 0. The old fixed
+# 30 s is the deadline; the checks below judge what is there either way.
+$adapters = @()
+[void](Wait-Until -What "the graphics card reports problem code 0" -TimeoutSec 30 -IntervalMs 2000 {
+        $script:adapters = @(Get-GuestDisplayAdapters)
+        @($script:adapters | Where-Object { $_ -notmatch "Hyper-V Video" -and $_ -match "problem code 0$" })
+    })
 $adapters
 $screen = Test-GuestDisplay
 Stop-Guest

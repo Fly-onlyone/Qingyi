@@ -8,7 +8,8 @@ description: >-
   sleeps", or wants screenshots or a screen recording of a Windows app running in a
   guest. Also use when a Windows app works on the development machine and nothing
   proves it installs and starts where the compiler, runtime libraries, git and a
-  graphics card are missing. Windows host with Hyper-V.
+  graphics card are missing, or when the guest test is too slow ("the VM test is too
+  slow", "speed up the guest test"). Windows host with Hyper-V.
 ---
 
 # Clean VM Test
@@ -61,6 +62,7 @@ Get-VMSnapshot -VMName * | Select-Object VMName, Name
    Every run restores `clean` first.
    With `-Gpu` it restores `clean-gpu` and attaches the card. Run both passes when the
    app draws with Direct3D: they are two different user machines.
+   Keep the run short and timed: see "Keep the run fast" below.
 5. **Read every screenshot** the run saved. The script judges exit codes, files and
    processes. Only a reader can tell that a page is blank.
 6. **Write the report as a Claude Artifact**, summary first, as
@@ -153,15 +155,20 @@ refuses a checkpoint; then run the case in the pass without the card and say so 
 This case has not yet run on a real guest. After its first run, write what happened into
 `references/hyperv-notes.md`.
 
+The same goes for the bundled `scripts\test-template.ps1` and `Vm.ps1` as they are now: their
+waiting, timing and helper functions were proven in a project's rig that shares this code, and
+the template itself has not been run since the port. Run it on a few cases with `-Only` first.
+
 ## Helpers in `Vm.ps1`
 
 | Function | Does |
 |---|---|
-| `Initialize-Vm -Name -User -Password` | call once after dot-sourcing |
+| `Initialize-Vm -Name -User -Password [-NoAgent]` | call once after dot-sourcing; `-NoAgent` runs every guest script the old way |
+| `Initialize-Timing -Path -Pace` | call once after it: the timing log's path and the factor `-Pace` stands for |
 | `Restore-Guest`, `Start-Guest`, `Wait-Guest`, `Stop-Guest`, `Restart-Guest` | checkpoint and power; `Wait-Guest` returns at the logged-in desktop |
 | `Copy-ToGuest -Path -GuestDirectory [-MarkDownloaded]` | file or folder in, unpacked as the guest user; `-MarkDownloaded` marks it as a browser download |
 | `Copy-FromGuest -GuestPath -Destination` | file or folder out |
-| `Invoke-GuestScript -Script` | PowerShell 5.1 code on the user's desktop; returns `Output`, `ExitCode`, `Completed` |
+| `Invoke-GuestScript -Script` | PowerShell 5.1 code on the user's desktop; returns `Output`, `ExitCode`, `Completed`. `-InProcess` runs a rig instrument that reads and starts nothing (window position, log read, process wait) in a runspace of the guest helper instead of a fresh process; it sees the helper's environment, not a fresh one |
 | `Invoke-GuestExe -Exe -Arguments` | one program; returns `ExitCode`, `Stdout`, `Stderr` |
 | `Start-GuestExe -Exe -Arguments` | a window program, not waited for |
 | `Show-GuestWindow -ProcessName` | waits for the window, gives it the keyboard focus, returns its position |
@@ -169,6 +176,13 @@ This case has not yet run on a real guest. After its first run, write what happe
 | `Send-Keys "ctrl+k", "enter"`, `Send-Text "words"` | real key presses |
 | `Send-Click -X -Y`, `Send-Scroll` | real mouse input, in screen pixels |
 | `Get-GuestProcessorLoad`, `Wait-GuestIdle` | how busy the guest is, measured by the host |
+| `Wait-Until -What -TimeoutSec { condition }` | polls the condition (`-IntervalMs`, default 250); returns its value, or `$null` at the deadline, when the run goes on (`-Throw` throws instead); logs the wait, and whether it hit its deadline |
+| `Hold-For -Seconds -Reason [-Exact]` | a deliberate pause that is part of a test; logged and named; `-Exact` is not stretched by `-Pace` |
+| `Wait-ScreenChange -TimeoutSec [-Since frame]`, `Wait-ScreenStill -TimeoutSec [-QuietMs -MinSec]`, `Wait-ScreenSettled -TimeoutSec` | watch the guest's thumbnail from the host (`Get-ScreenFrame` takes the frame for `-Since`). Both take a `-Region` (left, top, right, bottom in thumbnail pixels, 480x270) and a `-Tolerance`: the share of pixels that may differ, 0.005, or 0.05 when `$script:Vm.Gpu` is set, because an animated backdrop never stands still. `Wait-ScreenSettled` is the usual wait after an input: it lets 40 percent of the deadline pass, then waits for stillness. They return a value only with `-PassThru` |
+| `Wait-GuestProcessGone -Name -TimeoutSec` | waits until no process of that name (or names) runs in the guest; returns how many were left (`$null`: the guest did not answer) |
+| `Measure-Step "name" { block }` | runs the block and logs how long it took, for the setup steps |
+| `Start-GuestAgent`, `Stop-GuestAgent` | start or end the guest helper; `Invoke-GuestScript` starts it by itself, and `Start-Guest`, `Stop-Guest` and `Restore-Guest` forget it |
+| `Write-TimingSummary -Report [-Previous]` | writes `logs\timing.md` from `logs\timing.jsonl` |
 | `Enable-GuestGpu`, `Disable-GuestGpu` | attach the host's graphics card after a restore, or remove it; the VM must be off |
 | `Test-GuestGpuDriver`, `Test-GuestDisplay`, `Get-GuestDisplayAdapters` | check the driver copy, the screen, and the adapters Windows started |
 | `Update-GuestWindows`, `Get-GuestBuild` | install the monthly Windows update in the guest |
@@ -176,6 +190,32 @@ This case has not yet run on a real guest. After its first run, write what happe
 
 `-Background` on the two `Invoke-` functions runs elevated and without a desktop. Keep
 it for housekeeping.
+
+`-NoGuestAgent` (a switch of the test script, passed on as `Initialize-Vm -NoAgent`) forces
+the old way, one scheduled task per guest command. Use it as the A/B baseline, and to tell a
+rig failure from an app failure. The test script's other switches for this: `-Only <ids>`,
+`-Skip <patterns>`, `-Pace`, `-Previous <report folder>`.
+
+## Keep the run fast
+
+A full pass is long, and most of the time is waiting the rig chose, not waiting the app
+needs. Measured costs and mechanisms: `references/hyperv-notes.md`, "What a run costs".
+
+| Rule | Do |
+|---|---|
+| **Wait for a condition, not a time** | Never sleep a fixed time for what the rig can observe. `Wait-Until -What "<what>" -TimeoutSec n { condition }`; the old fixed time is a good deadline. At the deadline the script goes on, as the sleep did, and the case's own checks judge. The timing summary lists it as "hit its deadline", so a slow page shows up as a number |
+| **Observe, cheapest first** | The VM's state and the guest's load (host). The screen changing or standing still (host thumbnail; `Wait-ScreenChange`, `Wait-ScreenStill`). A process, window, file, log line or HTTP answer (guest). UI Automation cannot read every window (a GPU-drawn one, for instance) |
+| **Have the app say when a page is drawn** | When the app is yours: one log line after the frame that shows the page with its data, naming the kind of page and never user content. The project's rig waits for it (a `Wait-AppPage`-style helper that reads the log from a line mark taken before the action). With no such line, wait for the screen to stand still |
+| **A deliberate pause is a test** | Keep it and mark it: `Hold-For -Seconds n -Reason "<why>"`, never a bare sleep. Examples: the pointer resting on a button before a click, an app started and left alone, an idle-load window, a check that something does NOT happen, input pacing that was measured as needed. A speed pass leaves every `Hold-For` alone |
+| **One helper, not a task per guest command** | One helper process in the logged-in desktop session, fed scripts through a file queue over one persistent PowerShell Direct session. Each script still runs as a fresh process with a fresh environment, and its children die with it. A script that ends by itself leaves its children alone, as a scheduled task did; one that times out takes them with it. Fall back to the scheduled-task path when the helper cannot start or never takes the request, or says it did not start the script; a request the helper took is never run a second time |
+| **Keep the checkpoint current** | A checkpoint that needs the same fix-up at the start of every run (a driver copy, an update, an install) is retaken once. Keep the old one under a dated name until the user says it can go |
+| **Copy once** | Send what the run needs as one archive at setup, not a file per case |
+| **Time everything** | `logs\timing.jsonl` holds one line for every case, step, wait, hold and guest call: when it ended, how many seconds it took, the case it ran in, and for a wait its deadline and whether it was met. `results.json` gives each case `started`, `ended`, `seconds`. `Write-TimingSummary` writes `logs\timing.md`: total, time before the film starts, slowest cases and waits, time by kind, waits that hit their deadline, fallbacks taken, guest calls by lane, difference to the previous run. Never log script text; it can hold a token |
+| **The film stays real-time and uncut** | Do not cut still stretches: a real hang must stay visible, and the report's seek buttons depend on the film's clock |
+| **Prove a rig change on a subset first** | A few cases with `-Only` (after the usual setup) take minutes; a full pass takes an hour. Compare each case's status with the last full run. Run the full pass once, at the end |
+| **`-Pace`** | The template's switch that multiplies waits. It scales deadlines and deliberate pauses (`Hold-For`, unless it has `-Exact`), never poll intervals |
+
+The helper's design and its fallback rules are in `references/hyperv-notes.md`.
 
 ## Rules
 
@@ -233,15 +273,23 @@ it for housekeeping.
 | Copying files with `Copy-Item -ToSession` from a cloud-synced folder | "Cannot convert value 524320 to FileAttributes" | `Copy-ToGuest` (sends a zip) |
 | Marking a page case passed because the window exists | a blank page passes | read the screenshot |
 | Trusting a click position after the layout changed | the click lands elsewhere | take a screenshot, read the position again |
+| A fixed wait after every action | most of it is idle; one project lost 42 of 100 minutes to sleeps, while pages drew in under a second | `Wait-Until` with the old time as the deadline |
+| A new scheduled task per guest command | 3 to 4 s each before the command runs; about 500 commands is 20 to 30 minutes | the one guest helper |
+| Fixing up the checkpoint at the start of every run | the same 3 to 8 minutes of setup, every pass | retake the checkpoint once; keep the old one under a dated name |
+| Cutting the still stretches out of the film | a real hang disappears and the seek buttons point at the wrong time | keep the film real-time and uncut |
+| Logging no durations | slow spots are found only by watching the film | `logs\timing.jsonl`, `Write-TimingSummary`, durations in the report |
+| Removing a pause because it looks like a sleep | a dead button or a late redraw goes unseen | a `Hold-For` with a reason stays; a speed pass touches bare sleeps only |
+| Proving a rig change with a full pass | an hour per try | `-Only` on a few cases, then one full pass |
 
 ## Additional Resources
 
 - **`references/hyperv-notes.md`**: links to Microsoft's page for every interface used,
   and beside each what that page does not say: rights, the two places to run code in
   the guest, typing, screenshot format, unattended install, memory, the graphics card,
-  and what to do without Hyper-V.
+  and what to do without Hyper-V. Also what a run costs, and how the guest helper works.
 - **`references/report-template.md`**: report layout, verdicts, severities, embedding
   screenshots and the recording, and the Artifact size limits.
 - **`scripts/`**: `Vm.ps1`, `record.ps1`, `provision.ps1`, `provision-gpu.ps1`,
-  `autounattend.xml`, `guest/update-windows.ps1`, `test-template.ps1`. Run them with
+  `autounattend.xml`, `guest/update-windows.ps1`, `guest/agent.ps1` (the guest helper),
+  `test-template.ps1`. Run them with
   `pwsh`, never by bare path.

@@ -9,10 +9,19 @@
 # Every run starts from the VM's "clean" checkpoint (see provision.ps1).
 # Results go to report\vm-test-<date>\: screenshots\, recording\session.mp4
 # with session.start.txt (when the film began; each result in results.json has
-# a started time), logs\results.json, logs\facts-*.json and logs\run.log, a transcript of
-# everything the run prints. The script decides only what a program can decide
-# (exit codes, files, processes). Whether a page was drawn correctly is for
-# whoever reads the screenshots.
+# started, ended and seconds), logs\results.json, logs\facts-*.json,
+# logs\timing.jsonl and logs\timing.md (what took the time), and logs\run.log, a
+# transcript of everything the run prints. The script decides only what a
+# program can decide (exit codes, files, processes). Whether a page was drawn
+# correctly is for whoever reads the screenshots.
+#
+# This script has no fixed sleep. A step waits for what it needs (Wait-Until,
+# Wait-ScreenChange, Wait-ScreenStill, Wait-ScreenSettled, Wait-GuestProcessGone),
+# with the time a sleep used to have as its deadline: at the deadline the case
+# goes on and its own checks judge, and logs\timing.md lists the wait as one that
+# hit its deadline. A pause that is itself a test is Hold-For with its reason.
+# The helpers are in Vm.ps1. They were proven in a project's rig that shares
+# this code; this template itself has not been run since it was ported.
 param(
     [string]$VmName = "Software Tester",
     # Package to test. Default: the newest match of $app.Package in dist\.
@@ -27,12 +36,31 @@ param(
     [switch]$Gpu,
     # Leave the VM running at the end, for a look by hand.
     [switch]$KeepRunning,
-    # Multiplies every wait; raise it on a slow host.
-    [double]$Pace = 1.0
+    # Multiplies every deadline and every Hold-For; raise it on a slow host. It
+    # never changes how often a wait polls.
+    [double]$Pace = 1.0,
+    # Run only these cases (their IDs), after the usual setup of the guest. For
+    # a case that can stand alone; most cases build on the ones before them.
+    # Use it to prove a change to this script on a few cases before a full pass.
+    [string[]]$Only,
+    # Leave these cases out (their IDs; wildcards allowed, as "G*").
+    [string[]]$Skip,
+    # The report folder of an earlier run: logs\timing.md then compares this
+    # run's total, setup and cases with it.
+    [string]$Previous,
+    # Run every guest script the old way, as a scheduled task of its own, and
+    # not through the helper in the guest (guest\agent.ps1). For telling a fault
+    # of the helper from a fault of the app, and as the baseline when timing it.
+    [switch]$NoGuestAgent
 )
 $ErrorActionPreference = "Stop"
+# "pwsh -File ... -Only A1,C1" hands the list over as one text.
+if ($Only) { $Only = @($Only | ForEach-Object { $_ -split "," } | ForEach-Object { $_.Trim() } | Where-Object { $_ }) }
+if ($Skip) { $Skip = @($Skip | ForEach-Object { $_ -split "," } | ForEach-Object { $_.Trim() } | Where-Object { $_ }) }
 . (Join-Path $PSScriptRoot "Vm.ps1")
-Initialize-Vm -Name $VmName -User $User -Password $Password
+Initialize-Vm -Name $VmName -User $User -Password $Password -NoAgent:$NoGuestAgent
+# Widens the screen compare's tolerance: with a graphics card the backdrop drifts.
+$script:Vm.Gpu = [bool]$Gpu
 
 # ---------------------------------------------------------------- settings
 $guestHome = "C:\Users\$User"
@@ -80,6 +108,9 @@ $Report = (Resolve-Path $Report).Path
 # Evidence of an earlier run into the same folder would mix with this one's.
 Get-ChildItem $shots -Filter "*.png" | Remove-Item -Force
 Get-ChildItem $logs -Filter "facts-*.json" | Remove-Item -Force
+Remove-Item (Join-Path $logs "timing.md") -Force -ErrorAction SilentlyContinue
+# What takes the time, event by event (Write-Timing in Vm.ps1); summarized at the end.
+Initialize-Timing -Path (Join-Path $logs "timing.jsonl") -Pace $Pace
 # Everything this run prints, for the report and for following a background run.
 Start-Transcript -Path (Join-Path $logs "run.log") -Force | Out-Null
 $guestUnpacked = "$guestHome\Downloads\$($app.Name)"
@@ -87,8 +118,6 @@ $guestUnpacked = "$guestHome\Downloads\$($app.Name)"
 # ---------------------------------------------------------------- harness
 $results = [System.Collections.Generic.List[object]]::new()
 $shotCount = 0
-
-function Wait-For { param([double]$Seconds) Start-Sleep -Milliseconds ([int]($Seconds * 1000 * $Pace)) }
 
 # Take a screenshot named after the case and return its file name.
 function Shot {
@@ -107,22 +136,34 @@ function Add-Result {
         [ValidateSet("pass", "fail", "note", "error")][string]$Status,
         [string]$Observed, [string[]]$Shots = @(), [string]$Output = ""
     )
-    # When the case began, so the report can jump the recording to it
-    # (recording\session.start.txt holds when the film began).
-    $started = if ($script:caseStarted) { $script:caseStarted } else { Get-Date }
     $results.Add([pscustomobject]@{
             id = $Id; title = $Title; expect = $Expect; status = $Status
             observed = $Observed; screenshots = $Shots; output = $Output
-            started = $started.ToString("o")
         })
     "{0,-5} {1,-4} {2}" -f $Status, $Id, $Observed
-    $results | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $logs "results.json")
+    Save-Results
+}
+
+# Written to a file beside it first and moved over, so that a reader who
+# follows the run through results.json never sees half of it.
+function Save-Results {
+    $file = Join-Path $logs "results.json"
+    $results | ConvertTo-Json -Depth 5 | Set-Content "$file.tmp"
+    Move-Item "$file.tmp" $file -Force
 }
 
 # Run one case; a thrown error becomes an "error" result and the run goes on.
+# Every result the case added gets started (so the report can jump the
+# recording to it: recording\session.start.txt holds when the film began),
+# ended and seconds. -Only and -Skip leave a case out.
 function Test-Case {
     param([string]$Id, [string]$Title, [string]$Expect, [scriptblock]$Body)
-    $script:caseStarted = Get-Date
+    if ($Only -and $Only -notcontains $Id) { return }
+    if ($Skip | Where-Object { $Id -like $_ }) { return }
+    $first = $results.Count
+    $began = Get-Date
+    $clock = [System.Diagnostics.Stopwatch]::StartNew()
+    $script:Timing.Case = $Id
     try {
         & $Body
     } catch {
@@ -130,7 +171,15 @@ function Test-Case {
         Add-Result -Id $Id -Title $Title -Expect $Expect -Status error `
             -Observed "the harness failed: $($_.Exception.Message)" -Shots @($shot | Where-Object { $_ })
     } finally {
-        $script:caseStarted = $null
+        $seconds = [math]::Round($clock.Elapsed.TotalSeconds, 1)
+        for ($i = $first; $i -lt $results.Count; $i++) {
+            $results[$i] | Add-Member -NotePropertyName started -NotePropertyValue $began.ToString("o") -Force
+            $results[$i] | Add-Member -NotePropertyName ended -NotePropertyValue (Get-Date).ToString("o") -Force
+            $results[$i] | Add-Member -NotePropertyName seconds -NotePropertyValue $seconds -Force
+        }
+        if ($results.Count -gt $first) { Save-Results }
+        Write-Timing -Kind case -What $Id -Sec $seconds
+        $script:Timing.Case = ""
     }
 }
 
@@ -168,12 +217,26 @@ function Get-Facts {
 # Open the Start menu, type the app's name and press Enter, as a user does.
 function Start-FromStartMenu {
     Send-Keys "win"
-    Wait-For 4
+    Wait-ScreenSettled -TimeoutSec 4 -MinSec 1 -What "the Start menu opens"
     Send-Text $app.Name
-    Wait-For 6
+    Wait-ScreenSettled -TimeoutSec 6 -MinSec 2 -QuietMs 800 -What "the Start menu lists the app"
     $found = Shot "start-menu-search"
+    $before = Get-ScreenFrame
+    $clock = [System.Diagnostics.Stopwatch]::StartNew()
     Send-Keys "enter"
-    Wait-For 20
+    # The old fixed wait was 20 s; that stays the deadline for both steps. This
+    # watches the host's thumbnail, not the guest: a guest that the app keeps too
+    # busy to answer (see P1) still shows its window, and no input is sent.
+    # The window opens: the screen differs from what it showed before Enter.
+    Wait-ScreenChange -TimeoutSec 20 -Since $before -What "the app's window opens"
+    # The page is drawn: the screen stands still. A project whose app writes a
+    # ready line to its log would wait for that line here instead: take a line
+    # mark of the log in the guest before the Enter above, then poll the log from
+    # that mark in one guest-side loop (a 200 ms poll, the old 20 s as its
+    # deadline) and log it with Write-Timing -Kind wait. A wait for a window of
+    # a given process is Show-GuestWindow, which also clicks the window.
+    $left = [math]::Max(2, 20 - $clock.Elapsed.TotalSeconds / $Pace)
+    Wait-ScreenStill -TimeoutSec $left -MinSec 1 -QuietMs 1500 -What "the app's page is drawn (the screen stands still)"
     $found
 }
 
@@ -184,14 +247,18 @@ $starved = $false
 
 # Close the app without asking the guest, and wait until the guest answers again.
 function Close-AppByKeyboard {
+    $before = Get-ScreenFrame
     Send-Keys "alt+f4"
-    Wait-For 5
+    # The window goes: the screen changes. Not a question to the guest, which may
+    # be too busy to answer. The old fixed wait, 5 s, is the deadline.
+    Wait-ScreenChange -TimeoutSec 5 -Since $before -What "the app's window closes"
     Wait-Guest -TimeoutSec 300
 }
 
 function Stop-App {
     Invoke-GuestScript -Script "Get-Process '$($app.Process)' -ErrorAction SilentlyContinue | Stop-Process -Force" | Out-Null
-    Wait-For 2
+    # The old fixed wait, 2 s, is the deadline.
+    [void](Wait-GuestProcessGone -Name $app.Process -TimeoutSec 2 -What "the app's processes end")
 }
 
 # Run an install command in the unpacked folder and say whether the app is there.
@@ -226,20 +293,28 @@ if ($Gpu -and -not $PSBoundParameters.ContainsKey("Snapshot")) { $Snapshot = "cl
 # The finally block at the end runs also when the run stops early, so that no
 # recorder and no guest is left running.
 try {
-    Restore-Guest -Snapshot $Snapshot
+    Measure-Step "restore checkpoint" { Restore-Guest -Snapshot $Snapshot }
     # A checkpoint does not keep the card, so it is attached after every restore.
     if ($Gpu) { Enable-GuestGpu }
-    Start-Guest
-    Wait-Guest -TimeoutSec 900
-    if ($Gpu) {
-        $driver = Test-GuestGpuDriver
-        if (-not $driver.Match) { throw "the guest holds the graphics driver '$($driver.GuestDrivers -join ', ')' and the host now has '$($driver.HostDriver)'; run provision-gpu.ps1 -Force" }
-        if (-not (Test-GuestDisplay)) { throw "the guest's desktop has no screen with the graphics card attached; see Test-GuestDisplay in Vm.ps1" }
+    Measure-Step "start guest and wait for the desktop" {
+        Start-Guest
+        Wait-Guest -TimeoutSec 900
     }
-    Wait-For 30
+    if ($Gpu) {
+        $driver = Measure-Step "check the graphics driver" { Test-GuestGpuDriver }
+        if (-not $driver.Match) { throw "the guest holds the graphics driver '$($driver.GuestDrivers -join ', ')' and the host now has '$($driver.HostDriver)'; run provision-gpu.ps1 -Force" }
+        if (-not (Measure-Step "check the guest's display" { Test-GuestDisplay })) { throw "the guest's desktop has no screen with the graphics card attached; see Test-GuestDisplay in Vm.ps1" }
+    }
+    # Right after the sign-in Windows is busy by itself for a while; the film
+    # and the first measurements should not start in the middle of it. The old
+    # fixed 30 s is the deadline.
+    Measure-Step "wait for the guest to be quiet" {
+        $quiet = Wait-GuestIdle -BelowPercent 20 -TimeoutSec (30 * $Pace)
+        Write-Timing -Kind wait -What "the guest's processors are quiet before the film" -Sec 0 -Deadline (30 * $Pace) -Met ($quiet -lt 20)
+    }
     Start-Recording -Path (Join-Path $Report "recording\session.mp4") | Out-Null
     # Marked as downloaded from the internet, as a browser marks it.
-    Copy-ToGuest -Path $Zip -GuestDirectory "$guestHome\Downloads" -MarkDownloaded
+    Measure-Step "copy the package" { Copy-ToGuest -Path $Zip -GuestDirectory "$guestHome\Downloads" -MarkDownloaded }
     $guestZip = "$guestHome\Downloads\$(Split-Path -Leaf $Zip)"
 
     Test-Case "B1" "Guest before install" "recorded only" {
@@ -307,7 +382,11 @@ try {
     Test-Case "P1" "Idle processor use" "an idle window leaves the processors idle" {
         # Measured by the host. A guest has no graphics processor, and an app that
         # animates there can keep every core busy and the guest too busy to answer.
+        # The 20 s are the measurement itself, not a wait: a shorter window
+        # would average out an app that animates now and then. Logged as a hold.
+        $window20 = [System.Diagnostics.Stopwatch]::StartNew()
         $load = Get-GuestProcessorLoad -Seconds 20
+        Write-Timing -Kind hold -What "P1: the idle app's processor load is measured over 20 s" -Sec $window20.Elapsed.TotalSeconds -Deadline 20
         $script:starved = $load -ge 90
         # Which Direct3D driver the app loaded: d3d10warp.dll draws on the
         # processor, a vendor's DLL (nv*, ati*, amd*, ig*) on a graphics card.
@@ -332,10 +411,15 @@ try {
         # Start menu launch gave the window the focus anyway.
         if (-not $starved) { $script:window = Show-GuestWindow -ProcessName $app.Process }
         $a = Shot "keys-before"
-        Send-Keys "ctrl+k"; Wait-For 2
+        # Each wait ends when the screen has reacted and stands still; the old
+        # fixed time (2, 2 and 4 s) is its deadline.
+        Send-Keys "ctrl+k"
+        Wait-ScreenSettled -TimeoutSec 2 -What "the shortcut is answered"
         $b = Shot "keys-after-shortcut"
-        Send-Text "settings"; Wait-For 2
-        Send-Keys "enter"; Wait-For 4
+        Send-Text "settings"
+        Wait-ScreenSettled -TimeoutSec 2 -What "the typed text is shown"
+        Send-Keys "enter"
+        Wait-ScreenSettled -TimeoutSec 4 -What "Enter is answered"
         $c = Shot "keys-after-enter"
         Add-Result -Id "G1" -Title "Keyboard" -Expect "the documented shortcut works" -Status note -Shots @($a, $b, $c) `
             -Observed "keys sent: Ctrl+K, 'settings', Enter; read the screenshots"
@@ -347,7 +431,8 @@ try {
         # keeps the click right when the window opens somewhere else.
         if (-not $window) { throw "no window position to measure from: the guest was too busy to give one (see P1)" }
         $x = $window.Right - 40; $y = $window.Top + 60
-        Send-Click -X $x -Y $y; Wait-For 3
+        Send-Click -X $x -Y $y
+        Wait-ScreenSettled -TimeoutSec 3 -What "the click is answered"
         Add-Result -Id "N1" -Title "Mouse" -Expect "a click on a control presses it" -Status note -Shots @(Shot "after-click") `
             -Observed "clicked ($x,$y); read the screenshot"
     }
@@ -364,7 +449,9 @@ try {
     Test-Case "I1" "Restart Windows" "nothing of the app starts by itself; it starts again from the Start menu" {
         Restart-Guest
         Wait-Guest -TimeoutSec 900
-        Wait-For 40
+        # The watch is the test: that nothing starts by itself shows only in a
+        # window of this length in which the guest is looked at. Not shortened.
+        Hold-For 40 -Reason "I1: nothing of the app may start by itself after a restart, which only a window of this length that is watched can show"
         $a = Shot "after-restart"
         $facts = Get-Facts "after-restart"
         $search = Start-FromStartMenu
@@ -395,7 +482,14 @@ try {
             $line = "& cmd.exe /c '$command'"
         }
         $run = Invoke-GuestScript -TimeoutSec 600 -Script "$line 2>&1; `"uninstall exit: `$LASTEXITCODE`"; `$global:LASTEXITCODE = 0"
-        Wait-For 3
+        # An uninstaller may return while a copy of itself goes on deleting. Wait
+        # until no process of the app runs and the install folder is gone; the old
+        # fixed 3 s is the deadline (a folder the uninstall leaves behind, which
+        # the case reports, holds this to it).
+        [void](Wait-Until -What "the app's processes and install folder are gone" -TimeoutSec 3 -IntervalMs 500 {
+                $check = Invoke-GuestScript -InProcess -TimeoutSec 30 -Script "`"left=`$(@(Get-Process '$($app.Process)*' -ErrorAction SilentlyContinue).Count + [int](Test-Path '$($app.Target)'))`""
+                $check.Output -match 'left=0'
+            })
         $facts = Get-Facts "uninstalled"
         $problems = @()
         if ($run.Output -notmatch "uninstall exit: 0") { $problems += "the uninstall command failed" }
@@ -416,12 +510,16 @@ try {
 } finally {
     # ------------------------------------------------------------ wrap up
     Stop-Recording
-    if (-not $KeepRunning) { Stop-Guest }
+    if (-not $KeepRunning) { Stop-Guest } else { Stop-GuestAgent }
 }
 Get-VM -Name $VmName | Select-Object Name, Generation, ProcessorCount, @{ n = "MemoryMb"; e = { $_.MemoryStartup / 1MB } }, Version |
     ConvertTo-Json | Set-Content (Join-Path $logs "vm.json")
 
+Write-TimingSummary -Report $Report -Previous $Previous
+$total = Get-TimingTotal (Read-TimingLog $Report)
+if ($total) { "total: {0:n1} min ({1} min of setup before the film); timing in {2}" -f $total.Total, $(if ($null -ne $total.Setup) { "{0:n1}" -f $total.Setup } else { "n/a" }), (Join-Path $logs "timing.md") }
+
 $counts = $results | Group-Object status | ForEach-Object { "$($_.Count) $($_.Name)" }
 "done: $($counts -join ', '); evidence in $Report"
-"next: read every screenshot, then write report.md"
+"next: read every screenshot, then write the report (the clean-vm-test skill says how)"
 Stop-Transcript | Out-Null

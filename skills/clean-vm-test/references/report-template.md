@@ -12,7 +12,7 @@ report\
     report.html                    the page source that was published
     screenshots\NN-<case>.png
     recording\session.mp4, session.start.txt
-    logs\results.json, run.log, facts-*.json, vm.json
+    logs\results.json, timing.jsonl, timing.md, run.log, facts-*.json, vm.json
 ```
 
 ## Sections, in this order
@@ -20,7 +20,11 @@ report\
 1. **Summary.** What was tested (package name, version, commit), where (guest Windows
    build, VM size, hypervisor), the counts, and the verdict in two or three sentences. A
    reader who stops here knows whether the package can ship. Show the counts as a row
-   of verdict tiles.
+   of verdict tiles. State how long the run took (total, and the setup before the film
+   started), and carry a "Slowest steps" table (the ten slowest cases, steps and waits,
+   with seconds) and a "Waits that hit their deadline" list (what was waited for, the
+   deadline, the case). A wait that hit its deadline is a slow page or a missing signal,
+   not a verdict. Paste or link the timing summary, `logs\timing.md`.
 2. **Findings.** One table: number, severity, one-line statement, state (open, fixed in
    this run, not a defect). Worst first. Each row links to its section.
 3. **One section per finding.** What a user sees, how it was reproduced, the evidence
@@ -78,9 +82,11 @@ description as `alt` text and a caption, and link the image to itself for full s
 
 ## Recording
 
-`logs\results.json` gives each case a `started` time, and `recording\session.start.txt`
-holds the time of the film's first picture. A case's position in the film is the
-difference in seconds. Cases that ran before the recording started (A1) have none.
+`logs\results.json` gives each case `started`, `ended` and `seconds`, and
+`recording\session.start.txt` holds the time of the film's first picture. A case's
+position in the film is the difference in seconds. Cases that ran before the recording
+started (A1) have none. Show each case's `seconds` beside its name. The film is real-time
+and uncut, so these positions hold; do not cut still stretches out of it.
 
 Embed one `<video controls preload="metadata">` of the recording, and give each case a
 button that seeks it:
