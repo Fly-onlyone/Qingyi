@@ -44,6 +44,7 @@ Ask them in rounds with `AskUserQuestion`, each with a recommended answer. Look 
 | Anything that uses the user's accounts in the guest (a login, a token) | ask every time |
 | A defect found by the guest test or CI | fix, rerun, tag only when clean |
 | Guest scope | new cases for new features, update from the previous version, a run against the published release |
+| Guest run's scope: which suites and passes may shrink | as the project's facts say; each part skipped is named in the report with the reason |
 | Docs | the files the facts name |
 | Power action at the end | none, unless the user names one (section 10) |
 | Power action when no release came out | none, unless the user says it runs either way |
@@ -81,8 +82,13 @@ A worktree is finished when its session says so, not when its folder looks clean
 - **With a guest test**: follow `qingyi:clean-vm-test` and the project's guest notes. Add a case to the project's test script for each new feature, before the run.
 - **Without one**: install or unpack the package into a fresh folder on this machine and run what its docs promise, as written.
 - Run long tests in the background, with the output sent to a log file, and follow that file.
-- Read every screenshot. Write `report.md` in the report folder, summary first.
-- A defect: fix on the main branch, run the checks, package again, rerun the cases it touches into a new report folder.
+- Read every screenshot. For a guest test, the report is the one `qingyi:clean-vm-test` requires (an Artifact `report.html` with a link file; `report.md` only as its fallback). For a test without a guest, write `report.md` in the report folder, summary first.
+- A defect: fix on the main branch, run the checks, package again, rerun the cases it touches (not the whole pass) into a new report folder.
+- Keep the guest run short, as `qingyi:clean-vm-test` says in "Keep the run fast". Prove a change to the test rig on a few cases with `-Only` first; run the full pass once, at the end.
+- Run what the change can break, and say in the report what was skipped and why. Only when the project's facts say so:
+  - a suite that tests code unchanged since the previous release (for example real third-party servers, when the code that talks to them is untouched) may be skipped;
+  - the second pass on another machine profile (no graphics card) may be the cases that draw or move;
+  - the pass against the published package (step 9) is the two or three cases that need the published files.
 - Afterwards the guest is off (`Get-VM`); the VM and its checkpoints stay.
 
 A login handed to the guest follows these rules: only a short-lived access token, never a refresh token (a renewal in the guest can end the login on the host, and every session on it); never printed, logged or passed on a command line; no checkpoint while it is in the guest; removed at the end. When the token would expire during the run, or does not work, ask the user to log in by hand in the guest. Do not look for another way in.
@@ -128,6 +134,10 @@ pwsh -NoProfile -File <skill>/../shutdown/scripts/power.ps1 -Reason "The release
 - A session that ends without its "done" message leaves its branch as the only word: read it, run the checks on it, and take over what it still owed.
 - A dependency audit (`cargo deny`, `npm audit`) can fail on an advisory published the same day, with no change in the repository. Follow the project's rule for it, or ask.
 - Removing a worktree can be refused by the permission rules. Leave it and give the user the commands.
+- A guest pass of 95 to 102 minutes held about 42 minutes of fixed sleeps, after app starts whose pages were drawn in under a second. Wait for a condition, with the old time as the deadline.
+- Every pass with the graphics card copied the host's 2 GB driver into the guest, 3.5 to 8 minutes, because the checkpoint held an older driver. Retaking the checkpoint once took 6 minutes.
+- A release day had five passes (main, a rerun, a servers pass, a one-case rerun, the published-package pass), each repeating 5 to 7 minutes of setup. Plan the passes before the first one, and shrink the later ones as the facts allow.
+- A change to the test rig was proven only by a full pass, an hour per try. Prove it on a few cases first.
 
 ## Additional Resources
 

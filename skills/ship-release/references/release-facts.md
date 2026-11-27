@@ -19,7 +19,7 @@ repository as shown, and confirm what was found with the user before the first c
 | Workflows to wait for after a push | workflows with `on: push` |
 | Workflows a tag starts, and what they publish | workflows with `on: push: tags:`; their upload steps |
 | Rules for pushing a tag | the instructions; often "only when asked" |
-| Guest test: script, VM, account, checkpoints, memory, passes, report folder | the instructions; `scripts/vm/` or similar; `Get-VM`, `Get-VMSnapshot -VMName *` |
+| Guest test: script, VM, account, checkpoints, memory, passes, report folder, how long a pass takes, and which suites or passes may shrink and when | the instructions; `scripts/vm/` or similar; `Get-VM`, `Get-VMSnapshot -VMName *` |
 | Docs to update for a release | `CHANGELOG.md`, `ROADMAP.md`, `README.md` status lines, the agent instructions, generated docs |
 | Clean-up after a release | the instructions; `scripts/clean*` |
 | Traps of this project or machine | the instructions; the memory notes |
@@ -43,7 +43,10 @@ Offer a section like this for the project's instructions file, filled with what 
 - Push: wait for `ci.yml` and `security.yml`. Tag: `v<version>`, which starts `release.yml`; it
   publishes the zip and its `.sha256`.
 - Guest test: `pwsh scripts\vm\test-release.ps1 -VmName "Test VM" -Snapshot "Clean" -Zip <zip>
-  -OldZip <previous zip> -Report report\vm-test-<date>-<version>`; about 45 minutes.
+  -OldZip <previous zip> -Report report\vm-test-<date>-<version>`; about 45 minutes. May shrink:
+  skip the `-Servers` suite when `crates/servers` is unchanged since the last release; the
+  second pass (no graphics card) runs `-Only <cases that draw or move>`; the published-package
+  pass runs `-Only <the install and update cases>`. Say in the report what was skipped.
 - Docs: `CHANGELOG.md`, the status line in `README.md`, `AGENTS.md` for new parts.
 - Clean-up: `pwsh scripts\clean.ps1`.
 ```
