@@ -2,7 +2,7 @@
 
 > Claude Code plugin for project initialization and reusable skills.
 
-![version](https://img.shields.io/badge/version-5.2.0-blue)
+![version](https://img.shields.io/badge/version-5.3.0-blue)
 ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 
 ## Features
