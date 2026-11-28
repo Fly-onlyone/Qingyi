@@ -73,18 +73,18 @@ When asked to add or modify IDE run configurations, ALWAYS call `get_run_configu
 
 ## Git Worktrees
 
-- **Shared checkout check:** in a git repository, before the session's first file edit, file write, or state-changing git command, check whether another live Claude Code session works in the same checkout:
+- **Shared checkout check:** in a git repository, before the session's first file edit, file write, or state-changing git command, check whether another Claude Code session is working in the same checkout:
 
   ```powershell
   $me = git rev-parse --show-toplevel
   Get-ChildItem "$HOME/.claude/sessions/*.json" |
     ForEach-Object { Get-Content $_ -Raw | ConvertFrom-Json } |
-    Where-Object { $_.sessionId -ne $env:CLAUDE_CODE_SESSION_ID -and (Get-Process -Id $_.pid -ErrorAction SilentlyContinue) -and (Test-Path $_.cwd) -and (git -C $_.cwd rev-parse --show-toplevel 2>$null) -eq $me } |
+    Where-Object { $_.sessionId -ne $env:CLAUDE_CODE_SESSION_ID -and $_.status -ne 'idle' -and (Get-Process -Id $_.pid -ErrorAction SilentlyContinue) -and (Test-Path $_.cwd) -and (git -C $_.cwd rev-parse --show-toplevel 2>$null) -eq $me } |
     Select-Object name, pid, status, cwd
   $global:LASTEXITCODE = 0
   ```
 
-  Each row is another live session in this checkout. If there is at least one row (2 or more sessions in total), call `EnterWorktree` before the change, without asking. Tell the user in one line which sessions you found and which worktree you entered.
+  Each row is another session that is working in this checkout right now. An idle session does not count: it waits for a prompt, or was opened and never used. If there is at least one row (2 or more sessions in total), call `EnterWorktree` before the change, without asking. Tell the user in one line which sessions you found and which worktree you entered.
 - Skip the check when the session is already in a worktree (`git rev-parse --git-dir` differs from `--git-common-dir`), or when the user says to work in the main checkout.
 - Stay in the checkout when the task acts on its current state: committing, pushing, or stashing its changes, or merging worktrees into it.
 - **NEVER** auto-delete or remove a git worktree. Do not run `git worktree remove` unless the user **explicitly** asks for it. Worktrees may contain in-progress work — always ask before removing.
